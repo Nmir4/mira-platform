@@ -19,125 +19,125 @@
 }
 body{font-family:'Inter',sans-serif;background:#e8e4de;color:var(--texto);min-height:100vh}
 /* TOPBAR */
-#topbar{background:var(--verde-escuro);color:#fff;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:48px;border-bottom:2px solid var(--dourado)}
-#topbar a{color:rgba(255,255,255,0.6);font-size:11px;letter-spacing:0.1em;text-decoration:none;text-transform:uppercase}
+#topbar{background:var(--verde-escuro);color:#fff;padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:58px;border-bottom:2px solid var(--dourado)}
+#topbar a{color:rgba(255,255,255,0.6);font-size:13px;letter-spacing:0.1em;text-decoration:none;text-transform:uppercase}
 #topbar a:hover{color:#fff}
 /* TOOLBAR */
-#toolbar{background:var(--verde-escuro);color:#fff;padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#toolbar{background:var(--verde-escuro);color:#fff;padding:0 33px;display:flex;align-items:center;justify-content:space-between;height:62px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 #toolbar .tb-left{display:flex;align-items:center;gap:0}
-#toolbar .tb-right{display:flex;gap:10px}
-.tab-btn{background:transparent;border:none;color:rgba(255,255,255,.55);padding:0 18px;height:52px;font-size:12px;font-family:'Inter',sans-serif;font-weight:500;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;border-bottom:3px solid transparent;transition:all .15s}
+#toolbar .tb-right{display:flex;gap:12px}
+.tab-btn{background:transparent;border:none;color:rgba(255,255,255,.55);padding:0 21px;height:62px;font-size:14px;font-family:'Inter',sans-serif;font-weight:500;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;border-bottom:3px solid transparent;transition:all .15s}
 .tab-btn:hover{color:rgba(255,255,255,.85)}
 .tab-btn.tab-active{color:#fff;border-bottom-color:var(--dourado)}
-.btn-tool{background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;padding:7px 16px;border-radius:3px;font-size:12px;font-family:'Inter',sans-serif;font-weight:500;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.btn-tool{background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;padding:8px 19px;border-radius:3px;font-size:14px;font-family:'Inter',sans-serif;font-weight:500;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:all .2s}
 .btn-tool:hover{background:rgba(255,255,255,.15)}
 .btn-tool.primary{background:var(--dourado);border-color:var(--dourado)}
 .btn-tool.primary:hover{background:#9a720a}
-#orcamento-status{margin-left:16px;font-size:11px;opacity:.6}
+#orcamento-status{margin-left:16px;font-size:13px;opacity:.6}
 /* EDITOR */
-#editor{max-width:900px;margin:24px auto;padding:0 20px 60px}
+#editor{max-width:900px;margin:24px auto;padding:0 24px 71px}
 .card{background:#fff;border:1px solid var(--linha);border-radius:4px;margin-bottom:16px;overflow:hidden}
-.card-header{background:var(--cinza-claro);border-bottom:1px solid var(--linha);padding:10px 18px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--cinza)}
-.card-body{padding:18px}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px}
-.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;margin-bottom:13px}
-.grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:13px;margin-bottom:13px}
-label.lbl{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza);margin-bottom:4px}
-input[type=text],input[type=date],input[type=number],textarea,select{width:100%;border:1px solid var(--linha);border-radius:3px;padding:7px 9px;font-size:13px;font-family:'Inter',sans-serif;color:var(--texto);background:#fdfcfa;outline:none}
+.card-header{background:var(--cinza-claro);border-bottom:1px solid var(--linha);padding:12px 21px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--cinza)}
+.card-body{padding:21px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:13px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;margin-bottom:13px}
+.grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:15px;margin-bottom:13px}
+label.lbl{display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza);margin-bottom:4px}
+input[type=text],input[type=date],input[type=number],textarea,select{width:100%;border:1px solid var(--linha);border-radius:3px;padding:8px 11px;font-size:15px;font-family:'Inter',sans-serif;color:var(--texto);background:#fdfcfa;outline:none}
 input:focus,textarea:focus,select:focus{border-color:var(--verde)}
 textarea{resize:vertical;min-height:60px}
 /* TABELA ITENS */
 .items-table{width:100%;border-collapse:collapse}
-.drag-handle{cursor:grab;color:#ccc;font-size:16px;padding:0 6px 0 2px;user-select:none;flex-shrink:0;line-height:1}
+.drag-handle{cursor:grab;color:#ccc;font-size:21px;padding:0 7px 0 2px;user-select:none;flex-shrink:0;line-height:1}
 .drag-handle:active{cursor:grabbing}
 .items-table tr.dragging{opacity:0.4;background:#f0f7f4}
 .items-table tr.drag-over{border-top:2px solid var(--verde);background:#f0f7f4}
 .items-table td.td-handle{padding:0;width:24px;cursor:grab}
-.items-table th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza);border-bottom:2px solid var(--linha);padding:7px 7px;text-align:left;white-space:nowrap}
+.items-table th{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza);border-bottom:2px solid var(--linha);padding:8px 8px;text-align:left;white-space:nowrap}
 .items-table th.r,.items-table td.r{text-align:right}
-.items-table td{padding:8px 7px;border-bottom:1px solid #f0ece4;font-size:13px;vertical-align:middle}
-.items-table input[type=number]{width:84px;text-align:right;padding:5px 7px}
+.items-table td{padding:9px 8px;border-bottom:1px solid #f0ece4;font-size:15px;vertical-align:middle}
+.items-table input[type=number]{width:84px;text-align:right;padding:6px 8px}
 /* TOTAIS */
-.totais-bar{background:var(--verde-escuro);color:#fff;border-radius:4px;padding:18px 22px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
-.totais-bar .t-label{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:#8ab89a;margin-bottom:4px}
-.totais-bar .t-val{font-size:18px;font-weight:600}
+.totais-bar{background:var(--verde-escuro);color:#fff;border-radius:4px;padding:21px 26px;display:grid;grid-template-columns:repeat(4,1fr);gap:19px;margin-bottom:16px}
+.totais-bar .t-label{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:#8ab89a;margin-bottom:4px}
+.totais-bar .t-val{font-size:21px;font-weight:600}
 .totais-bar .t-val.destaque{color:#a8d4b0}
 /* MÃO DE OBRA */
-.mao-row{display:grid;grid-template-columns:1fr 90px 90px 90px;gap:10px;align-items:end;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--linha)}
-.subtotal-box{padding:7px 9px;background:var(--verde-claro);border-radius:3px;font-size:13px;font-weight:600;color:var(--verde-escuro);text-align:right}
-.mao-total{display:flex;justify-content:space-between;align-items:center;background:var(--verde-escuro);color:#fff;border-radius:4px;padding:11px 16px}
-.mao-total .tl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;opacity:.75}
-.mao-total .tv{font-size:17px;font-weight:700}
+.mao-row{display:grid;grid-template-columns:1fr 90px 90px 90px;gap:12px;align-items:end;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--linha)}
+.subtotal-box{padding:8px 11px;background:var(--verde-claro);border-radius:3px;font-size:15px;font-weight:600;color:var(--verde-escuro);text-align:right}
+.mao-total{display:flex;justify-content:space-between;align-items:center;background:var(--verde-escuro);color:#fff;border-radius:4px;padding:13px 19px}
+.mao-total .tl{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;opacity:.75}
+.mao-total .tv{font-size:20px;font-weight:700}
 /* GESTÃO */
-#gestao-area{display:none;max-width:900px;margin:24px auto;padding:0 20px 60px}
-.gest-estado{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;font-family:'Inter',sans-serif}
+#gestao-area{display:none;max-width:900px;margin:24px auto;padding:0 24px 71px}
+.gest-estado{display:inline-block;padding:2px 9px;border-radius:10px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif}
 .est-rascunho{background:#f0f0f0;color:#666}
 .est-enviado{background:#e8f0fb;color:#2255aa}
 .est-aprovado{background:#e8f5ed;color:#1a7a3c}
 .est-recusado{background:#fdecea;color:#c0392b}
 .gest-table{width:100%;border-collapse:collapse}
-.gest-table th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--cinza);border-bottom:2px solid var(--linha);padding:9px 10px;text-align:left}
-.gest-table td{padding:11px 10px;border-bottom:1px solid #f0ece4;font-size:13px;vertical-align:middle}
+.gest-table th{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--cinza);border-bottom:2px solid var(--linha);padding:11px 12px;text-align:left}
+.gest-table td{padding:13px 12px;border-bottom:1px solid #f0ece4;font-size:15px;vertical-align:middle}
 .gest-table tr:hover td{background:#fdf9f4}
-.gest-btn{background:transparent;border:1px solid var(--linha);border-radius:3px;padding:4px 9px;font-size:11px;font-family:'Inter',sans-serif;cursor:pointer;color:var(--cinza)}
+.gest-btn{background:transparent;border:1px solid var(--linha);border-radius:3px;padding:5px 11px;font-size:13px;font-family:'Inter',sans-serif;cursor:pointer;color:var(--cinza)}
 .gest-btn:hover{background:var(--cinza-claro)}
 .gest-btn.primary{border-color:var(--verde);color:var(--verde)}
 .gest-btn.danger{border-color:#e88;color:#c0392b}
 /* PROPOSTA IMPRESSA */
 #proposta-preview{display:none;max-width:794px;margin:0 auto;background:#fff}
 .capa{width:100%;min-height:1123px;background:#dde8ee;position:relative;display:flex;flex-direction:column;overflow:hidden;page-break-after:always}
-.capa-topo{padding:40px 50px 0;display:flex;justify-content:flex-end;position:relative;z-index:1}
+.capa-topo{padding:47px 59px 0;display:flex;justify-content:flex-end;position:relative;z-index:1}
 .capa-logo-area{text-align:right}
 .capa-logo{width:130px;margin-bottom:6px}
-.capa-subtitulo{font-size:11px;font-weight:600;letter-spacing:.18em;color:var(--verde);text-transform:uppercase}
-.capa-id-bloco{margin-top:18px;text-align:right;font-size:11px;color:#666}
+.capa-subtitulo{font-size:13px;font-weight:600;letter-spacing:.18em;color:var(--verde);text-transform:uppercase}
+.capa-id-bloco{margin-top:18px;text-align:right;font-size:13px;color:#666}
 .capa-id-bloco strong{color:var(--texto)}
 .capa-dados{margin-top:24px;text-align:right}
-.capa-dados table{margin-left:auto;border-collapse:collapse;font-size:12px}
-.capa-dados td{padding:3px 0 3px 16px;color:#333;vertical-align:top}
+.capa-dados table{margin-left:auto;border-collapse:collapse;font-size:14px}
+.capa-dados td{padding:4px 0 4px 19px;color:#333;vertical-align:top}
 .capa-dados td.label-cell{color:#888;font-weight:500;text-align:right;padding-right:10px}
 .capa-tagline{position:absolute;bottom:140px;left:50px;z-index:1}
-.capa-tagline h1{font-family:'Playfair Display',serif;font-size:38px;font-weight:400;color:var(--verde-escuro);line-height:1.25}
-.capa-rodape{position:absolute;bottom:0;left:0;right:0;background:var(--verde-escuro);padding:14px 50px;display:flex;justify-content:space-between;align-items:center;z-index:1}
-.capa-rodape-logo{display:flex;align-items:center;gap:10px}
+.capa-tagline h1{font-family:'Playfair Display',serif;font-size:45px;font-weight:400;color:var(--verde-escuro);line-height:1.25}
+.capa-rodape{position:absolute;bottom:0;left:0;right:0;background:var(--verde-escuro);padding:17px 59px;display:flex;justify-content:space-between;align-items:center;z-index:1}
+.capa-rodape-logo{display:flex;align-items:center;gap:12px}
 .capa-rodape-logo img{width:36px;filter:brightness(0) invert(1)}
-.capa-rodape-logo span{font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.06em}
-.capa-rodape-info{font-size:10px;color:rgba(255,255,255,.45);text-align:right;line-height:1.7}
-.pagina-conteudo{width:100%;min-height:1123px;background:#fff;padding:36px 46px 60px;position:relative;display:flex;flex-direction:column;font-family:'Inter',sans-serif;page-break-after:always}
+.capa-rodape-logo span{font-size:13px;color:rgba(255,255,255,.6);letter-spacing:.06em}
+.capa-rodape-info{font-size:12px;color:rgba(255,255,255,.45);text-align:right;line-height:1.7}
+.pagina-conteudo{width:100%;min-height:1123px;background:#fff;padding:42px 54px 71px;position:relative;display:flex;flex-direction:column;font-family:'Inter',sans-serif;page-break-after:always}
 .pc-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--verde-escuro);padding-bottom:12px;margin-bottom:22px}
-.pc-header-left h2{font-family:'Playfair Display',serif;font-size:18px;font-weight:400;color:var(--verde-escuro)}
-.pc-header-left p{font-size:11px;color:var(--cinza);margin-top:3px}
-.pc-header-right{text-align:right;font-size:11px;color:var(--cinza);line-height:1.7}
+.pc-header-left h2{font-family:'Playfair Display',serif;font-size:21px;font-weight:400;color:var(--verde-escuro)}
+.pc-header-left p{font-size:13px;color:var(--cinza);margin-top:3px}
+.pc-header-right{text-align:right;font-size:13px;color:var(--cinza);line-height:1.7}
 .pc-header-right strong{color:var(--texto)}
-.pc-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--cinza);border-bottom:1px solid var(--linha);padding-bottom:5px;margin-bottom:10px;margin-top:20px}
+.pc-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--cinza);border-bottom:1px solid var(--linha);padding-bottom:5px;margin-bottom:10px;margin-top:20px}
 .orcamento-table{width:100%;border-collapse:collapse}
-.orcamento-table th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--cinza);border-bottom:1px solid var(--linha);padding:5px 5px;text-align:left}
+.orcamento-table th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--cinza);border-bottom:1px solid var(--linha);padding:6px 6px;text-align:left}
 .orcamento-table th.r{text-align:right}
-.orcamento-table td{font-size:11.5px;padding:7px 5px;border-bottom:1px solid #f0ece4;color:var(--texto);vertical-align:top}
+.orcamento-table td{font-size:11.5px;padding:8px 6px;border-bottom:1px solid #f0ece4;color:var(--texto);vertical-align:top}
 .orcamento-table td.r{text-align:right}
 .orcamento-table td.pvp{font-weight:600;text-align:right}
 .total-fornecimento{margin-top:12px;border-top:2px solid var(--linha);padding-top:9px;display:flex;justify-content:space-between;align-items:center}
-.total-fornecimento .tf-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza)}
-.total-fornecimento .tf-val{font-size:14px;font-weight:700;color:var(--verde-escuro)}
-.linha-mao-obra{margin-top:8px;display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--linha)}
+.total-fornecimento .tf-label{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza)}
+.total-fornecimento .tf-val{font-size:17px;font-weight:700;color:var(--verde-escuro)}
+.linha-mao-obra{margin-top:8px;display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--linha)}
 .linha-mao-obra .lmo-label{font-size:11.5px}
-.linha-mao-obra .lmo-val{font-size:13px;font-weight:600}
+.linha-mao-obra .lmo-val{font-size:15px;font-weight:600}
 .iva-breakdown{margin-top:10px;border-top:1px solid var(--linha);padding-top:8px}
-.iva-row{display:flex;justify-content:space-between;font-size:11px;color:var(--cinza);padding:3px 0}
+.iva-row{display:flex;justify-content:space-between;font-size:13px;color:var(--cinza);padding:4px 0}
 .iva-row span:last-child{font-weight:600}
-.total-geral-box{margin-top:10px;background:var(--verde-escuro);color:#fff;border-radius:4px;padding:13px 16px;display:flex;justify-content:space-between;align-items:center}
-.tg-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;opacity:.75}
-.tg-val{font-size:22px;font-weight:700}
-.consideracoes h4{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--cinza);margin-bottom:5px;margin-top:14px}
+.total-geral-box{margin-top:10px;background:var(--verde-escuro);color:#fff;border-radius:4px;padding:15px 19px;display:flex;justify-content:space-between;align-items:center}
+.tg-label{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;opacity:.75}
+.tg-val{font-size:26px;font-weight:700}
+.consideracoes h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--cinza);margin-bottom:5px;margin-top:14px}
 .consideracoes p,.consideracoes li{font-size:10.5px;color:#444;line-height:1.65}
 .consideracoes ul{padding-left:16px}
-.pc-rodape{position:absolute;bottom:0;left:0;right:0;background:var(--verde-escuro);padding:11px 50px;display:flex;justify-content:space-between;align-items:center}
-.pc-rodape-flow{display:flex;justify-content:space-between;align-items:center;background:var(--verde-escuro);padding:11px 50px;margin-top:auto;color:#fff}
-.pc-rodape-logo{display:flex;align-items:center;gap:8px}
-.pc-rodape-flow .pc-rodape-logo span,.pc-rodape-flow .pc-rodape-info{color:rgba(255,255,255,0.55)!important;font-size:10px}
+.pc-rodape{position:absolute;bottom:0;left:0;right:0;background:var(--verde-escuro);padding:13px 59px;display:flex;justify-content:space-between;align-items:center}
+.pc-rodape-flow{display:flex;justify-content:space-between;align-items:center;background:var(--verde-escuro);padding:13px 59px;margin-top:auto;color:#fff}
+.pc-rodape-logo{display:flex;align-items:center;gap:9px}
+.pc-rodape-flow .pc-rodape-logo span,.pc-rodape-flow .pc-rodape-info{color:rgba(255,255,255,0.55)!important;font-size:12px}
 .pc-rodape-flow .pc-rodape-logo img{filter:brightness(0) invert(1) opacity(.5)}
 .pc-rodape-logo img{width:30px;filter:brightness(0) invert(1)}
-.pc-rodape-logo span{font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.05em}
+.pc-rodape-logo span{font-size:12px;color:rgba(255,255,255,.55);letter-spacing:.05em}
 .pc-rodape-info{font-size:9.5px;color:rgba(255,255,255,.4);text-align:right;line-height:1.7}
 @media print{
   @page{margin:0;size:A4 portrait}
@@ -149,25 +149,25 @@ textarea{resize:vertical;min-height:60px}
   .capa-rodape{background:#1e3d2a!important;position:absolute!important;bottom:0!important}
   .pagina-conteudo{page-break-after:avoid!important;break-after:avoid!important;min-height:unset!important;height:auto!important;padding:28px 44px 20px!important;background:white!important}
   img{display:block!important;visibility:visible!important}
-  .orcamento-table td,.orcamento-table th{font-size:10px!important;padding:3px 4px!important;line-height:1.2!important}
-  .pc-section-title{margin-top:10px!important;margin-bottom:5px!important;font-size:9px!important}
-  .consideracoes h4{margin-top:8px!important;font-size:9px!important}
-  .consideracoes p,.consideracoes li{font-size:9px!important;line-height:1.45!important}
+  .orcamento-table td,.orcamento-table th{font-size:12px!important;padding:3px 4px!important;line-height:1.2!important}
+  .pc-section-title{margin-top:10px!important;margin-bottom:5px!important;font-size:11px!important}
+  .consideracoes h4{margin-top:8px!important;font-size:11px!important}
+  .consideracoes p,.consideracoes li{font-size:11px!important;line-height:1.45!important}
   .total-geral-box{padding:9px 13px!important;margin-top:6px!important;background:#1e3d2a!important}
-  .tg-val{font-size:17px!important;color:#fff!important}
-  .tg-label{font-size:10px!important;color:rgba(255,255,255,0.75)!important}
+  .tg-val{font-size:20px!important;color:#fff!important}
+  .tg-label{font-size:12px!important;color:rgba(255,255,255,0.75)!important}
   .iva-breakdown{margin-top:6px!important}
-  .iva-row{padding:2px 0!important;font-size:10px!important}
+  .iva-row{padding:2px 0!important;font-size:12px!important}
   .linha-mao-obra{padding:5px 0!important;font-size:10.5px!important}
   .total-fornecimento{margin-top:7px!important;padding-top:6px!important}
-  .tf-label{font-size:10px!important}
-  .tf-val{font-size:12px!important}
+  .tf-label{font-size:12px!important}
+  .tf-val{font-size:14px!important}
   .pc-rodape-flow{display:flex!important;margin-top:16px!important;padding-top:10px!important;border-top:1px solid #ddd!important;background:#1e3d2a!important;padding:10px 44px!important}
   .pc-rodape{display:none!important}
   #p-flores-bloco{margin-top:10px!important}
   .pc-header{margin-bottom:14px!important;padding-bottom:10px!important}
-  .pc-header-left h2{font-size:15px!important}
-  .pc-header-right{font-size:10px!important}
+  .pc-header-left h2{font-size:18px!important}
+  .pc-header-right{font-size:12px!important}
 }
 </style>
 </head>
@@ -175,7 +175,7 @@ textarea{resize:vertical;min-height:60px}
 
 <div id="topbar">
   <a href="../../index.html" style="color:rgba(201,169,110,0.7)">← Plataforma</a>
-  <span style="color:rgba(255,255,255,.5);font-size:11px;letter-spacing:.1em;text-transform:uppercase">Florista Mira · Orçamentos</span>
+  <span style="color:rgba(255,255,255,.5);font-size:13px;letter-spacing:.1em;text-transform:uppercase">Florista Mira · Orçamentos</span>
   <span></span>
 </div>
 
@@ -215,18 +215,18 @@ textarea{resize:vertical;min-height:60px}
   <div class="card">
     <div class="card-header">📊 Margem e IVA</div>
     <div class="card-body">
-      <div style="display:flex;gap:32px;align-items:center;flex-wrap:wrap">
-        <div style="display:flex;align-items:center;gap:10px">
+      <div style="display:flex;gap:38px;align-items:center;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:12px">
           <label class="lbl" style="margin:0">Margem base</label>
           <input type="number" id="margemGlobal" value="40" min="0" max="99" style="width:70px" oninput="renderTabela()">
-          <span style="font-size:14px;color:var(--cinza)">%</span>
+          <span style="font-size:17px;color:var(--cinza)">%</span>
         </div>
-        <div style="display:flex;align-items:center;gap:10px">
+        <div style="display:flex;align-items:center;gap:12px">
           <label class="lbl" style="margin:0">Taxa IVA</label>
           <input type="number" id="taxaIva" value="6" min="0" max="99" style="width:60px" oninput="renderTabela()">
-          <span style="font-size:14px;color:var(--cinza)">%</span>
+          <span style="font-size:17px;color:var(--cinza)">%</span>
         </div>
-        <div style="font-size:11px;color:#999">PVPs introduzidos com IVA incluído · Margem calculada sobre s/ IVA</div>
+        <div style="font-size:13px;color:#999">PVPs introduzidos com IVA incluído · Margem calculada sobre s/ IVA</div>
       </div>
     </div>
   </div>
@@ -250,7 +250,7 @@ textarea{resize:vertical;min-height:60px}
         <tbody id="tbody-itens"></tbody>
       </table>
     </div>
-    <div style="padding:12px 18px;border-top:1px solid var(--linha)">
+    <div style="padding:14px 21px;border-top:1px solid var(--linha)">
       <button class="btn-tool" style="color:var(--verde);border-color:var(--verde)" onclick="addItem()">+ Adicionar item</button>
     </div>
   </div>
@@ -313,13 +313,13 @@ textarea{resize:vertical;min-height:60px}
   <div class="card">
     <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
       <span>📋 Orçamentos gravados</span>
-      <div style="display:flex;gap:8px">
+      <div style="display:flex;gap:9px">
         <button class="btn-tool" style="color:var(--cinza);border-color:var(--linha);margin:0;padding:5px 12px" onclick="carregarLista()">↻ Actualizar</button>
         <button class="btn-tool" style="color:var(--verde);border-color:var(--verde);margin:0;padding:5px 12px" onclick="novoOrcamento()">+ Novo</button>
       </div>
     </div>
-    <div id="gestao-loading" style="padding:36px;text-align:center;color:var(--cinza);font-size:13px">A inicializar Firebase...</div>
-    <div id="gestao-vazio" style="display:none;padding:36px;text-align:center;color:var(--cinza);font-size:13px">Nenhum orçamento gravado.</div>
+    <div id="gestao-loading" style="padding:42px;text-align:center;color:var(--cinza);font-size:15px">A inicializar Firebase...</div>
+    <div id="gestao-vazio" style="display:none;padding:42px;text-align:center;color:var(--cinza);font-size:15px">Nenhum orçamento gravado.</div>
     <div id="gestao-tabela-wrap" style="display:none;overflow-x:auto">
       <table class="gest-table">
         <thead><tr>
@@ -511,14 +511,14 @@ function renderTabela(){
     tr.setAttribute('data-id', item.id);
     tr.innerHTML=`
       <td class="td-handle" title="Arrastar para reordenar"><span class="drag-handle">⠿</span></td>
-      <td><input type="text" value="${item.desc}" style="width:100%;border:none;background:transparent;font-size:13px;padding:2px 0;outline:none" onchange="itens.find(i=>i.id===${item.id}).desc=this.value"></td>
-      <td class="r" style="color:#888;padding:0"><input type="number" min="1" step="1" value="${item.qty}" style="width:48px;text-align:right;font-size:13px;padding:5px 6px;background:rgba(0,0,0,0.03)" oninput="updateQty(${item.id},this.value)" title="Quantidade"></td>
-      <td class="r"><input type="number" id="c_${item.id}" min="0" step="0.01" placeholder="0,00" value="${item.custo}" style="width:84px;text-align:right;font-size:13px;padding:5px 7px" oninput="onEditCusto(${item.id})"></td>
-      <td class="r"><input type="number" id="m_${item.id}" min="0" max="99" step="0.1" placeholder="${g}" value="${margDefault>0?margDefault.toFixed(1):''}" style="width:64px;text-align:right;font-size:13px;padding:5px 7px" oninput="onEditMargem(${item.id})"></td>
-      <td class="r"><input type="number" id="p_${item.id}" min="0" step="0.01" placeholder="0,00" value="${pvpDefault}" style="width:84px;text-align:right;font-size:13px;padding:5px 7px;border-color:var(--verde)" oninput="onEditPvp(${item.id})"></td>
-      <td class="r" id="pt_${item.id}" style="font-weight:600;color:var(--verde-escuro);font-size:13px">—</td>
-      <td class="r" id="l_${item.id}" style="font-size:12px;color:#2d6a4f">—</td>
-      <td><button onclick="removeItem(${item.id})" style="background:none;border:1px solid #e0b0b0;border-radius:3px;cursor:pointer;color:#c0392b;font-size:14px;padding:2px 7px;margin-left:4px;transition:background .15s" onmouseover="this.style.background='#fdecea'" onmouseout="this.style.background='none'" title="Remover linha">×</button></td>`;
+      <td><input type="text" value="${item.desc}" style="width:100%;border:none;background:transparent;font-size:15px;padding:2px 0;outline:none" onchange="itens.find(i=>i.id===${item.id}).desc=this.value"></td>
+      <td class="r" style="color:#888;padding:0"><input type="number" min="1" step="1" value="${item.qty}" style="width:48px;text-align:right;font-size:15px;padding:6px 7px;background:rgba(0,0,0,0.03)" oninput="updateQty(${item.id},this.value)" title="Quantidade"></td>
+      <td class="r"><input type="number" id="c_${item.id}" min="0" step="0.01" placeholder="0,00" value="${item.custo}" style="width:84px;text-align:right;font-size:15px;padding:5px 7px" oninput="onEditCusto(${item.id})"></td>
+      <td class="r"><input type="number" id="m_${item.id}" min="0" max="99" step="0.1" placeholder="${g}" value="${margDefault>0?margDefault.toFixed(1):''}" style="width:64px;text-align:right;font-size:15px;padding:5px 7px" oninput="onEditMargem(${item.id})"></td>
+      <td class="r"><input type="number" id="p_${item.id}" min="0" step="0.01" placeholder="0,00" value="${pvpDefault}" style="width:84px;text-align:right;font-size:15px;padding:6px 8px;border-color:var(--verde)" oninput="onEditPvp(${item.id})"></td>
+      <td class="r" id="pt_${item.id}" style="font-weight:600;color:var(--verde-escuro);font-size:15px">—</td>
+      <td class="r" id="l_${item.id}" style="font-size:14px;color:#2d6a4f">—</td>
+      <td><button onclick="removeItem(${item.id})" style="background:none;border:1px solid #e0b0b0;border-radius:3px;cursor:pointer;color:#c0392b;font-size:17px;padding:2px 8px;margin-left:4px;transition:background .15s" onmouseover="this.style.background='#fdecea'" onmouseout="this.style.background='none'" title="Remover linha">×</button></td>`;
     tbody.appendChild(tr);
     if(item.custo||item.pvpManual) recalcRow(item.id);
   });
@@ -607,8 +607,8 @@ function renderFixos(){
   const el=document.getElementById('fixos-lista'); el.innerHTML='';
   fixos.forEach(f=>{
     const div=document.createElement('div');
-    div.style.cssText='display:grid;grid-template-columns:1fr 90px 90px 90px;gap:10px;align-items:end;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--linha)';
-    div.innerHTML=`<div><label class="lbl">Descrição</label><input type="text" value="${f.desc}" style="width:100%" onchange="fixos.find(x=>x.id===${f.id}).desc=this.value"></div><div></div><div><label class="lbl">Valor (€)</label><input type="number" id="fv_${f.id}" min="0" step="0.01" value="${f.valor}" style="width:100%" oninput="calcMao()"></div><div style="display:flex;align-items:flex-end;gap:5px"><div id="fsub_${f.id}" class="subtotal-box" style="flex:1">—</div><button onclick="removeFixo(${f.id})" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:18px;padding:0 3px;margin-bottom:1px">×</button></div>`;
+    div.style.cssText='display:grid;grid-template-columns:1fr 90px 90px 90px;gap:12px;align-items:end;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--linha)';
+    div.innerHTML=`<div><label class="lbl">Descrição</label><input type="text" value="${f.desc}" style="width:100%" onchange="fixos.find(x=>x.id===${f.id}).desc=this.value"></div><div></div><div><label class="lbl">Valor (€)</label><input type="number" id="fv_${f.id}" min="0" step="0.01" value="${f.valor}" style="width:100%" oninput="calcMao()"></div><div style="display:flex;align-items:flex-end;gap:6px"><div id="fsub_${f.id}" class="subtotal-box" style="flex:1">—</div><button onclick="removeFixo(${f.id})" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:21px;padding:0 4px;margin-bottom:1px">×</button></div>`;
     el.appendChild(div);
   });
 }
@@ -685,7 +685,7 @@ function renderLista(docs){
     const eClass={rascunho:'est-rascunho',enviado:'est-enviado',aprovado:'est-aprovado',recusado:'est-recusado'}[d.estado]||'est-rascunho';
     const eLabel={rascunho:'Rascunho',enviado:'Enviado',aprovado:'Aprovado',recusado:'Recusado'}[d.estado]||'Rascunho';
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td style="font-weight:600;color:var(--verde-escuro)">${d.propId||docId}</td><td>${d.cliente||'—'}</td><td style="color:var(--cinza)">${d.local||'—'}</td><td>${dtEv}</td><td style="text-align:right;font-weight:600">${total}</td><td><span class="gest-estado ${eClass}">${eLabel}</span></td><td style="color:var(--cinza);font-size:12px">${dt}</td><td style="text-align:right;white-space:nowrap"><select style="font-size:11px;border:1px solid var(--linha);border-radius:3px;padding:3px 5px;margin-right:5px" onchange="mudarEstado('${docId}',this.value)"><option value="rascunho" ${d.estado==='rascunho'?'selected':''}>Rascunho</option><option value="enviado" ${d.estado==='enviado'?'selected':''}>Enviado</option><option value="aprovado" ${d.estado==='aprovado'?'selected':''}>Aprovado</option><option value="recusado" ${d.estado==='recusado'?'selected':''}>Recusado</option></select><button class="gest-btn primary" onclick="abrirOrcamento('${docId}')">Abrir</button> <button class="gest-btn" onclick="duplicarOrcamento('${docId}')">Dup.</button> <button class="gest-btn danger" onclick="eliminarOrcamento('${docId}',this)">×</button></td>`;
+    tr.innerHTML=`<td style="font-weight:600;color:var(--verde-escuro)">${d.propId||docId}</td><td>${d.cliente||'—'}</td><td style="color:var(--cinza)">${d.local||'—'}</td><td>${dtEv}</td><td style="text-align:right;font-weight:600">${total}</td><td><span class="gest-estado ${eClass}">${eLabel}</span></td><td style="color:var(--cinza);font-size:14px">${dt}</td><td style="text-align:right;white-space:nowrap"><select style="font-size:13px;border:1px solid var(--linha);border-radius:3px;padding:4px 6px;margin-right:5px" onchange="mudarEstado('${docId}',this.value)"><option value="rascunho" ${d.estado==='rascunho'?'selected':''}>Rascunho</option><option value="enviado" ${d.estado==='enviado'?'selected':''}>Enviado</option><option value="aprovado" ${d.estado==='aprovado'?'selected':''}>Aprovado</option><option value="recusado" ${d.estado==='recusado'?'selected':''}>Recusado</option></select><button class="gest-btn primary" onclick="abrirOrcamento('${docId}')">Abrir</button> <button class="gest-btn" onclick="duplicarOrcamento('${docId}')">Dup.</button> <button class="gest-btn danger" onclick="eliminarOrcamento('${docId}',this)">×</button></td>`;
     tbody.appendChild(tr);
   });
 }
