@@ -48,6 +48,11 @@ input:focus,textarea:focus,select:focus{border-color:var(--verde)}
 textarea{resize:vertical;min-height:60px}
 /* TABELA ITENS */
 .items-table{width:100%;border-collapse:collapse}
+.drag-handle{cursor:grab;color:#ccc;font-size:16px;padding:0 6px 0 2px;user-select:none;flex-shrink:0;line-height:1}
+.drag-handle:active{cursor:grabbing}
+.items-table tr.dragging{opacity:0.4;background:#f0f7f4}
+.items-table tr.drag-over{border-top:2px solid var(--verde);background:#f0f7f4}
+.items-table td.td-handle{padding:0;width:24px;cursor:grab}
 .items-table th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza);border-bottom:2px solid var(--linha);padding:7px 7px;text-align:left;white-space:nowrap}
 .items-table th.r,.items-table td.r{text-align:right}
 .items-table td{padding:8px 7px;border-bottom:1px solid #f0ece4;font-size:13px;vertical-align:middle}
@@ -232,6 +237,7 @@ textarea{resize:vertical;min-height:60px}
     <div class="card-body" style="padding:0;overflow-x:auto">
       <table class="items-table" id="tabela-itens">
         <thead><tr>
+          <th style="width:20px"></th>
           <th>Descrição</th>
           <th class="r" style="width:64px">Qtd</th>
           <th class="r" style="width:96px">Custo unit. €</th>
@@ -501,7 +507,10 @@ function renderTabela(){
     const tr=document.createElement('tr');
     const margDefault=item.margem!=null?item.margem:g;
     const pvpDefault=item.pvpManual||'';
+    tr.setAttribute('draggable','true');
+    tr.setAttribute('data-id', item.id);
     tr.innerHTML=`
+      <td class="td-handle" title="Arrastar para reordenar"><span class="drag-handle">⠿</span></td>
       <td><input type="text" value="${item.desc}" style="width:100%;border:none;background:transparent;font-size:13px;padding:2px 0;outline:none" onchange="itens.find(i=>i.id===${item.id}).desc=this.value"></td>
       <td class="r" style="color:#888;padding:0"><input type="number" min="1" step="1" value="${item.qty}" style="width:48px;text-align:right;font-size:13px;padding:5px 6px;background:rgba(0,0,0,0.03)" oninput="updateQty(${item.id},this.value)" title="Quantidade"></td>
       <td class="r"><input type="number" id="c_${item.id}" min="0" step="0.01" placeholder="0,00" value="${item.custo}" style="width:84px;text-align:right;font-size:13px;padding:5px 7px" oninput="onEditCusto(${item.id})"></td>
@@ -514,8 +523,53 @@ function renderTabela(){
     if(item.custo||item.pvpManual) recalcRow(item.id);
   });
   atualizaTotais();
+  initDragDrop();
 }
 function removeItem(id){ itens=itens.filter(i=>i.id!==id); renderTabela(); }
+
+// ============================================================
+// DRAG & DROP
+// ============================================================
+let dragSrcId = null;
+
+function initDragDrop() {
+  const tbody = document.getElementById('tbody-itens');
+  tbody.addEventListener('dragstart', e => {
+    const tr = e.target.closest('tr');
+    if (!tr) return;
+    dragSrcId = parseInt(tr.getAttribute('data-id'));
+    tr.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  tbody.addEventListener('dragend', e => {
+    document.querySelectorAll('#tbody-itens tr').forEach(r => {
+      r.classList.remove('dragging','drag-over');
+    });
+    dragSrcId = null;
+  });
+  tbody.addEventListener('dragover', e => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const tr = e.target.closest('tr');
+    if (!tr || parseInt(tr.getAttribute('data-id')) === dragSrcId) return;
+    document.querySelectorAll('#tbody-itens tr').forEach(r => r.classList.remove('drag-over'));
+    tr.classList.add('drag-over');
+  });
+  tbody.addEventListener('drop', e => {
+    e.preventDefault();
+    const tr = e.target.closest('tr');
+    if (!tr) return;
+    const targetId = parseInt(tr.getAttribute('data-id'));
+    if (!targetId || targetId === dragSrcId) return;
+    const srcIdx    = itens.findIndex(i => i.id === dragSrcId);
+    const targetIdx = itens.findIndex(i => i.id === targetId);
+    if (srcIdx === -1 || targetIdx === -1) return;
+    const [moved] = itens.splice(srcIdx, 1);
+    itens.splice(targetIdx, 0, moved);
+    renderTabela();
+    initDragDrop();
+  });
+}
 function addItem(){ itens.push({id:nextId++,desc:'Novo item',qty:1,custo:'',pvpManual:'',margem:null}); renderTabela(); }
 
 function calcMao(){
@@ -728,6 +782,7 @@ function voltarEditor(){
 function imprimirProposta(){ buildProposta(); document.getElementById('proposta-preview').style.display='block'; window.print(); }
 
 renderTabela();
+initDragDrop();
 
 </script>
 </body>
