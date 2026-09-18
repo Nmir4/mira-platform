@@ -11,59 +11,72 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--castanho:#8b7355;--castanho-claro:#c9a96e;--escuro:#111010;--texto:#f0ebe3;--muted:#7a7068;--linha:rgba(255,255,255,0.07)}
-html,body{min-height:100%;background:var(--escuro);color:var(--texto);font-family:'Inter',sans-serif;font-size:21px}
+html,body{min-height:100%;background:var(--escuro);color:var(--texto);font-family:'Inter',sans-serif;font-size:18px}
 body::before{content:'';position:fixed;inset:0;z-index:0;background:linear-gradient(165deg,#1a1714 0%,#111010 40%,#0e0d0c 100%);pointer-events:none}
 body::after{content:'';position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--castanho-claro),transparent);z-index:10}
-nav{width:100%;background:#0e0d0c;border-bottom:1px solid rgba(255,255,255,0.07);padding:0 33px;height:62px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:999}
-nav a{display:flex;align-items:center;gap:12px;text-decoration:none;color:rgba(255,255,255,0.5);font-size:17px;letter-spacing:0.08em;text-transform:uppercase;transition:color .2s}
+nav{width:100%;background:#0e0d0c;border-bottom:1px solid rgba(255,255,255,0.07);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:999}
+nav a{display:flex;align-items:center;gap:10px;text-decoration:none;color:rgba(255,255,255,0.5);font-size:15px;letter-spacing:0.08em;text-transform:uppercase;transition:color .2s}
 nav a:hover{color:#c9a96e}
-.main{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:33px 28px 94px}
-/* TOOLBAR */
+.main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:28px 24px 80px}
 .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:14px}
-.toolbar h1{font-family:'Cormorant Garamond',serif;font-size:33px;font-weight:400}
-.toolbar-right{display:flex;gap:12px;align-items:center}
-.search-input{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:4px;padding:12px 19px;font-size:17px;color:var(--texto);font-family:'Inter',sans-serif;outline:none;width:240px;transition:border-color .2s}
+.toolbar h1{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:400}
+.toolbar-right{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.search-wrap{position:relative}
+.search-input{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 16px 11px 42px;font-size:15px;color:var(--texto);font-family:'Inter',sans-serif;outline:none;width:260px;transition:border-color .2s}
 .search-input:focus{border-color:var(--castanho-claro)}
-.btn{padding:12px 24px;font-size:15px;font-family:'Inter',sans-serif;font-weight:500;letter-spacing:0.08em;border-radius:4px;cursor:pointer;transition:all .2s;border:1px solid var(--castanho);background:var(--castanho);color:#fff}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px;pointer-events:none}
+.btn{padding:11px 22px;font-size:14px;font-family:'Inter',sans-serif;font-weight:500;letter-spacing:0.08em;border-radius:4px;cursor:pointer;transition:all .2s;border:1px solid var(--castanho);background:var(--castanho);color:#fff}
 .btn:hover{background:var(--castanho-claro);border-color:var(--castanho-claro)}
-.btn-outline{background:transparent;border-color:var(--linha);color:var(--muted)}
-.btn-outline:hover{border-color:var(--castanho);color:var(--castanho-claro)}
-/* FILTROS POR CATEGORIA */
-.cat-filters{display:flex;gap:9px;margin-bottom:20px;flex-wrap:wrap}
-.cat-btn{padding:8px 19px;font-size:15px;font-family:'Inter',sans-serif;border:1px solid var(--linha);background:transparent;color:var(--muted);cursor:pointer;border-radius:20px;transition:all .15s}
-.cat-btn.active{background:var(--castanho);border-color:var(--castanho);color:#fff}
-/* GRID DE CONTACTOS */
-.contacts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:17px}
-.contact-card{background:rgba(255,255,255,0.025);border:1px solid var(--linha);border-radius:4px;padding:21px 24px;transition:all .2s;cursor:pointer;position:relative}
-.contact-card:hover{background:rgba(255,255,255,0.05);border-color:rgba(201,169,110,0.3);transform:translateY(-2px)}
-.contact-cat{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--castanho);margin-bottom:6px}
-.contact-nome{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;margin-bottom:10px;line-height:1.2}
-.contact-info{display:flex;flex-direction:column;gap:6px}
-.contact-linha{display:flex;align-items:center;gap:9px;font-size:17px;color:var(--muted)}
+/* CATEGORIAS SIDEBAR + GRID */
+.layout{display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:start}
+@media(max-width:700px){.layout{grid-template-columns:1fr}}
+/* SIDEBAR CATEGORIAS */
+.sidebar{background:rgba(255,255,255,0.025);border:1px solid var(--linha);border-radius:4px;overflow:hidden;position:sticky;top:72px}
+.sidebar-header{background:rgba(255,255,255,0.04);border-bottom:1px solid var(--linha);padding:12px 16px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--castanho)}
+.cat-item{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:all .15s;display:flex;justify-content:space-between;align-items:center;font-size:14px}
+.cat-item:last-child{border-bottom:none}
+.cat-item:hover{background:rgba(255,255,255,0.04);color:var(--castanho-claro)}
+.cat-item.active{background:rgba(139,115,85,0.15);color:var(--castanho-claro);font-weight:600}
+.cat-count{font-size:12px;color:var(--muted);background:rgba(255,255,255,0.05);padding:2px 8px;border-radius:10px}
+.cat-item.active .cat-count{color:var(--castanho)}
+/* CONTACTOS */
+.contacts-grid{display:flex;flex-direction:column;gap:10px}
+.contact-card{background:rgba(255,255,255,0.025);border:1px solid var(--linha);border-radius:4px;padding:20px 22px;transition:all .2s;position:relative;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start}
+.contact-card:hover{background:rgba(255,255,255,0.05);border-color:rgba(201,169,110,0.25)}
+.contact-main{}
+.contact-cat-badge{display:inline-block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--castanho);margin-bottom:6px}
+.contact-nome{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;margin-bottom:12px;line-height:1.2}
+.contact-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px}
+.contact-linha{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:var(--muted);line-height:1.4}
 .contact-linha a{color:var(--texto);text-decoration:none;transition:color .15s}
 .contact-linha a:hover{color:var(--castanho-claro)}
-.contact-icon{font-size:17px;width:18px;text-align:center;flex-shrink:0}
-.contact-edit{position:absolute;top:12px;right:12px;background:none;border:none;color:rgba(255,255,255,0.2);font-size:18px;cursor:pointer;transition:color .15s;padding:2px 6px}
-.contact-edit:hover{color:var(--castanho-claro)}
-.loading{padding:47px;text-align:center;font-size:17px;color:var(--muted)}
+.contact-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+.contact-notas{font-size:13px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.04);line-height:1.5}
+.contact-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.action-btn{background:none;border:1px solid var(--linha);color:var(--muted);padding:7px 12px;border-radius:3px;cursor:pointer;font-size:13px;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
+.action-btn:hover{border-color:var(--castanho);color:var(--castanho-claro)}
+.action-btn.danger:hover{border-color:#e88;color:#e88}
+.empty-msg{padding:40px;text-align:center;font-size:15px;color:var(--muted);background:rgba(255,255,255,0.02);border:1px solid var(--linha);border-radius:4px}
 /* MODAL */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;display:none;align-items:center;justify-content:center;padding:24px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
 .overlay.open{display:flex}
-.modal{background:#1c1a17;border:1px solid rgba(255,255,255,0.1);border-radius:8px;width:100%;max-width:500px;overflow:hidden}
-.modal-header{background:rgba(139,115,85,0.15);border-bottom:1px solid rgba(255,255,255,0.07);padding:19px 26px;display:flex;justify-content:space-between;align-items:center}
-.modal-header h3{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400}
-.modal-close{background:none;border:none;color:var(--muted);font-size:28px;cursor:pointer}
-.modal-body{padding:26px;display:flex;flex-direction:column;gap:17px}
-.field label{display:block;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:6px}
-.field input,.field select,.field textarea{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:4px;padding:12px 17px;font-size:18px;color:var(--texto);font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
-.field input:focus,.field select:focus{border-color:var(--castanho-claro)}
+.modal{background:#1c1a17;border:1px solid rgba(255,255,255,0.1);border-radius:8px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
+.modal-header{background:rgba(139,115,85,0.15);border-bottom:1px solid rgba(255,255,255,0.07);padding:18px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1}
+.modal-header h3{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400}
+.modal-close{background:none;border:none;color:var(--muted);font-size:26px;cursor:pointer;line-height:1}
+.modal-body{padding:24px;display:flex;flex-direction:column;gap:16px}
+.field label{display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:16px;color:var(--texto);font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--castanho-claro)}
 .field select option{background:#1c1a17}
-.field textarea{min-height:70px;resize:vertical}
-.modal-footer{padding:17px 26px;border-top:1px solid rgba(255,255,255,0.07);display:flex;gap:12px;justify-content:flex-end}
-.btn-cancel{background:transparent;border:1px solid var(--linha);color:var(--muted);padding:12px 21px;font-size:15px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif}
-.btn-save{background:var(--castanho);border:none;color:#fff;padding:12px 24px;font-size:15px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500}
+.field textarea{min-height:80px;resize:vertical}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.modal-footer{padding:16px 24px;border-top:1px solid rgba(255,255,255,0.07);display:flex;gap:10px;justify-content:flex-end}
+.btn-cancel{background:transparent;border:1px solid var(--linha);color:var(--muted);padding:10px 18px;font-size:14px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif}
+.btn-cancel:hover{border-color:var(--castanho);color:var(--castanho-claro)}
+.btn-save{background:var(--castanho);border:none;color:#fff;padding:10px 22px;font-size:14px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500}
 .btn-save:hover{background:var(--castanho-claro)}
-.btn-del{background:transparent;border:1px solid rgba(200,80,80,0.4);color:#e88;padding:12px 19px;font-size:15px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;margin-right:auto}
+.btn-del{background:transparent;border:1px solid rgba(200,80,80,0.4);color:#e88;padding:10px 16px;font-size:14px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;margin-right:auto}
 </style>
 </head>
 <body>
@@ -72,25 +85,32 @@ nav a:hover{color:#c9a96e}
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
     Plataforma
   </a>
-  <span style="font-size:15px;color:rgba(255,255,255,0.3);letter-spacing:0.1em">Agenda de Contactos</span>
-  <img src="../../assets/logo.png" style="height:22px;filter:brightness(0) invert(1) opacity(.35)" alt="MIRA" onerror="this.style.display='none'">
+  <span style="font-size:14px;color:rgba(255,255,255,0.3);letter-spacing:0.1em">Agenda de Contactos</span>
+  <img src="../../assets/logo.png" style="height:26px;opacity:0.9" alt="MIRA" onerror="this.style.display='none'">
 </nav>
 
 <div class="main">
   <div class="toolbar">
     <h1>Contactos</h1>
     <div class="toolbar-right">
-      <input type="text" class="search-input" id="search" placeholder="🔍 Pesquisar..." oninput="filtrar()">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="search" placeholder="Pesquisar..." oninput="filtrar()">
+      </div>
       <button class="btn" onclick="abrirModal()">+ Novo contacto</button>
     </div>
   </div>
 
-  <div class="cat-filters" id="cat-filters">
-    <button class="cat-btn active" onclick="setCat('',this)">Todos</button>
-  </div>
-
-  <div class="contacts-grid" id="contacts-grid">
-    <div class="loading">A carregar contactos...</div>
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-header">Categorias</div>
+      <div id="sidebar-cats"></div>
+    </div>
+    <div>
+      <div class="contacts-grid" id="contacts-grid">
+        <div class="empty-msg">A carregar contactos...</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -105,24 +125,29 @@ nav a:hover{color:#c9a96e}
       <div class="field"><label>Nome / Entidade</label><input type="text" id="f-nome" placeholder="Nome ou entidade..."></div>
       <div class="field"><label>Categoria</label>
         <select id="f-cat">
-          <option value="Instituição Pública">Instituição Pública</option>
-          <option value="Saúde">Saúde</option>
-          <option value="Segurança">Segurança</option>
-          <option value="Justiça / Notariado">Justiça / Notariado</option>
-          <option value="Junta de Freguesia">Junta de Freguesia</option>
-          <option value="Parceiro / Fornecedor">Parceiro / Fornecedor</option>
-          <option value="Advogado / Solicitador">Advogado / Solicitador</option>
-          <option value="Igreja / Religioso">Igreja / Religioso</option>
-          <option value="Frota / Mecânica">Frota / Mecânica</option>
-          <option value="Cliente">Cliente</option>
-          <option value="Outro">Outro</option>
+          <option value="Emergência">🆘 Emergência</option>
+          <option value="Autarquia">🏛 Autarquia</option>
+          <option value="Junta de Freguesia">🏘 Junta de Freguesia</option>
+          <option value="Saúde">🏥 Saúde</option>
+          <option value="Segurança">🛡 Segurança</option>
+          <option value="Justiça / Notariado">⚖️ Justiça / Notariado</option>
+          <option value="Serviços Públicos">📋 Serviços Públicos</option>
+          <option value="Igreja / Religioso">⛪ Igreja / Religioso</option>
+          <option value="Parceiro / Fornecedor">🤝 Parceiro / Fornecedor</option>
+          <option value="Advogado / Solicitador">📜 Advogado / Solicitador</option>
+          <option value="Frota / Mecânica">🚗 Frota / Mecânica</option>
+          <option value="Cliente">👤 Cliente</option>
+          <option value="Outro">📌 Outro</option>
         </select>
       </div>
-      <div class="field"><label>Telefone</label><input type="text" id="f-tel" placeholder="251 000 000"></div>
+      <div class="grid-2">
+        <div class="field"><label>Telefone</label><input type="text" id="f-tel" placeholder="251 000 000"></div>
+        <div class="field"><label>Telemóvel</label><input type="text" id="f-tlm" placeholder="9xx 000 000"></div>
+      </div>
       <div class="field"><label>Email</label><input type="email" id="f-email" placeholder="email@exemplo.pt"></div>
       <div class="field"><label>Morada</label><input type="text" id="f-morada" placeholder="Rua, localidade..."></div>
       <div class="field"><label>Website</label><input type="text" id="f-web" placeholder="www.exemplo.pt"></div>
-      <div class="field"><label>Notas</label><textarea id="f-notas" placeholder="Pessoa de contacto, horários, observações..."></textarea></div>
+      <div class="field"><label>Notas / Horários / Observações</label><textarea id="f-notas" placeholder="Pessoa de contacto, horários, observações..."></textarea></div>
     </div>
     <div class="modal-footer">
       <button class="btn-del" id="btn-del" onclick="eliminarContacto()" style="display:none">Eliminar</button>
@@ -133,114 +158,142 @@ nav a:hover{color:#c9a96e}
 </div>
 
 <script>
-let db = null, editId = null, todosContactos = [], catActiva = '';
+let db = null, editId = null, todos = [], catActiva = 'TODOS';
 try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch(e) {}
 
-// Contactos pré-carregados (instituições de Melgaço)
-const CONTACTOS_INICIAIS = [
-  {nome:'Câmara Municipal de Melgaço',cat:'Instituição Pública',telefone:'251 410 100',email:'geral@cm-melgaco.pt',morada:'Largo Hermenegildo Solheiro, 4960-551 Melgaço',web:'www.cm-melgaco.pt',notas:'Horário: 2ª a 6ª, 09h-17h. Atendimento: atendimento@cm-melgaco.pt'},
-  {nome:'Assembleia Municipal de Melgaço',cat:'Instituição Pública',telefone:'251 410 108',email:'assembleia.municipal@cm-melgaco.pt',morada:'Largo Hermenegildo Solheiro, 4960-551 Melgaço',web:'',notas:''},
-  {nome:'Centro de Saúde de Melgaço (UCSP)',cat:'Saúde',telefone:'251 400 330',email:'ucsp.melgaco@ulsam.min-saude.pt',morada:'Rua Fonte da Vila, s/n, 4960-546 Melgaço',web:'www.ulsam.min-saude.pt',notas:'Fax: 251 400 333. Linha Azul (só informações): 251 403 618. Internamento: 251 400 338. Horário: 2ª a 6ª, 08h-20h'},
-  {nome:'UCC Melgaço (Unidade Cuidados Comunidade)',cat:'Saúde',telefone:'251 400 336',email:'ucc.melgaco@ulsam.min-saude.pt',morada:'Rua Fonte da Vila, 278, 4960-546 Melgaço',web:'',notas:'Enf. Coordenadora: Ana Pires'},
-  {nome:'GNR — Posto Territorial de Melgaço',cat:'Segurança',telefone:'251 404 960',email:'ct.vct.dvln.pmlg@gnr.pt',morada:'Rua do Fecho, 20 - Roussas, 4960-366 Melgaço',web:'www.gnr.pt',notas:'Fax: 251 402 346. Horário: Permanente. Emergência: 112'},
-  {nome:'Serviço de Finanças de Melgaço',cat:'Instituição Pública',telefone:'251 402 338',email:'',morada:'Rua Doutor António Durães, 4960-522 Melgaço',web:'portaldasfinancas.gov.pt',notas:'Horário: 09h-12h30 e 14h-16h30'},
-  {nome:'Segurança Social — Serviço Local de Melgaço',cat:'Instituição Pública',telefone:'300 502 502',email:'',morada:'Rua Dr. José Cândido Gomes de Abreu, 23, 4960-554 Melgaço',web:'www.seg-social.pt',notas:'Horário: Dias úteis 09h-13h e 14h-16h. Feriado Municipal: Quinta-feira de Ascensão. Linha nacional: 300 502 502'},
-  {nome:'Conservatória do Registo Civil e Predial de Melgaço',cat:'Justiça / Notariado',telefone:'251 400 030',email:'',morada:'Largo Hermenegildo Solheiro, n.º 234, 4960-551 Melgaço',web:'irn.justica.gov.pt',notas:'Inclui Cartório Notarial. Horário: 2ª a 6ª, 09h-16h. Encerra fins de semana, feriados e feriado municipal (5ª feira da Ascensão). Agendamentos: justica.gov.pt'},
-  {nome:'Loja Interativa de Turismo de Melgaço',cat:'Instituição Pública',telefone:'251 402 440',email:'turismo@cm-melgaco.pt',morada:'Praça da República, 133, 4960-567 Melgaço',web:'www.portoenorte.pt',notas:'Horário Verão (Abr-Set): 09h30-13h / 14h-18h. Horário Inverno (Out-Mar): 09h30-13h / 14h-17h'},
-  {nome:'Museu de Cinema de Melgaço',cat:'Instituição Pública',telefone:'251 401 575',email:'museudecinema@cm-melgaco.pt',morada:'Rua do Carvalho – Centro Histórico, Melgaço',web:'',notas:''},
-  {nome:'Emergência Médica',cat:'Saúde',telefone:'112',email:'',morada:'',web:'',notas:'Linha de Emergência Nacional'},
-  {nome:'SNS 24',cat:'Saúde',telefone:'808 24 24 24',email:'',morada:'',web:'sns24.gov.pt',notas:'Linha de saúde não urgente, 24h'},
-  {nome:'Unidade Local de Saúde do Alto Minho (ULSAM)',cat:'Saúde',telefone:'258 802 100',email:'',morada:'Estrada de Santa Luzia, 4901-858 Viana do Castelo',web:'www.ulsam.min-saude.pt',notas:'Hospital de referência do Alto Minho'},
+const CAT_ICON = {'Emergência':'🆘','Autarquia':'🏛','Junta de Freguesia':'🏘','Saúde':'🏥','Segurança':'🛡','Justiça / Notariado':'⚖️','Serviços Públicos':'📋','Igreja / Religioso':'⛪','Parceiro / Fornecedor':'🤝','Advogado / Solicitador':'📜','Frota / Mecânica':'🚗','Cliente':'👤','Outro':'📌'};
+
+const INICIAIS = [
+  {nome:'Emergência Geral (112)',cat:'Emergência',telefone:'112',email:'',morada:'',web:'',tlm:'',notas:'Emergências médicas, incêndios, segurança — Linha gratuita 24h'},
+  {nome:'SNS 24',cat:'Emergência',telefone:'808 24 24 24',email:'',morada:'',web:'sns24.gov.pt',tlm:'',notas:'Linha de saúde não urgente, 24h por dia'},
+  {nome:'Bombeiros Voluntários de Melgaço',cat:'Emergência',telefone:'251 402 112',email:'',morada:'Melgaço',web:'',tlm:'',notas:''},
+  {nome:'Câmara Municipal de Melgaço',cat:'Autarquia',telefone:'251 410 100',email:'geral@cm-melgaco.pt',morada:'Largo Hermenegildo Solheiro, 4960-551 Melgaço',web:'www.cm-melgaco.pt',tlm:'',notas:'Atendimento: atendimento@cm-melgaco.pt | Presidência: 251 410 111 | Seg-Sex 09h-17h'},
+  {nome:'Assembleia Municipal de Melgaço',cat:'Autarquia',telefone:'251 410 108',email:'assembleia.municipal@cm-melgaco.pt',morada:'Largo Hermenegildo Solheiro, 4960-551 Melgaço',web:'www.cm-melgaco.pt',tlm:'',notas:''},
+  {nome:'Casa da Cultura de Melgaço',cat:'Autarquia',telefone:'251 410 060',email:'casacultura@cm-melgaco.pt',morada:'Av. Capitão Salgueiro Maia, 4960-570 Melgaço',web:'',tlm:'',notas:''},
+  {nome:'Junta de Freguesia de Alvaredo',cat:'Junta de Freguesia',telefone:'251 416 302',email:'freguesia.alvaredo@gmail.com',morada:'Lugar da Charneca, 4960-010 Alvaredo',web:'',tlm:'934 831 795',notas:'Presidente: Diogo Castro | Qua 19h30-20h30 e Sáb 12h-13h'},
+  {nome:'Junta de Freguesia de Cousso',cat:'Junta de Freguesia',telefone:'',email:'freguesiadecousso@gmail.com',morada:'Cousso, Melgaço',web:'',tlm:'933 289 303',notas:'Presidente: João Luís Rodrigues Vilarinho | Sáb 16h-18h'},
+  {nome:'Junta de Freguesia de Cristóval',cat:'Junta de Freguesia',telefone:'251 404 924',email:'juntacristoval@hotmail.com',morada:'Cristóval, Melgaço',web:'',tlm:'932 808 153',notas:'Presidente: David Manuel Barbeitos | Sáb 14h30-16h30'},
+  {nome:'Junta de Freguesia de Fiães',cat:'Junta de Freguesia',telefone:'251 410 100',email:'',morada:'Fiães, Melgaço',web:'cm-melgaco.pt',tlm:'',notas:'Contacto via Câmara Municipal de Melgaço'},
+  {nome:'Junta de Freguesia de Gave',cat:'Junta de Freguesia',telefone:'',email:'freguesiagave@gmail.com',morada:'Gave, Melgaço',web:'',tlm:'936 734 498',notas:'Presidente: Joselito Domingues Gonçalves | Dom 9h30-11h30'},
+  {nome:'Junta de Freguesia de Paderne',cat:'Junta de Freguesia',telefone:'251 404 340',email:'freguesiapaderne.junta@sapo.pt',morada:'Lugar da Portela, 4960-263 Paderne',web:'',tlm:'966 487 015',notas:'Presidente: Amado Manuel Rodrigues Dias | Seg-Sex 18h15-19h15'},
+  {nome:'Junta de Freguesia de Penso',cat:'Junta de Freguesia',telefone:'',email:'freguesia_penso@sapo.pt',morada:'Lugar de Ranho, 4960-310 Penso',web:'',tlm:'963 240 340',notas:'Presidente: Sílvia Elisete Domingues | Dom 11h-12h'},
+  {nome:'Junta de Freguesia de São Paio',cat:'Junta de Freguesia',telefone:'',email:'j.f.s.paio@sapo.pt',morada:'Lugar do Outeiro, 4960-420 São Paio',web:'',tlm:'933 833 450',notas:'Presidente: Eduarda Caldas Oliveira | Seg e Qua 18h-20h'},
+  {nome:'UF Castro Laboreiro e Lamas de Mouro',cat:'Junta de Freguesia',telefone:'251 465 613',email:'junta.laboreiro@gmail.com',morada:'Lugar da Vila, 4960-906 Castro Laboreiro',web:'',tlm:'933 338 241',notas:'Presidente: Alfredo Domingos'},
+  {nome:'UF Chaviães e Paços',cat:'Junta de Freguesia',telefone:'251 410 100',email:'',morada:'Portela do Couto, 4960-110 Chaviães',web:'cm-melgaco.pt',tlm:'',notas:'Presidente: Amadeu Esteves | Contacto via CMM'},
+  {nome:'UF Parada e Cubalhão',cat:'Junta de Freguesia',telefone:'251 410 100',email:'',morada:'Parada, Melgaço',web:'cm-melgaco.pt',tlm:'',notas:'Contacto via Câmara Municipal de Melgaço'},
+  {nome:'UF Prado e Remoães',cat:'Junta de Freguesia',telefone:'251 410 100',email:'',morada:'Prado, Melgaço',web:'cm-melgaco.pt',tlm:'',notas:'Contacto via Câmara Municipal de Melgaço'},
+  {nome:'UF Vila e Roussas',cat:'Junta de Freguesia',telefone:'251 410 100',email:'',morada:'Vila, Melgaço',web:'cm-melgaco.pt',tlm:'',notas:'Contacto via Câmara Municipal de Melgaço'},
+  {nome:'Centro de Saúde de Melgaço (UCSP)',cat:'Saúde',telefone:'251 400 330',email:'ucsp.melgaco@ulsam.min-saude.pt',morada:'Rua Fonte da Vila, 278, 4960-546 Melgaço',web:'www.ulsam.min-saude.pt',tlm:'',notas:'Fax: 251 400 333 | Linha Azul (informações): 251 403 618 | Internamento: 251 400 338 | Seg-Sex 08h-20h'},
+  {nome:'UCC Melgaço — Cuidados na Comunidade',cat:'Saúde',telefone:'251 400 336',email:'ucc.melgaco@ulsam.min-saude.pt',morada:'Rua Fonte da Vila, 278, 4960-546 Melgaço',web:'',tlm:'',notas:'Enf. Coordenadora: Ana Pires'},
+  {nome:'Hospital de Santa Luzia — Viana do Castelo',cat:'Saúde',telefone:'258 802 100',email:'administracao@ulsam.min-saude.pt',morada:'Estrada de Santa Luzia, 4904-858 Viana do Castelo',web:'www.ulsam.min-saude.pt',tlm:'',notas:'Urgência: 258 802 337 | Consultas: 258 802 278 | Fax: 258 802 511 | Hospital de referência do Alto Minho'},
+  {nome:'Hospital do Conde de Bertiandos — Ponte de Lima',cat:'Saúde',telefone:'258 802 100',email:'administracao@ulsam.min-saude.pt',morada:'Ponte de Lima',web:'www.ulsam.min-saude.pt',tlm:'',notas:'ULSAM EPE | Unidade de cuidados continuados'},
+  {nome:'Unidade de Saúde de Melgaço (ISJD)',cat:'Saúde',telefone:'251 400 330',email:'',morada:'Rua Fonte da Vila, Melgaço',web:'www.isjd.pt',tlm:'',notas:'Instituto São João de Deus | Média e Longa Duração e Manutenção'},
+  {nome:'GNR — Posto Territorial de Melgaço',cat:'Segurança',telefone:'251 404 960',email:'ct.vct.dvln.pmlg@gnr.pt',morada:'Rua do Fecho, 20 — Roussas, 4960-366 Melgaço',web:'www.gnr.pt',tlm:'',notas:'Fax: 251 402 346 | Horário: Permanente (24h)'},
+  {nome:'GNR — Comando Territorial Viana do Castelo',cat:'Segurança',telefone:'258 800 500',email:'ct.vct@gnr.pt',morada:'Viana do Castelo',web:'www.gnr.pt',tlm:'',notas:'Comando que cobre toda a área do Alto Minho'},
+  {nome:'Tribunal de Melgaço — Juízo Local',cat:'Justiça / Notariado',telefone:'251 400 120',email:'melgaco.judicial@tribunais.org.pt',morada:'Palácio da Justiça, Largo Hermenegildo Solheiro, 4960-551 Melgaço',web:'comarcas.tribunais.org.pt',tlm:'',notas:'Fax: 251 400 128 | Instância Local da Comarca de Viana do Castelo'},
+  {nome:'Ministério Público de Melgaço (DIAP)',cat:'Justiça / Notariado',telefone:'251 400 120',email:'melgaco.ministeriopublico@tribunais.org.pt',morada:'Palácio da Justiça, Largo Hermenegildo Solheiro, 4960-551 Melgaço',web:'',tlm:'',notas:'Secção local do DIAP | Fax: 251 400 128'},
+  {nome:'Tribunal Comarca Viana do Castelo (sede)',cat:'Justiça / Notariado',telefone:'258 090 160',email:'vcastelo.judicial@tribunais.org.pt',morada:'Praça da Liberdade, 4900-040 Viana do Castelo',web:'comarcas.tribunais.org.pt',tlm:'',notas:'Sede da Comarca de Viana do Castelo'},
+  {nome:'Conservatória do Registo Civil e Predial de Melgaço',cat:'Justiça / Notariado',telefone:'251 400 030',email:'',morada:'Largo Hermenegildo Solheiro, 234, 4960-551 Melgaço',web:'irn.justica.gov.pt',tlm:'',notas:'Inclui Cartório Notarial e Registo Comercial | Seg-Sex 09h-16h | Agendamentos: justica.gov.pt'},
+  {nome:'Serviço de Finanças de Melgaço',cat:'Serviços Públicos',telefone:'251 402 338',email:'',morada:'Rua Doutor António Durães, 4960-522 Melgaço',web:'portaldasfinancas.gov.pt',tlm:'',notas:'Horário: 09h-12h30 e 14h-16h30'},
+  {nome:'Segurança Social — Serviço Local Melgaço',cat:'Serviços Públicos',telefone:'300 502 502',email:'',morada:'Rua Dr. José Cândido Gomes de Abreu, 23, 4960-554 Melgaço',web:'www.seg-social.pt',tlm:'',notas:'Horário: Dias úteis 09h-13h e 14h-16h | Feriado municipal: 5ª feira da Ascensão'},
+  {nome:'Loja Interativa de Turismo de Melgaço',cat:'Serviços Públicos',telefone:'251 402 440',email:'turismo@cm-melgaco.pt',morada:'Praça da República, 133, 4960-567 Melgaço',web:'www.portoenorte.pt',tlm:'',notas:'Verão (Abr-Set): 09h30-18h | Inverno (Out-Mar): 09h30-17h'},
+  {nome:'Paróquia de Melgaço (Matriz)',cat:'Igreja / Religioso',telefone:'251 402 030',email:'',morada:'Largo da Igreja, Melgaço',web:'diocese-braga.pt',tlm:'',notas:'Igreja Paroquial de Melgaço — Diocese de Braga | Vicariato do Minho Lima'},
+  {nome:'Diocese de Braga',cat:'Igreja / Religioso',telefone:'253 265 500',email:'',morada:'Paço Episcopal, Rua Paio Mendes, 4704-533 Braga',web:'diocese-braga.pt',tlm:'',notas:'Diocese responsável pela região de Melgaço'},
 ];
 
-async function iniciarContactos() {
+async function init() {
   if(!db) return;
-  // Verificar se já existem contactos na BD
   const snap = await db.collection('contactos').limit(1).get();
   if(snap.empty) {
-    // Importar contactos iniciais
     const batch = db.batch();
-    CONTACTOS_INICIAIS.forEach((c,i) => {
-      const ref = db.collection('contactos').doc('INI-'+i);
-      batch.set(ref, {...c, criadoEm: new Date().toISOString()});
+    INICIAIS.forEach((c,i) => {
+      batch.set(db.collection('contactos').doc('INI-'+String(i).padStart(3,'0')), {...c, criadoEm: new Date().toISOString()});
     });
     await batch.commit();
   }
-  carregarContactos();
+  carregar();
 }
 
-async function carregarContactos() {
+async function carregar() {
   if(!db) return;
-  try {
-    const snap = await db.collection('contactos').orderBy('nome','asc').get();
-    todosContactos = snap.docs.map(d=>({id:d.id,...d.data()}));
-    renderCategorias();
-    filtrar();
-  } catch(e) {
-    document.getElementById('contacts-grid').innerHTML = '<div class="loading">Erro ao carregar: '+e.message+'</div>';
-  }
+  const snap = await db.collection('contactos').orderBy('nome','asc').get();
+  todos = snap.docs.map(d=>({id:d.id,...d.data()}));
+  renderSidebar();
+  filtrar();
 }
 
-function renderCategorias() {
-  const cats = [...new Set(todosContactos.map(c=>c.cat).filter(Boolean))].sort();
-  const filtersEl = document.getElementById('cat-filters');
-  filtersEl.innerHTML = '<button class="cat-btn active" onclick="setCat(\'\',this)">Todos ('+todosContactos.length+')</button>';
-  cats.forEach(cat => {
-    const count = todosContactos.filter(c=>c.cat===cat).length;
-    filtersEl.innerHTML += `<button class="cat-btn" onclick="setCat('${cat}',this)">${cat} (${count})</button>`;
+function renderSidebar() {
+  const cats = {};
+  todos.forEach(c => { cats[c.cat] = (cats[c.cat]||0)+1; });
+  const el = document.getElementById('sidebar-cats');
+  const total = todos.length;
+  el.innerHTML = `<div class="cat-item ${catActiva==='TODOS'?'active':''}" onclick="setCat('TODOS',this)"><span>Todos</span><span class="cat-count">${total}</span></div>`;
+  // Ordem preferida
+  const ordem = ['Emergência','Autarquia','Junta de Freguesia','Saúde','Segurança','Justiça / Notariado','Serviços Públicos','Igreja / Religioso','Parceiro / Fornecedor','Advogado / Solicitador','Frota / Mecânica','Cliente','Outro'];
+  ordem.forEach(cat => {
+    if(!cats[cat]) return;
+    const icon = CAT_ICON[cat]||'📌';
+    el.innerHTML += `<div class="cat-item ${catActiva===cat?'active':''}" onclick="setCat('${cat}',this)"><span>${icon} ${cat}</span><span class="cat-count">${cats[cat]}</span></div>`;
   });
 }
 
-function setCat(cat, btn) {
+function setCat(cat) {
   catActiva = cat;
-  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  renderSidebar();
   filtrar();
 }
 
 function filtrar() {
   const q = document.getElementById('search').value.toLowerCase().trim();
-  let lista = todosContactos;
-  if(catActiva) lista = lista.filter(c=>c.cat===catActiva);
-  if(q) lista = lista.filter(c=>(c.nome||'').toLowerCase().includes(q)||(c.telefone||'').includes(q)||(c.email||'').toLowerCase().includes(q)||(c.notas||'').toLowerCase().includes(q));
-  renderContactos(lista);
+  let lista = todos;
+  if(catActiva !== 'TODOS') lista = lista.filter(c=>c.cat===catActiva);
+  if(q) lista = lista.filter(c=>(c.nome||'').toLowerCase().includes(q)||(c.telefone||'').includes(q)||(c.tlm||'').includes(q)||(c.email||'').toLowerCase().includes(q)||(c.morada||'').toLowerCase().includes(q)||(c.notas||'').toLowerCase().includes(q));
+  render(lista);
 }
 
-function renderContactos(lista) {
+function render(lista) {
   const grid = document.getElementById('contacts-grid');
-  if(!lista.length){grid.innerHTML='<div class="loading">Nenhum contacto encontrado.</div>';return;}
+  if(!lista.length){grid.innerHTML='<div class="empty-msg">Nenhum contacto encontrado.</div>';return;}
   grid.innerHTML = lista.map(c=>`
-    <div class="contact-card" onclick="editarContacto('${c.id}')">
-      <button class="contact-edit" onclick="event.stopPropagation();editarContacto('${c.id}')">✏</button>
-      <div class="contact-cat">${c.cat||'—'}</div>
-      <div class="contact-nome">${c.nome||'—'}</div>
-      <div class="contact-info">
-        ${c.telefone?`<div class="contact-linha"><span class="contact-icon">📞</span><a href="tel:${c.telefone.replace(/\s/g,'')}" onclick="event.stopPropagation()">${c.telefone}</a></div>`:''}
-        ${c.email?`<div class="contact-linha"><span class="contact-icon">✉️</span><a href="mailto:${c.email}" onclick="event.stopPropagation()">${c.email}</a></div>`:''}
-        ${c.morada?`<div class="contact-linha"><span class="contact-icon">📍</span><span>${c.morada}</span></div>`:''}
-        ${c.web?`<div class="contact-linha"><span class="contact-icon">🌐</span><a href="${c.web.startsWith('http')?c.web:'https://'+c.web}" target="_blank" onclick="event.stopPropagation()">${c.web}</a></div>`:''}
-        ${c.notas?`<div class="contact-linha" style="margin-top:4px"><span class="contact-icon">📝</span><span style="font-size:14px;color:var(--muted)">${c.notas.substring(0,80)}${c.notas.length>80?'…':''}</span></div>`:''}
+    <div class="contact-card">
+      <div class="contact-main">
+        <div class="contact-cat-badge">${CAT_ICON[c.cat]||'📌'} ${c.cat||'—'}</div>
+        <div class="contact-nome">${c.nome||'—'}</div>
+        <div class="contact-grid">
+          ${c.telefone?`<div class="contact-linha"><span class="contact-icon">📞</span><a href="tel:${c.telefone.replace(/\s/g,'')}">${c.telefone}</a></div>`:''}
+          ${c.tlm?`<div class="contact-linha"><span class="contact-icon">📱</span><a href="tel:${c.tlm.replace(/\s/g,'')}">${c.tlm}</a></div>`:''}
+          ${c.email?`<div class="contact-linha"><span class="contact-icon">✉️</span><a href="mailto:${c.email}">${c.email}</a></div>`:''}
+          ${c.morada?`<div class="contact-linha"><span class="contact-icon">📍</span><span>${c.morada}</span></div>`:''}
+          ${c.web?`<div class="contact-linha"><span class="contact-icon">🌐</span><a href="${c.web.startsWith('http')?c.web:'https://'+c.web}" target="_blank">${c.web}</a></div>`:''}
+        </div>
+        ${c.notas?`<div class="contact-notas">📝 ${c.notas}</div>`:''}
+      </div>
+      <div class="contact-actions">
+        <button class="action-btn" onclick="editar('${c.id}')">✏ Editar</button>
+        ${c.telefone?`<button class="action-btn" onclick="location.href='tel:${c.telefone.replace(/\s/g,'')}'">📞 Ligar</button>`:''}
+        ${c.email?`<button class="action-btn" onclick="location.href='mailto:${c.email}'">✉ Email</button>`:''}
       </div>
     </div>`).join('');
 }
 
-function abrirModal(data='') {
+function abrirModal() {
   editId=null;
   document.getElementById('modal-titulo').textContent='Novo Contacto';
-  ['f-nome','f-tel','f-email','f-morada','f-web','f-notas'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('f-cat').value='Instituição Pública';
+  ['f-nome','f-tel','f-tlm','f-email','f-morada','f-web','f-notas'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-cat').value='Outro';
   document.getElementById('btn-del').style.display='none';
   document.getElementById('overlay').classList.add('open');
   setTimeout(()=>document.getElementById('f-nome').focus(),100);
 }
 
-function editarContacto(id) {
-  const c=todosContactos.find(x=>x.id===id);if(!c)return;
+function editar(id) {
+  const c=todos.find(x=>x.id===id);if(!c)return;
   editId=id;
   document.getElementById('modal-titulo').textContent='Editar Contacto';
   document.getElementById('f-nome').value=c.nome||'';
   document.getElementById('f-cat').value=c.cat||'Outro';
   document.getElementById('f-tel').value=c.telefone||'';
+  document.getElementById('f-tlm').value=c.tlm||'';
   document.getElementById('f-email').value=c.email||'';
   document.getElementById('f-morada').value=c.morada||'';
   document.getElementById('f-web').value=c.web||'';
@@ -255,19 +308,10 @@ async function gravarContacto() {
   if(!db)return;
   const nome=document.getElementById('f-nome').value.trim();
   if(!nome){document.getElementById('f-nome').focus();return;}
-  const doc={
-    nome,cat:document.getElementById('f-cat').value,
-    telefone:document.getElementById('f-tel').value.trim(),
-    email:document.getElementById('f-email').value.trim(),
-    morada:document.getElementById('f-morada').value.trim(),
-    web:document.getElementById('f-web').value.trim(),
-    notas:document.getElementById('f-notas').value.trim(),
-    criadoEm:new Date().toISOString()
-  };
-  const id=editId||('CT-'+Date.now());
-  await db.collection('contactos').doc(id).set(doc,{merge:true});
+  const doc={nome,cat:document.getElementById('f-cat').value,telefone:document.getElementById('f-tel').value.trim(),tlm:document.getElementById('f-tlm').value.trim(),email:document.getElementById('f-email').value.trim(),morada:document.getElementById('f-morada').value.trim(),web:document.getElementById('f-web').value.trim(),notas:document.getElementById('f-notas').value.trim(),criadoEm:new Date().toISOString()};
+  await db.collection('contactos').doc(editId||('CT-'+Date.now())).set(doc,{merge:true});
   fecharModal();
-  carregarContactos();
+  carregar();
 }
 
 async function eliminarContacto(){
@@ -275,10 +319,10 @@ async function eliminarContacto(){
   if(!confirm('Eliminar este contacto?'))return;
   await db.collection('contactos').doc(editId).delete();
   fecharModal();
-  carregarContactos();
+  carregar();
 }
 
-iniciarContactos();
+init();
 </script>
 </body>
 </html>
