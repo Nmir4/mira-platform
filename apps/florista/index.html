@@ -127,16 +127,42 @@ textarea{resize:vertical;min-height:60px}
 .consideracoes p,.consideracoes li{font-size:10.5px;color:#444;line-height:1.65}
 .consideracoes ul{padding-left:16px}
 .pc-rodape{position:absolute;bottom:0;left:0;right:0;background:var(--verde-escuro);padding:11px 50px;display:flex;justify-content:space-between;align-items:center}
+.pc-rodape-flow{display:flex;justify-content:space-between;align-items:center;background:var(--verde-escuro);padding:11px 50px;margin-top:auto;color:#fff}
 .pc-rodape-logo{display:flex;align-items:center;gap:8px}
+.pc-rodape-flow .pc-rodape-logo span,.pc-rodape-flow .pc-rodape-info{color:rgba(255,255,255,0.55)!important;font-size:10px}
+.pc-rodape-flow .pc-rodape-logo img{filter:brightness(0) invert(1) opacity(.5)}
 .pc-rodape-logo img{width:30px;filter:brightness(0) invert(1)}
 .pc-rodape-logo span{font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.05em}
 .pc-rodape-info{font-size:9.5px;color:rgba(255,255,255,.4);text-align:right;line-height:1.7}
 @media print{
-  body{background:white}
-  #topbar,#toolbar,#editor,#gestao-area{display:none!important}
-  #proposta-preview{display:block!important}
-  .capa,.pagina-conteudo{page-break-after:always}
-  @page{margin:0;size:A4}
+  @page{margin:0;size:A4 portrait}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
+  body{background:white!important;margin:0!important;padding:0!important}
+  #topbar,#toolbar,#editor,#gestao-area,#mira-navbar{display:none!important}
+  #proposta-preview{display:block!important;width:210mm!important}
+  .capa{page-break-after:always!important;break-after:page!important;height:297mm!important;min-height:unset!important;overflow:hidden!important;background:#dde8ee!important}
+  .capa-rodape{background:#1e3d2a!important;position:absolute!important;bottom:0!important}
+  .pagina-conteudo{page-break-after:avoid!important;break-after:avoid!important;min-height:unset!important;height:auto!important;padding:28px 44px 20px!important;background:white!important}
+  img{display:block!important;visibility:visible!important}
+  .orcamento-table td,.orcamento-table th{font-size:10px!important;padding:3px 4px!important;line-height:1.2!important}
+  .pc-section-title{margin-top:10px!important;margin-bottom:5px!important;font-size:9px!important}
+  .consideracoes h4{margin-top:8px!important;font-size:9px!important}
+  .consideracoes p,.consideracoes li{font-size:9px!important;line-height:1.45!important}
+  .total-geral-box{padding:9px 13px!important;margin-top:6px!important;background:#1e3d2a!important}
+  .tg-val{font-size:17px!important;color:#fff!important}
+  .tg-label{font-size:10px!important;color:rgba(255,255,255,0.75)!important}
+  .iva-breakdown{margin-top:6px!important}
+  .iva-row{padding:2px 0!important;font-size:10px!important}
+  .linha-mao-obra{padding:5px 0!important;font-size:10.5px!important}
+  .total-fornecimento{margin-top:7px!important;padding-top:6px!important}
+  .tf-label{font-size:10px!important}
+  .tf-val{font-size:12px!important}
+  .pc-rodape-flow{display:flex!important;margin-top:16px!important;padding-top:10px!important;border-top:1px solid #ddd!important;background:#1e3d2a!important;padding:10px 44px!important}
+  .pc-rodape{display:none!important}
+  #p-flores-bloco{margin-top:10px!important}
+  .pc-header{margin-bottom:14px!important;padding-bottom:10px!important}
+  .pc-header-left h2{font-size:15px!important}
+  .pc-header-right{font-size:10px!important}
 }
 </style>
 </head>
@@ -268,6 +294,7 @@ textarea{resize:vertical;min-height:60px}
         <div><label class="lbl">Validade</label><input type="text" id="validade" value="15 dias úteis a contar da data de emissão"></div>
         <div><label class="lbl">Sinal</label><input type="text" id="sinal" value="50% do valor total na confirmação da encomenda"></div>
       </div>
+      <div style="margin-bottom:13px"><label class="lbl">Prazo de execução</label><input type="text" id="prazoConclusao" placeholder="ex: Os trabalhos serão concluídos no dia X, em horário a combinar."></div>
       <div style="margin-bottom:13px"><label class="lbl">Tipologia de flores</label><textarea id="flores" rows="2">Rosas brancas; Eustomas brancos; Vivás branco; Verdura: fetos, eucalipto populus, arálias, aspidistras</textarea></div>
       <div style="margin-bottom:13px"><label class="lbl">Considerações técnicas</label><textarea id="consTec" rows="2">Os altares que vão receber os trabalhos deverão estar limpos e desocupados; não efetuamos a remoção de quaisquer trabalhos ali colocados.</textarea></div>
       <div><label class="lbl">Considerações gerais</label><textarea id="consGer" rows="3">A presente proposta não prevê serviços a mais além dos aqui detalhados, devendo qualquer alteração ser comunicada via e-mail (catarinamira@mmira.pt), com antecedência mínima de 15 dias úteis.</textarea></div>
@@ -337,42 +364,58 @@ textarea{resize:vertical;min-height:60px}
       <div class="pc-header-left"><h2>Orçamento · Serviço Florista</h2><p id="p-subtitulo-orcamento"></p></div>
       <div class="pc-header-right">ID: <strong id="p-id2"></strong><br>Data: <strong id="p-data2"></strong></div>
     </div>
+
+    <!-- 1. FORNECIMENTO DOS BENS -->
     <div class="pc-section-title">1. Fornecimento dos bens</div>
     <table class="orcamento-table">
       <thead><tr><th>Descrição</th><th class="r">Qtd</th><th class="r">Valor unit.</th><th class="r">Total</th></tr></thead>
       <tbody id="p-tbody"></tbody>
     </table>
-    <div id="p-flores-bloco" style="margin-top:14px">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--cinza);margin-bottom:4px">1.1 Tipologia das flores</div>
-      <p style="font-size:10.5px;color:#444;line-height:1.6" id="p-flores-txt"></p>
-    </div>
-    <div class="total-fornecimento">
-      <span class="tf-label">Total fornecimento</span>
+
+    <div class="total-fornecimento" style="margin-top:10px">
+      <span class="tf-label">Total fornecimento dos bens</span>
       <span class="tf-val" id="p-total-forn"></span>
     </div>
-    <div style="margin-top:16px">
+
+    <!-- 2. SERVIÇOS PRESTADOS -->
+    <div style="margin-top:12px">
       <div class="pc-section-title">2. Serviços prestados</div>
       <div class="linha-mao-obra">
         <span id="p-mao-desc"></span>
         <span id="p-mao-val" style="font-weight:600"></span>
       </div>
     </div>
+
+    <!-- TOTAIS IVA -->
     <div class="iva-breakdown">
       <div class="iva-row"><span>Subtotal s/ IVA</span><span id="p-subtotal-siva"></span></div>
       <div class="iva-row"><span id="p-iva-label">IVA (6%)</span><span id="p-iva-valor"></span></div>
     </div>
-    <div class="total-geral-box" style="margin-top:10px">
+    <div class="total-geral-box" style="margin-top:8px">
       <span class="tg-label">Total c/ IVA</span>
       <span class="tg-val" id="p-total-geral"></span>
     </div>
+
+    <!-- 3. TIPOLOGIA DAS FLORES -->
+    <div id="p-flores-bloco" style="margin-top:14px">
+      <div class="pc-section-title">3. Tipologia das flores</div>
+      <p style="font-size:10.5px;color:#444;line-height:1.6" id="p-flores-txt"></p>
+    </div>
+
+    <!-- 4-7. CONSIDERAÇÕES -->
     <div class="consideracoes">
-      <h4>3. Prazo de execução</h4><p id="p-prazo-txt"></p>
-      <h4>4. Considerações técnicas</h4><p id="p-cons-tec"></p>
-      <h4>5. Considerações gerais</h4><p id="p-cons-ger"></p>
-      <h4>6. Condições de pagamento</h4>
+      <h4>4. Prazo de execução</h4>
+      <p id="p-prazo-txt"></p>
+      <h4>5. Considerações técnicas</h4>
+      <p id="p-cons-tec"></p>
+      <h4>6. Considerações gerais</h4>
+      <p id="p-cons-ger"></p>
+      <h4>7. Condições de pagamento</h4>
       <ul><li id="p-validade-li"></li><li id="p-sinal-li"></li></ul>
     </div>
-    <div class="pc-rodape">
+
+    <!-- RODAPÉ — em fluxo normal, não absoluto -->
+    <div class="pc-rodape-flow">
       <div class="pc-rodape-logo"><img id="p-logo-pc" src="../../assets/logo.png" alt=""><span>Florista Mira · Desde 1850</span></div>
       <div class="pc-rodape-info">Rua Rio do Porto, 53 · 4960-568 Melgaço · 251 404 014 · geral@mmira.pt</div>
     </div>
@@ -546,7 +589,7 @@ function setStatus(msg,tipo){ const el=document.getElementById('orcamento-status
 function novoOrcamento(){
   orcamentoAtualId=null;
   const defaults={tagline1:'Flores que falam',tagline2:'por si.',validade:'15 dias úteis a contar da data de emissão',sinal:'50% do valor total na confirmação da encomenda',moDesc:'Mão de obra',kmDesc:'Deslocação',moTarifa:'15',kmTarifa:'0.40',margemGlobal:'40',taxaIva:'6'};
-  ['propId','cliente','local','nif','email','telefone','dataEvento','tagline1','tagline2','validade','sinal','flores','consTec','consGer','margemGlobal','taxaIva','moDesc','moHoras','moTarifa','kmDesc','kmQty','kmTarifa'].forEach(id=>{ const el=document.getElementById(id); if(!el) return; el.value=defaults[id]||''; });
+  ['propId','cliente','local','nif','email','telefone','dataEvento','tagline1','tagline2','validade','sinal','prazoConclusao','flores','consTec','consGer','margemGlobal','taxaIva','moDesc','moHoras','moTarifa','kmDesc','kmQty','kmTarifa'].forEach(id=>{ const el=document.getElementById(id); if(!el) return; el.value=defaults[id]||''; });
   itens=[{id:1,desc:"2 arranjos altar mor",qty:2,custo:"",pvpManual:"",margem:null},{id:2,desc:"1 arranjo mesa da eucaristia",qty:1,custo:"",pvpManual:"",margem:null},{id:3,desc:"1 arranjo ambão",qty:1,custo:"",pvpManual:"",margem:null},{id:4,desc:"8 ramos para os bancos da igreja",qty:8,custo:"",pvpManual:"",margem:null},{id:5,desc:"40 cartuchos com pétalas e arroz",qty:40,custo:"",pvpManual:"",margem:null},{id:6,desc:"1 arranjo com ventosa para o carro dos noivos",qty:1,custo:"",pvpManual:"",margem:null},{id:7,desc:"2 ramos para as damas de honor",qty:2,custo:"",pvpManual:"",margem:null},{id:8,desc:"1 mini ramo de noiva com 30 fitas",qty:1,custo:"",pvpManual:"",margem:null},{id:9,desc:"1 ramo de noiva preservado (10/12 rosas brancas e verdura)",qty:1,custo:"",pvpManual:"",margem:null},{id:10,desc:"1 boutonniere com rosa preservada (noivo)",qty:1,custo:"",pvpManual:"",margem:null}];
   nextId=11; fixos=[]; fixoNextId=1;
   renderTabela(); renderFixos(); calcMao(); setStatus(''); showTab('editor');
@@ -559,7 +602,7 @@ async function gravarOrcamento(){
   itens.forEach(item=>{ const c=calcItem(item); totalPvp+=c.pvpTotal; });
   const totalGeral=totalPvp+mao;
   const id=orcamentoAtualId||('ORC-'+Date.now());
-  const campos=['propId','cliente','local','nif','email','telefone','dataEvento','tagline1','tagline2','validade','sinal','flores','consTec','consGer','margemGlobal','taxaIva','moDesc','moHoras','moTarifa','kmDesc','kmQty','kmTarifa'];
+  const campos=['propId','cliente','local','nif','email','telefone','dataEvento','tagline1','tagline2','validade','sinal','prazoConclusao','flores','consTec','consGer','margemGlobal','taxaIva','moDesc','moHoras','moTarifa','kmDesc','kmQty','kmTarifa'];
   const doc={id,totalGeral,estado:'rascunho',gravadoEm:new Date().toISOString(),fixos:fixos.map(f=>({...f})),itens:itens.map(i=>({...i}))};
   campos.forEach(f=>{ const el=document.getElementById(f); if(el) doc[f]=el.value; });
   if(orcamentoAtualId){ try{ const s=await db.collection('florista-orcamentos').doc(id).get(); if(s.exists) doc.estado=s.data().estado||'rascunho'; }catch(e){} }
@@ -608,7 +651,7 @@ async function abrirOrcamento(id){
   const snap=await db.collection('florista-orcamentos').doc(id).get();
   if(!snap.exists) return;
   const d=snap.data();
-  ['propId','cliente','local','nif','email','telefone','dataEvento','tagline1','tagline2','validade','sinal','flores','consTec','consGer','margemGlobal','taxaIva','moDesc','moHoras','moTarifa','kmDesc','kmQty','kmTarifa'].forEach(f=>{ const el=document.getElementById(f); if(el&&d[f]!=null) el.value=d[f]; });
+  ['propId','cliente','local','nif','email','telefone','dataEvento','tagline1','tagline2','validade','sinal','prazoConclusao','flores','consTec','consGer','margemGlobal','taxaIva','moDesc','moHoras','moTarifa','kmDesc','kmQty','kmTarifa'].forEach(f=>{ const el=document.getElementById(f); if(el&&d[f]!=null) el.value=d[f]; });
   if(d.itens){ itens=d.itens; nextId=Math.max(...itens.map(i=>i.id))+1; }
   if(d.fixos){ fixos=d.fixos; fixoNextId=fixos.length?Math.max(...fixos.map(f=>f.id))+1:1; }
   orcamentoAtualId=id; renderTabela(); renderFixos(); calcMao(); setStatus(d.propId||id); showTab('editor');
@@ -660,7 +703,10 @@ function buildProposta(){
   const flores=document.getElementById('flores').value.trim();
   if(flores){ document.getElementById('p-flores-bloco').style.display=''; document.getElementById('p-flores-txt').textContent=flores; }
   else document.getElementById('p-flores-bloco').style.display='none';
-  if(de) document.getElementById('p-prazo-txt').textContent='Os trabalhos serão concluídos no dia '+dataFmt+', em horário a combinar.';
+  const prazoEl = document.getElementById('prazoConclusao');
+  const prazoVal = prazoEl && prazoEl.value.trim() ? prazoEl.value.trim() :
+    (de ? 'Os trabalhos serão concluídos no dia '+dataFmt+', em horário a combinar.' : '');
+  document.getElementById('p-prazo-txt').textContent = prazoVal;
   document.getElementById('p-cons-tec').textContent=document.getElementById('consTec').value;
   document.getElementById('p-cons-ger').textContent=document.getElementById('consGer').value;
   document.getElementById('p-validade-li').textContent='Validade: '+document.getElementById('validade').value;
