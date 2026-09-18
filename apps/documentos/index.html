@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentos Oficiais — MIRA</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--castanho:#8b7355;--castanho-claro:#c9a96e;--escuro:#111010;--texto:#f0ebe3;--muted:#7a7068;--linha:rgba(255,255,255,0.07)}
+body{font-family:'Inter',sans-serif;background:var(--escuro);color:var(--texto);min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 120% 80% at 20% 110%,rgba(139,115,85,0.18) 0%,transparent 60%),linear-gradient(165deg,#1a1714 0%,#111010 40%,#0e0d0c 100%);pointer-events:none}
+body::after{content:'';position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 0%,var(--castanho-claro) 30%,var(--castanho) 70%,transparent 100%);z-index:10}
+.main{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:40px 24px 80px}
+.page-header{margin-bottom:40px}
+.page-header h1{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;color:var(--texto);margin-bottom:6px}
+.page-header p{font-size:12px;color:var(--muted);letter-spacing:0.06em}
+.section-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.2em;color:var(--castanho);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--linha)}
+.section{margin-bottom:36px}
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.doc-card{display:flex;align-items:center;gap:14px;padding:16px 18px;background:rgba(255,255,255,0.03);border:1px solid var(--linha);border-radius:3px;text-decoration:none;color:var(--texto);transition:all .2s;cursor:pointer}
+.doc-card:hover{background:rgba(255,255,255,0.07);border-color:rgba(201,169,110,0.3);transform:translateX(3px)}
+.doc-icon{font-size:22px;flex-shrink:0;width:36px;text-align:center}
+.doc-info{flex:1;min-width:0}
+.doc-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+.doc-meta{font-size:11px;color:var(--muted)}
+.doc-arrow{color:var(--castanho);font-size:16px;flex-shrink:0;transition:transform .2s}
+.doc-card:hover .doc-arrow{transform:translateX(3px)}
+.doc-card.view-btn{border-color:rgba(201,169,110,0.2)}
+</style>
+</head>
+<body>
+<div id="mira-navbar" style="width:100%;background:#0e0d0c;border-bottom:1px solid rgba(255,255,255,0.07);padding:0 24px;height:44px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:999">
+  <a href="../../index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:rgba(255,255,255,0.55);font-size:11px;font-family:Inter,sans-serif;letter-spacing:0.1em;text-transform:uppercase;transition:color .2s" onmouseover="this.style.color='rgba(201,169,110,1)'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Plataforma
+  </a>
+  <img src="../../assets/logo.png" style="height:22px;filter:brightness(0) invert(1) opacity(.5)" alt="MIRA" onerror="this.style.display='none'">
+  <span style="font-size:10px;color:rgba(255,255,255,0.2);font-family:Inter,sans-serif;letter-spacing:0.08em">mmira.pt</span>
+</div>
+<div class="main">
+  <div class="page-header">
+    <h1>Documentos Oficiais</h1>
+    <p>Agência Funerária Mira · Uso interno</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Tabelas de Preços</div>
+    <div class="doc-grid">
+      <a class="doc-card view-btn" href="tabela_precos_funerarios.html" target="_blank">
+        <div class="doc-icon">📋</div>
+        <div class="doc-info">
+          <div class="doc-name">Tabela de Preços Fúnebres</div>
+          <div class="doc-meta">Vigente · Atualizada 13/01/2026</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+      <a class="doc-card view-btn" href="tabela_precos_funerarios.html" target="_blank" onclick="window.print(); return false;" style="opacity:0.7">
+        <div class="doc-icon">🖨️</div>
+        <div class="doc-info">
+          <div class="doc-name">Imprimir Tabela de Preços</div>
+          <div class="doc-meta">Formato A3 horizontal</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Dados Bancários</div>
+    <div class="doc-grid">
+      <a class="doc-card" href="informacao_de_conta.pdf" target="_blank">
+        <div class="doc-icon">🏦</div>
+        <div class="doc-info">
+          <div class="doc-name">Informação de Conta</div>
+          <div class="doc-meta">IBAN · BIC/SWIFT · CA Crédito Agrícola</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+      <div class="doc-card" onclick="navigator.clipboard.writeText('PT50004514234015856197952').then(()=>{this.querySelector('.doc-meta').textContent='Copiado!';setTimeout(()=>this.querySelector('.doc-meta').textContent='Clique para copiar',2000)})" style="cursor:pointer">
+        <div class="doc-icon">📋</div>
+        <div class="doc-info">
+          <div class="doc-name">IBAN</div>
+          <div class="doc-meta">Clique para copiar</div>
+        </div>
+        <div class="doc-arrow" style="font-size:12px;color:var(--muted)">PT50 0045 1423 4015 8561 9795 2</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Imóveis e Propriedades</div>
+    <div class="doc-grid">
+      <a class="doc-card" href="CENTRO_LOGISTICO_PENSO.zip" download>
+        <div class="doc-icon">🏭</div>
+        <div class="doc-info">
+          <div class="doc-name">Centro Logístico · Penso</div>
+          <div class="doc-meta">Documentação · ZIP</div>
+        </div>
+        <div class="doc-arrow">⬇</div>
+      </a>
+      <a class="doc-card" href="Lojas_Rio_do_Porto.zip" download>
+        <div class="doc-icon">🏪</div>
+        <div class="doc-info">
+          <div class="doc-name">Lojas · Rio do Porto</div>
+          <div class="doc-meta">Documentação · ZIP</div>
+        </div>
+        <div class="doc-arrow">⬇</div>
+      </a>
+      <a class="doc-card" href="TERRENO_MONTE_PRADO.zip" download>
+        <div class="doc-icon">🌿</div>
+        <div class="doc-info">
+          <div class="doc-name">Terreno · Monte Prado</div>
+          <div class="doc-meta">Documentação · ZIP</div>
+        </div>
+        <div class="doc-arrow">⬇</div>
+      </a>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
