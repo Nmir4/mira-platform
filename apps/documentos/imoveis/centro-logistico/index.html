@@ -11,32 +11,32 @@
 body{font-family:'Inter',sans-serif;background:var(--escuro);color:var(--texto);min-height:100vh}
 body::before{content:'';position:fixed;inset:0;z-index:0;background:linear-gradient(165deg,#1a1714 0%,#111010 40%,#0e0d0c 100%);pointer-events:none}
 body::after{content:'';position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 0%,var(--castanho-claro) 30%,var(--castanho) 70%,transparent 100%);z-index:10}
-.main{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:36px 24px 80px}
-.breadcrumb{font-size:11px;color:var(--muted);margin-bottom:28px;display:flex;align-items:center;gap:8px}
+.main{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:42px 28px 94px}
+.breadcrumb{font-size:13px;color:var(--muted);margin-bottom:28px;display:flex;align-items:center;gap:9px}
 .breadcrumb a{color:var(--castanho);text-decoration:none}
 .breadcrumb a:hover{color:var(--castanho-claro)}
-.imovel-header{display:flex;align-items:center;gap:18px;margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid var(--linha)}
-.imovel-icon{width:52px;height:52px;border-radius:12px;background:rgba(40,60,80,0.4);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
-.imovel-header h1{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;margin-bottom:5px}
-.imovel-header p{font-size:12px;color:var(--muted)}
-.section-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.2em;color:var(--castanho);margin-bottom:12px}
-.docs-list{display:flex;flex-direction:column;gap:6px;margin-bottom:32px}
-.doc-item{display:flex;align-items:center;gap:12px;padding:13px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--linha);border-radius:3px;text-decoration:none;color:var(--texto);transition:all .2s}
+.imovel-header{display:flex;align-items:center;gap:21px;margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid var(--linha)}
+.imovel-icon{width:52px;height:62px;border-radius:12px;background:rgba(40,60,80,0.4);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+.imovel-header h1{font-family:'Cormorant Garamond',serif;font-size:31px;font-weight:400;margin-bottom:5px}
+.imovel-header p{font-size:14px;color:var(--muted)}
+.section-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.2em;color:var(--castanho);margin-bottom:12px}
+.docs-list{display:flex;flex-direction:column;gap:7px;margin-bottom:32px}
+.doc-item{display:flex;align-items:center;gap:14px;padding:15px 19px;background:rgba(255,255,255,0.03);border:1px solid var(--linha);border-radius:3px;text-decoration:none;color:var(--texto);transition:all .2s}
 .doc-item:hover{background:rgba(255,255,255,0.07);border-color:rgba(201,169,110,0.3);transform:translateX(4px)}
-.doc-item-icon{font-size:16px;flex-shrink:0;width:24px;text-align:center}
-.doc-item-name{flex:1;font-size:13px}
-.doc-item-ext{font-size:10px;font-weight:600;letter-spacing:0.1em;color:var(--castanho);background:rgba(139,115,85,0.15);padding:2px 7px;border-radius:2px;flex-shrink:0}
-.nota{font-size:12px;color:var(--muted);background:rgba(255,255,255,0.02);border:1px solid var(--linha);border-radius:3px;padding:12px 16px;margin-bottom:24px}
+.doc-item-icon{font-size:21px;flex-shrink:0;width:24px;text-align:center}
+.doc-item-name{flex:1;font-size:15px}
+.doc-item-ext{font-size:12px;font-weight:600;letter-spacing:0.1em;color:var(--castanho);background:rgba(139,115,85,0.15);padding:2px 8px;border-radius:2px;flex-shrink:0}
+.nota{font-size:14px;color:var(--muted);background:rgba(255,255,255,0.02);border:1px solid var(--linha);border-radius:3px;padding:14px 19px;margin-bottom:24px}
 </style>
 </head>
 <body>
-<div style="width:100%;background:#0e0d0c;border-bottom:1px solid rgba(255,255,255,0.07);padding:0 24px;height:44px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:999;box-sizing:border-box;font-family:Inter,sans-serif">
-  <a href="../../../index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:rgba(255,255,255,0.5);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;transition:color .2s" onmouseover="this.style.color='#c9a96e'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">
+<div style="width:100%;background:#0e0d0c;border-bottom:1px solid rgba(255,255,255,0.07);padding:0 28px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:999;box-sizing:border-box;font-family:Inter,sans-serif">
+  <a href="../../../index.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:rgba(255,255,255,0.5);font-size:13px;letter-spacing:0.1em;text-transform:uppercase;transition:color .2s" onmouseover="this.style.color='#c9a96e'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
     Plataforma
   </a>
   <img src="../../../assets/logo.png" style="height:20px;filter:brightness(0) invert(1) opacity(.4)" alt="MIRA" onerror="this.style.display='none'">
-  <span style="font-size:10px;color:rgba(255,255,255,0.18);letter-spacing:0.06em">mmira.pt</span>
+  <span style="font-size:12px;color:rgba(255,255,255,0.18);letter-spacing:0.06em">mmira.pt</span>
 </div>
 <div class="main">
   <div class="breadcrumb">
