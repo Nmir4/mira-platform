@@ -207,7 +207,7 @@ textarea{resize:vertical;min-height:60px}
       <table class="items-table" id="tabela-itens">
         <thead><tr>
           <th>Descrição</th>
-          <th class="r" style="width:44px">Qtd</th>
+          <th class="r" style="width:64px">Qtd</th>
           <th class="r" style="width:96px">Custo unit. €</th>
           <th class="r" style="width:76px">Margem %</th>
           <th class="r" style="width:96px">PVP unit. €</th>
@@ -460,13 +460,13 @@ function renderTabela(){
     const pvpDefault=item.pvpManual||'';
     tr.innerHTML=`
       <td><input type="text" value="${item.desc}" style="width:100%;border:none;background:transparent;font-size:13px;padding:2px 0;outline:none" onchange="itens.find(i=>i.id===${item.id}).desc=this.value"></td>
-      <td class="r" style="color:#888">${item.qty}</td>
+      <td class="r" style="color:#888;padding:0"><input type="number" min="1" step="1" value="${item.qty}" style="width:48px;text-align:right;font-size:13px;padding:5px 6px;background:rgba(0,0,0,0.03)" oninput="updateQty(${item.id},this.value)" title="Quantidade"></td>
       <td class="r"><input type="number" id="c_${item.id}" min="0" step="0.01" placeholder="0,00" value="${item.custo}" style="width:84px;text-align:right;font-size:13px;padding:5px 7px" oninput="onEditCusto(${item.id})"></td>
       <td class="r"><input type="number" id="m_${item.id}" min="0" max="99" step="0.1" placeholder="${g}" value="${margDefault>0?margDefault.toFixed(1):''}" style="width:64px;text-align:right;font-size:13px;padding:5px 7px" oninput="onEditMargem(${item.id})"></td>
       <td class="r"><input type="number" id="p_${item.id}" min="0" step="0.01" placeholder="0,00" value="${pvpDefault}" style="width:84px;text-align:right;font-size:13px;padding:5px 7px;border-color:var(--verde)" oninput="onEditPvp(${item.id})"></td>
       <td class="r" id="pt_${item.id}" style="font-weight:600;color:var(--verde-escuro);font-size:13px">—</td>
       <td class="r" id="l_${item.id}" style="font-size:12px;color:#2d6a4f">—</td>
-      <td><button onclick="removeItem(${item.id})" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:16px;padding:0 3px">×</button></td>`;
+      <td><button onclick="removeItem(${item.id})" style="background:none;border:1px solid #e0b0b0;border-radius:3px;cursor:pointer;color:#c0392b;font-size:14px;padding:2px 7px;margin-left:4px;transition:background .15s" onmouseover="this.style.background='#fdecea'" onmouseout="this.style.background='none'" title="Remover linha">×</button></td>`;
     tbody.appendChild(tr);
     if(item.custo||item.pvpManual) recalcRow(item.id);
   });
@@ -514,6 +514,13 @@ function renderFixos(){
     div.innerHTML=`<div><label class="lbl">Descrição</label><input type="text" value="${f.desc}" style="width:100%" onchange="fixos.find(x=>x.id===${f.id}).desc=this.value"></div><div></div><div><label class="lbl">Valor (€)</label><input type="number" id="fv_${f.id}" min="0" step="0.01" value="${f.valor}" style="width:100%" oninput="calcMao()"></div><div style="display:flex;align-items:flex-end;gap:5px"><div id="fsub_${f.id}" class="subtotal-box" style="flex:1">—</div><button onclick="removeFixo(${f.id})" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:18px;padding:0 3px;margin-bottom:1px">×</button></div>`;
     el.appendChild(div);
   });
+}
+
+function updateQty(id, val) {
+  const item = itens.find(i => i.id === id);
+  if (!item) return;
+  item.qty = parseInt(val) || 1;
+  recalcRow(id);
 }
 
 function atualizaTotais(){

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Orçamentos Fúnebres — MIRA</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--castanho:#8b7355;--castanho-claro:#c9a96e;--escuro:#111010;--texto:#f0ebe3;--muted:#7a7068;--linha:rgba(255,255,255,0.07);--verde:#2d5a3d}
+body{font-family:'Inter',sans-serif;background:var(--escuro);color:var(--texto);min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:0;background:linear-gradient(165deg,#1a1714 0%,#111010 40%,#0e0d0c 100%);pointer-events:none}
+body::after{content:'';position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--castanho-claro),transparent);z-index:10}
+.main{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:32px 20px 80px}
+h1{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;margin-bottom:6px}
+.subtitle{font-size:12px;color:var(--muted);margin-bottom:32px}
+.layout{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+@media(max-width:700px){.layout{grid-template-columns:1fr}}
+.card{background:rgba(255,255,255,0.03);border:1px solid var(--linha);border-radius:4px;overflow:hidden;margin-bottom:16px}
+.card-header{background:rgba(255,255,255,0.04);border-bottom:1px solid var(--linha);padding:10px 16px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--castanho)}
+.card-body{padding:16px}
+.servico-item{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.servico-item:last-child{border-bottom:none}
+.servico-left{display:flex;align-items:center;gap:10px;flex:1}
+.servico-check{width:18px;height:18px;border:1px solid rgba(255,255,255,0.2);border-radius:3px;cursor:pointer;flex-shrink:0;appearance:none;background:transparent;position:relative}
+.servico-check:checked{background:var(--castanho);border-color:var(--castanho)}
+.servico-check:checked::after{content:'✓';position:absolute;top:-1px;left:2px;font-size:12px;color:#fff}
+.servico-nome{font-size:13px}
+.servico-periodo{font-size:10px;color:var(--muted);margin-top:1px}
+.servico-preco{font-size:13px;font-weight:600;color:var(--castanho-claro);white-space:nowrap;flex-shrink:0}
+.servico-qty{display:flex;align-items:center;gap:6px;margin-left:10px}
+.servico-qty input{width:52px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:3px;padding:4px 7px;font-size:12px;color:var(--texto);text-align:center;font-family:'Inter',sans-serif}
+/* PAINEL TOTAL */
+.total-panel{background:rgba(255,255,255,0.03);border:1px solid var(--linha);border-radius:4px;overflow:hidden;position:sticky;top:60px}
+.total-header{background:rgba(139,115,85,0.15);border-bottom:1px solid var(--linha);padding:12px 18px}
+.total-header h3{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400}
+.total-body{padding:16px}
+.total-linha{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px}
+.total-linha:last-child{border-bottom:none}
+.total-linha .nome{color:var(--muted);font-size:12px}
+.total-linha .val{font-weight:500}
+.total-geral{display:flex;justify-content:space-between;padding:14px 16px;background:rgba(255,255,255,0.06);border-top:1px solid var(--linha);font-size:16px;font-weight:600}
+.total-geral .val{color:var(--castanho-claro)}
+.btn-imprimir{width:100%;background:var(--castanho);border:none;color:#fff;padding:11px;font-size:11px;font-family:'Inter',sans-serif;font-weight:600;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;margin-top:12px;border-radius:3px}
+.btn-imprimir:hover{background:var(--castanho-claro)}
+.periodo-tabs{display:flex;gap:6px;margin-bottom:16px}
+.periodo-tab{flex:1;padding:7px;font-size:11px;font-family:'Inter',sans-serif;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--linha);background:transparent;color:var(--muted);cursor:pointer;border-radius:3px;transition:all .15s}
+.periodo-tab.active{background:var(--castanho);border-color:var(--castanho);color:#fff}
+.campo-cliente{margin-bottom:16px}
+.campo-cliente input{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:3px;padding:8px 12px;font-size:13px;color:var(--texto);font-family:'Inter',sans-serif}
+.empty-msg{font-size:12px;color:var(--muted);text-align:center;padding:20px 0}
+@media print{
+  body{background:white;color:#1a1a1a}
+  body::before,body::after{display:none}
+  #mira-navbar{display:none}
+  .periodo-tabs,.btn-imprimir,.campo-cliente{display:none}
+  .total-panel{position:static;border:1px solid #ddd}
+  .card{border:1px solid #eee}
+}
+</style>
+</head>
+<body>
+<div style="width:100%;background:#0e0d0c;border-bottom:1px solid rgba(255,255,255,0.07);padding:0 24px;height:44px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:9999;box-sizing:border-box;font-family:Inter,sans-serif"><a href="../../index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:rgba(255,255,255,0.5);font-size:11px;letter-spacing:0.1em;text-transform:uppercase" onmouseover="this.style.color='#c9a96e'" onmouseout="this.style.color='rgba(255,255,255,0.5)'"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Plataforma</a><img src="../../assets/logo.png" style="height:20px;filter:brightness(0) invert(1) opacity(.4)" alt="MIRA" onerror="this.style.display='none'"><span style="font-size:10px;color:rgba(255,255,255,0.18);letter-spacing:0.06em">mmira.pt</span></div>
+<div class="main">
+  <h1>Calculadora de Orçamentos</h1>
+  <div class="subtitle">Agência Funerária Mira · Tabela de Preços 2026 · Isento de IVA</div>
+
+  <div style="margin-bottom:16px">
+    <div class="campo-cliente">
+      <input type="text" id="cliente" placeholder="Nome do cliente / família...">
+    </div>
+    <div class="periodo-tabs">
+      <button class="periodo-tab active" onclick="setPeriodo('laboral',this)">Laboral (08h–19h)</button>
+      <button class="periodo-tab" onclick="setPeriodo('especial',this)">Especial (Sáb/Dom/Fer)</button>
+      <button class="periodo-tab" onclick="setPeriodo('noturno',this)">Noturno (19h–08h)</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div id="servicos-lista"></div>
+    <div>
+      <div class="total-panel">
+        <div class="total-header"><h3>Resumo do Orçamento</h3></div>
+        <div class="total-body">
+          <div id="total-itens"><div class="empty-msg">Selecciona serviços</div></div>
+        </div>
+        <div class="total-geral">
+          <span>Total</span>
+          <span class="val" id="total-val">0,00 €</span>
+        </div>
+        <div style="padding:0 16px 16px">
+          <button class="btn-imprimir" onclick="imprimirOrcamento()">🖨 Imprimir Orçamento</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SERVICOS = [
+  {cat:"Gestão Administrativa",items:[
+    {id:"adm-lab",nome:"Administração Técnica — Processo",periodo:"Laboral",preco:175},
+    {id:"adm-esp",nome:"Administração Técnica — Processo",periodo:"Especial",preco:200},
+    {id:"adm-mp",nome:"Administração Técnica — Proc. MP/IML",periodo:"",preco:300},
+  ]},
+  {cat:"Serviços Técnicos",items:[
+    {id:"tanato",nome:"Tratamento Tanatoestético",periodo:"",preco:125},
+    {id:"coveiro-in",nome:"Coveiro — Inumação (≤2 covatos)",periodo:"",preco:250,desde:true},
+    {id:"coveiro-ex",nome:"Coveiro — Exumação",periodo:"",preco:500,desde:true},
+    {id:"fecho",nome:"Fecho Hermético (Urnas Zinco)",periodo:"",preco:150,desde:true},
+    {id:"frigorifico",nome:"Conservação Câmara Frigorífica",periodo:"24h",preco:50,qty:true},
+  ]},
+  {cat:"Logística e Viaturas",items:[
+    {id:"viat-nc",nome:"Viatura Fúnebre — Recolha/Transladação",periodo:"Não Cerimonial",preco:125},
+    {id:"viat-cer",nome:"Auto-Fúnebre Cerimonial — Recolha",periodo:"Cerimonial",preco:150},
+    {id:"viat-fun",nome:"Auto-Fúnebre Cerimonial — Funeral",periodo:"",preco:150},
+    {id:"viat-ap",nome:"Viatura de Apoio",periodo:"",preco:50},
+    {id:"km-nc",nome:"Km — Viatura Não Cerimonial",periodo:"por km",preco:1.75,qty:true},
+    {id:"km-cer",nome:"Km — Viatura Cerimonial",periodo:"por km",preco:2.00,qty:true},
+    {id:"km-ap",nome:"Km — Viatura de Apoio",periodo:"por km",preco:1.00,qty:true},
+  ]},
+  {cat:"Recursos Humanos (por colaborador)",items:[
+    {id:"rh-lab",nome:"Serviço de Recolha",periodo:"Laboral",preco:30},
+    {id:"rh-esp",nome:"Serviço de Recolha",periodo:"Especial",preco:45},
+    {id:"rh-not",nome:"Serviço de Recolha",periodo:"Noturno",preco:75},
+    {id:"fun-lab",nome:"Serviço de Funeral (até 3h)",periodo:"Laboral",preco:50},
+    {id:"fun-esp",nome:"Serviço de Funeral (até 3h)",periodo:"Especial",preco:75},
+    {id:"pes-cap",nome:"Pessoal de Apoio",periodo:"Capela/Vigilância",preco:25,desde:true},
+    {id:"hora-extra",nome:"Permanência Adicional",periodo:"hora extra",preco:20,qty:true},
+  ]},
+  {cat:"Urnas",items:[
+    {id:"urna-2",nome:"Urna n.º 2 — Mogno (Jazigo)",periodo:"",preco:1405},
+    {id:"urna-3",nome:"Urna n.º 3 — Zinco c/ Filtro",periodo:"",preco:1375},
+    {id:"urna-8",nome:"Urna n.º 8 — Ocomé TV",periodo:"",preco:880},
+    {id:"urna-18c",nome:"Urna n.º 18 — Folheada Castanho",periodo:"",preco:950},
+    {id:"urna-18e",nome:"Urna n.º 18 — Folheada Eucalipto",periodo:"",preco:984},
+    {id:"urna-20",nome:"Urna n.º 20 — Madeira Natural Cremação",periodo:"",preco:750},
+    {id:"urna-21",nome:"Urna n.º 21 — Coimbra",periodo:"",preco:880},
+    {id:"urna-22",nome:"Urna n.º 22 — Folheada/TV",periodo:"",preco:780},
+    {id:"urna-23",nome:"Urna n.º 23",periodo:"",preco:675},
+    {id:"urna-39",nome:"Urna n.º 39 — Ocomé TV Premium",periodo:"",preco:1150},
+    {id:"urna-40",nome:"Urna n.º 40 — Ocomé TV",periodo:"",preco:995},
+    {id:"urna-restos-z",nome:"Urna para restos mortais — Zinco",periodo:"",preco:130},
+    {id:"urna-restos-m",nome:"Urna para restos mortais — Madeira",periodo:"",preco:130},
+  ]},
+  {cat:"Câmara Ardente (24h)",items:[
+    {id:"ca-compl",nome:"Câmara Ardente Completa — Igreja/Capela",periodo:"",preco:200},
+    {id:"ca-parc",nome:"Câmara Ardente Parcial",periodo:"",preco:150},
+    {id:"ca-res",nome:"Câmara Ardente em Residência",periodo:"",preco:350},
+  ]},
+  {cat:"Serviços Digitais",items:[
+    {id:"foto-base",nome:"Tratamento de Foto — Edição Base",periodo:"",preco:18},
+    {id:"foto-comp",nome:"Tratamento de Foto — Restauro/Complexo",periodo:"",preco:35,desde:true},
+    {id:"pagelas",nome:"Pagelas de Recordação",periodo:"unidade",preco:1.15,qty:true},
+    {id:"folha",nome:"Folha de Rosto",periodo:"",preco:6},
+    {id:"quadro",nome:"Quadro Memória 40×30",periodo:"",preco:35},
+    {id:"livro-cond",nome:"Livro de Condolências",periodo:"",preco:35},
+    {id:"divulg",nome:"Divulgação — Redes Sociais, Montras e Jornal",periodo:"",preco:55},
+  ]},
+];
+
+const fmtN = v => Number(v).toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2});
+let periodo = 'laboral';
+let seleccionados = {};
+
+function setPeriodo(p, btn) {
+  periodo = p;
+  document.querySelectorAll('.periodo-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function renderServicos() {
+  const lista = document.getElementById('servicos-lista');
+  lista.innerHTML = '';
+  SERVICOS.forEach(cat => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<div class="card-header">${cat.cat}</div><div class="card-body"></div>`;
+    const body = card.querySelector('.card-body');
+    cat.items.forEach(s => {
+      const checked = seleccionados[s.id] ? 'checked' : '';
+      const qty = seleccionados[s.id]?.qty || (s.qty ? 1 : null);
+      const desde = s.desde ? '<span style="font-size:10px;color:var(--muted)">desde </span>' : '';
+      const qtyHtml = s.qty ? `<div class="servico-qty"><span style="font-size:11px;color:var(--muted)">×</span><input type="number" min="1" value="${qty||1}" oninput="updateQty('${s.id}',this.value)" style="width:52px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:3px;padding:4px 7px;font-size:12px;color:var(--texto);text-align:center;font-family:Inter,sans-serif"></div>` : '';
+      body.innerHTML += `
+        <div class="servico-item">
+          <div class="servico-left">
+            <input type="checkbox" class="servico-check" id="chk-${s.id}" ${checked} onchange="toggleServico('${s.id}')">
+            <div>
+              <div class="servico-nome">${s.nome}</div>
+              ${s.periodo?`<div class="servico-periodo">${s.periodo}</div>`:''}
+            </div>
+          </div>
+          ${qtyHtml}
+          <div class="servico-preco">${desde}${fmtN(s.preco)} €</div>
+        </div>`;
+    });
+    lista.appendChild(card);
+  });
+}
+
+function toggleServico(id) {
+  const s = SERVICOS.flatMap(c=>c.items).find(x=>x.id===id);
+  if (!s) return;
+  if (seleccionados[id]) {
+    delete seleccionados[id];
+  } else {
+    seleccionados[id] = {...s, qty: s.qty ? 1 : null};
+  }
+  actualizaTotal();
+}
+
+function updateQty(id, val) {
+  if (seleccionados[id]) seleccionados[id].qty = parseFloat(val)||1;
+  actualizaTotal();
+}
+
+function actualizaTotal() {
+  const items = Object.values(seleccionados);
+  const totalEl = document.getElementById('total-itens');
+  const totalValEl = document.getElementById('total-val');
+  if (items.length === 0) {
+    totalEl.innerHTML = '<div class="empty-msg">Selecciona serviços</div>';
+    totalValEl.textContent = '0,00 €';
+    return;
+  }
+  let total = 0;
+  let html = '';
+  items.forEach(s => {
+    const qty = s.qty || 1;
+    const sub = s.preco * qty;
+    total += sub;
+    const label = qty > 1 ? `${s.nome} ×${qty}` : s.nome;
+    html += `<div class="total-linha"><span class="nome">${label}</span><span class="val">${fmtN(sub)} €</span></div>`;
+  });
+  totalEl.innerHTML = html;
+  totalValEl.textContent = fmtN(total) + ' €';
+}
+
+function imprimirOrcamento() { window.print(); }
+
+renderServicos();
+</script>
+</body>
+</html>
