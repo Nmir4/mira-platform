@@ -3,84 +3,166 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculadora de Orçamentos Fúnebres — MIRA</title>
+<title>Calculadora de Orçamentos — MIRA</title>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="../../assets/firebase-config.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--castanho:#8b7355;--castanho-claro:#c9a96e;--escuro:#111010;--texto:#f0ebe3;--muted:#7a7068;--linha:rgba(255,255,255,0.07);--verde:#2d5a3d}
-body{font-family:'Inter',sans-serif;background:var(--escuro);color:var(--texto);min-height:100vh}
+:root{--castanho:#8b7355;--castanho-claro:#c9a96e;--escuro:#111010;--texto:#f0ebe3;--muted:#7a7068;--linha:rgba(255,255,255,0.07);--verde:#1e3d2a}
+html,body{min-height:100%;background:var(--escuro);color:var(--texto);font-family:'Inter',sans-serif;font-size:16px}
 body::before{content:'';position:fixed;inset:0;z-index:0;background:linear-gradient(165deg,#1a1714 0%,#111010 40%,#0e0d0c 100%);pointer-events:none}
 body::after{content:'';position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--castanho-claro),transparent);z-index:10}
-.main{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:32px 20px 80px}
-h1{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;margin-bottom:6px}
-.subtitle{font-size:12px;color:var(--muted);margin-bottom:32px}
-.layout{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
-@media(max-width:700px){.layout{grid-template-columns:1fr}}
-.card{background:rgba(255,255,255,0.03);border:1px solid var(--linha);border-radius:4px;overflow:hidden;margin-bottom:16px}
-.card-header{background:rgba(255,255,255,0.04);border-bottom:1px solid var(--linha);padding:10px 16px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--castanho)}
-.card-body{padding:16px}
-.servico-item{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
-.servico-item:last-child{border-bottom:none}
-.servico-left{display:flex;align-items:center;gap:10px;flex:1}
-.servico-check{width:18px;height:18px;border:1px solid rgba(255,255,255,0.2);border-radius:3px;cursor:pointer;flex-shrink:0;appearance:none;background:transparent;position:relative}
-.servico-check:checked{background:var(--castanho);border-color:var(--castanho)}
-.servico-check:checked::after{content:'✓';position:absolute;top:-1px;left:2px;font-size:12px;color:#fff}
-.servico-nome{font-size:13px}
-.servico-periodo{font-size:10px;color:var(--muted);margin-top:1px}
-.servico-preco{font-size:13px;font-weight:600;color:var(--castanho-claro);white-space:nowrap;flex-shrink:0}
-.servico-qty{display:flex;align-items:center;gap:6px;margin-left:10px}
-.servico-qty input{width:52px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:3px;padding:4px 7px;font-size:12px;color:var(--texto);text-align:center;font-family:'Inter',sans-serif}
+nav{width:100%;background:#0e0d0c;border-bottom:1px solid rgba(255,255,255,0.07);padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:999;flex-shrink:0}
+nav a{display:flex;align-items:center;gap:10px;text-decoration:none;color:rgba(255,255,255,0.5);font-size:14px;letter-spacing:0.08em;text-transform:uppercase;transition:color .2s}
+nav a:hover{color:#c9a96e}
+nav .titulo{font-size:13px;color:rgba(255,255,255,0.3);letter-spacing:0.1em}
+.main{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:36px 24px 100px}
+.page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;flex-wrap:wrap;gap:16px}
+.page-header h1{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:400;margin-bottom:5px}
+.page-header p{font-size:14px;color:var(--muted)}
+/* CAMPOS CLIENTE */
+.cliente-card{background:rgba(255,255,255,0.03);border:1px solid var(--linha);border-radius:4px;padding:22px;margin-bottom:24px}
+.cliente-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.field label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--castanho);margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:4px;padding:10px 14px;font-size:15px;color:var(--texto);font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus{border-color:var(--castanho-claro)}
+.field select option{background:#1a1714;color:var(--texto)}
+/* PERÍODO */
+.periodo-bar{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+.periodo-btn{flex:1;min-width:140px;padding:12px 16px;font-size:14px;font-family:'Inter',sans-serif;font-weight:500;letter-spacing:0.06em;border:1px solid var(--linha);background:transparent;color:var(--muted);cursor:pointer;border-radius:4px;transition:all .15s}
+.periodo-btn.active{background:var(--castanho);border-color:var(--castanho);color:#fff}
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start}
+@media(max-width:800px){.layout{grid-template-columns:1fr}}
+/* SECÇÕES */
+.section-card{background:rgba(255,255,255,0.025);border:1px solid var(--linha);border-radius:4px;overflow:hidden;margin-bottom:16px}
+.section-header{background:rgba(255,255,255,0.04);border-bottom:1px solid var(--linha);padding:13px 18px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--castanho);display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
+.section-header svg{transition:transform .2s;flex-shrink:0}
+.section-header.collapsed svg{transform:rotate(-90deg)}
+.section-body{padding:4px 0}
+/* ITENS */
+.item-row{display:grid;grid-template-columns:1fr 70px 90px 90px 36px;gap:8px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.03);align-items:center}
+.item-row:last-child{border-bottom:none}
+.item-check{width:20px;height:20px;border:1px solid rgba(255,255,255,0.2);border-radius:4px;cursor:pointer;appearance:none;background:transparent;position:relative;flex-shrink:0}
+.item-check:checked{background:var(--castanho);border-color:var(--castanho)}
+.item-check:checked::after{content:'✓';position:absolute;top:-1px;left:3px;font-size:13px;color:#fff}
+.item-nome-wrap{display:flex;align-items:center;gap:10px;min-width:0}
+.item-nome{font-size:15px;flex:1;min-width:0}
+.item-periodo{font-size:12px;color:var(--muted);white-space:nowrap}
+.item-input{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:4px;padding:6px 10px;font-size:14px;color:var(--texto);text-align:right;font-family:'Inter',sans-serif;width:100%;outline:none}
+.item-input:focus{border-color:var(--castanho-claro)}
+.item-preco-base{font-size:13px;color:var(--castanho-claro);white-space:nowrap;text-align:right}
+.item-remove{background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.2);font-size:18px;padding:0;transition:color .15s}
+.item-remove:hover{color:#e88}
+/* ADICIONAR ARTIGO */
+.add-item-row{padding:10px 16px;border-top:1px solid var(--linha)}
+.add-item-btn{background:none;border:1px dashed rgba(255,255,255,0.15);border-radius:4px;width:100%;padding:10px;font-size:13px;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+.add-item-btn:hover{border-color:var(--castanho);color:var(--castanho-claro)}
 /* PAINEL TOTAL */
-.total-panel{background:rgba(255,255,255,0.03);border:1px solid var(--linha);border-radius:4px;overflow:hidden;position:sticky;top:60px}
-.total-header{background:rgba(139,115,85,0.15);border-bottom:1px solid var(--linha);padding:12px 18px}
-.total-header h3{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400}
-.total-body{padding:16px}
-.total-linha{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px}
+.total-panel{background:rgba(255,255,255,0.025);border:1px solid var(--linha);border-radius:4px;overflow:hidden;position:sticky;top:66px}
+.total-header{background:rgba(139,115,85,0.15);border-bottom:1px solid var(--linha);padding:16px 20px}
+.total-header h3{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400;margin-bottom:3px}
+.total-header p{font-size:13px;color:var(--muted)}
+.total-body{padding:16px 20px}
+.total-linha{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:14px}
 .total-linha:last-child{border-bottom:none}
-.total-linha .nome{color:var(--muted);font-size:12px}
-.total-linha .val{font-weight:500}
-.total-geral{display:flex;justify-content:space-between;padding:14px 16px;background:rgba(255,255,255,0.06);border-top:1px solid var(--linha);font-size:16px;font-weight:600}
+.total-linha .nome{color:var(--muted);font-size:13px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:10px}
+.total-linha .val{font-weight:500;white-space:nowrap}
+.total-geral{display:flex;justify-content:space-between;padding:16px 20px;background:#1e3d2a;border-top:1px solid var(--linha);font-size:18px;font-weight:600}
 .total-geral .val{color:var(--castanho-claro)}
-.btn-imprimir{width:100%;background:var(--castanho);border:none;color:#fff;padding:11px;font-size:11px;font-family:'Inter',sans-serif;font-weight:600;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;margin-top:12px;border-radius:3px}
-.btn-imprimir:hover{background:var(--castanho-claro)}
-.periodo-tabs{display:flex;gap:6px;margin-bottom:16px}
-.periodo-tab{flex:1;padding:7px;font-size:11px;font-family:'Inter',sans-serif;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--linha);background:transparent;color:var(--muted);cursor:pointer;border-radius:3px;transition:all .15s}
-.periodo-tab.active{background:var(--castanho);border-color:var(--castanho);color:#fff}
-.campo-cliente{margin-bottom:16px}
-.campo-cliente input{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:3px;padding:8px 12px;font-size:13px;color:var(--texto);font-family:'Inter',sans-serif}
-.empty-msg{font-size:12px;color:var(--muted);text-align:center;padding:20px 0}
+.empty-msg{font-size:14px;color:var(--muted);text-align:center;padding:24px 0}
+.total-acoes{padding:16px 20px;display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--linha)}
+.btn{width:100%;padding:12px;font-size:13px;font-family:'Inter',sans-serif;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;border-radius:4px;border:none;transition:all .2s}
+.btn-primary{background:var(--castanho);color:#fff}
+.btn-primary:hover{background:var(--castanho-claro)}
+.btn-outline{background:transparent;border:1px solid var(--linha);color:var(--muted)}
+.btn-outline:hover{border-color:var(--castanho);color:var(--castanho-claro)}
+/* GESTÃO DE ORÇAMENTOS */
+#gestao-section{margin-top:40px}
+.gest-table-wrap{overflow-x:auto}
+.gest-table{width:100%;border-collapse:collapse;font-size:14px}
+.gest-table th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--castanho);border-bottom:1px solid var(--linha);padding:10px 12px;text-align:left}
+.gest-table td{padding:12px 12px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle}
+.gest-table tr:hover td{background:rgba(255,255,255,0.02)}
+.gest-btn{background:transparent;border:1px solid var(--linha);border-radius:3px;padding:5px 12px;font-size:12px;font-family:'Inter',sans-serif;cursor:pointer;color:var(--muted);transition:all .15s}
+.gest-btn:hover{border-color:var(--castanho);color:var(--castanho-claro)}
+.gest-btn.danger:hover{border-color:#e88;color:#e88}
+.estado-pill{display:inline-block;padding:3px 10px;border-radius:10px;font-size:12px;font-weight:600}
+.est-rascunho{background:rgba(100,100,100,0.2);color:#888}
+.est-enviado{background:rgba(30,50,120,0.3);color:#88aaee}
+.est-aprovado{background:rgba(30,90,50,0.3);color:#88ee99}
+.est-cancelado{background:rgba(120,30,30,0.3);color:#ee8888}
+.section-title-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.section-title-bar h2{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400}
 @media print{
-  body{background:white;color:#1a1a1a}
+  nav,.periodo-bar,.add-item-btn,.item-check,.item-remove,.item-input,.total-acoes,#gestao-section{display:none!important}
+  body{background:white;color:#1a1a1a;font-size:14px}
   body::before,body::after{display:none}
-  #mira-navbar{display:none}
-  .periodo-tabs,.btn-imprimir,.campo-cliente{display:none}
+  .layout{grid-template-columns:1fr}
   .total-panel{position:static;border:1px solid #ddd}
-  .card{border:1px solid #eee}
+  .section-card{border:1px solid #eee;background:white}
+  .item-row{grid-template-columns:1fr 60px 80px 80px}
+  .total-geral{background:#1e3d2a;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  @page{margin:15mm;size:A4}
 }
 </style>
 </head>
 <body>
-<div style="width:100%;background:#0e0d0c;border-bottom:1px solid rgba(255,255,255,0.07);padding:0 24px;height:44px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:9999;box-sizing:border-box;font-family:Inter,sans-serif"><a href="../../index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:rgba(255,255,255,0.5);font-size:11px;letter-spacing:0.1em;text-transform:uppercase" onmouseover="this.style.color='#c9a96e'" onmouseout="this.style.color='rgba(255,255,255,0.5)'"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Plataforma</a><img src="../../assets/logo.png" style="height:20px;filter:brightness(0) invert(1) opacity(.4)" alt="MIRA" onerror="this.style.display='none'"><span style="font-size:10px;color:rgba(255,255,255,0.18);letter-spacing:0.06em">mmira.pt</span></div>
-<div class="main">
-  <h1>Calculadora de Orçamentos</h1>
-  <div class="subtitle">Agência Funerária Mira · Tabela de Preços 2026 · Isento de IVA</div>
+<nav>
+  <a href="../../index.html">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Plataforma
+  </a>
+  <span class="titulo">Calculadora de Orçamentos Fúnebres</span>
+  <img src="../../assets/logo.png" style="height:22px;filter:brightness(0) invert(1) opacity(.35)" alt="MIRA" onerror="this.style.display='none'">
+</nav>
 
-  <div style="margin-bottom:16px">
-    <div class="campo-cliente">
-      <input type="text" id="cliente" placeholder="Nome do cliente / família...">
+<div class="main">
+  <div class="page-header">
+    <div>
+      <h1>Calculadora de Orçamentos</h1>
+      <p>Agência Funerária Mira · Tabela de Preços 2026 · Isento de IVA</p>
     </div>
-    <div class="periodo-tabs">
-      <button class="periodo-tab active" onclick="setPeriodo('laboral',this)">Laboral (08h–19h)</button>
-      <button class="periodo-tab" onclick="setPeriodo('especial',this)">Especial (Sáb/Dom/Fer)</button>
-      <button class="periodo-tab" onclick="setPeriodo('noturno',this)">Noturno (19h–08h)</button>
+    <div style="font-size:13px;color:var(--muted)" id="orcamento-id-label"></div>
+  </div>
+
+  <!-- DADOS DO CLIENTE -->
+  <div class="cliente-card">
+    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--castanho);margin-bottom:14px">Dados do Serviço</div>
+    <div class="cliente-grid">
+      <div class="field"><label>Data do Serviço</label><input type="date" id="c-data"></div>
+      <div class="field"><label>Nome do Cliente</label><input type="text" id="c-cliente" placeholder="Família..."></div>
+      <div class="field"><label>Nome do Falecido</label><input type="text" id="c-falecido" placeholder="Nome do falecido..."></div>
+      <div class="field"><label>Contacto</label><input type="text" id="c-contacto" placeholder="Telefone ou e-mail"></div>
+      <div class="field"><label>Local do Serviço</label><input type="text" id="c-local" placeholder="Igreja, cemitério..."></div>
+      <div class="field"><label>Estado</label>
+        <select id="c-estado">
+          <option value="rascunho">Rascunho</option>
+          <option value="enviado">Enviado</option>
+          <option value="aprovado">Aprovado</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+      </div>
     </div>
+  </div>
+
+  <!-- PERÍODO -->
+  <div class="periodo-bar">
+    <button class="periodo-btn active" onclick="setPeriodo('laboral',this)">🕗 Laboral (08h–19h)</button>
+    <button class="periodo-btn" onclick="setPeriodo('especial',this)">📅 Especial (Sáb/Dom/Fer)</button>
+    <button class="periodo-btn" onclick="setPeriodo('noturno',this)">🌙 Noturno (19h–08h)</button>
   </div>
 
   <div class="layout">
     <div id="servicos-lista"></div>
     <div>
       <div class="total-panel">
-        <div class="total-header"><h3>Resumo do Orçamento</h3></div>
+        <div class="total-header">
+          <h3>Resumo do Orçamento</h3>
+          <p id="total-cliente-label" style="color:var(--castanho-claro);font-size:14px;margin-top:4px"></p>
+        </div>
         <div class="total-body">
           <div id="total-itens"><div class="empty-msg">Selecciona serviços</div></div>
         </div>
@@ -88,130 +170,206 @@ h1{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;margin-
           <span>Total</span>
           <span class="val" id="total-val">0,00 €</span>
         </div>
-        <div style="padding:0 16px 16px">
-          <button class="btn-imprimir" onclick="imprimirOrcamento()">🖨 Imprimir Orçamento</button>
+        <div class="total-acoes">
+          <button class="btn btn-primary" onclick="gravarOrcamento()">💾 Gravar Orçamento</button>
+          <button class="btn btn-outline" onclick="imprimirOrcamento()">🖨 Imprimir</button>
+          <button class="btn btn-outline" onclick="novoOrcamento()">+ Novo</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GESTÃO -->
+  <div id="gestao-section">
+    <div class="section-title-bar">
+      <h2>Orçamentos Gravados</h2>
+      <button class="gest-btn" onclick="carregarLista()">↻ Actualizar</button>
+    </div>
+    <div class="section-card">
+      <div id="gestao-loading" style="padding:32px;text-align:center;font-size:14px;color:var(--muted)">A carregar...</div>
+      <div id="gestao-vazio" style="display:none;padding:32px;text-align:center;font-size:14px;color:var(--muted)">Nenhum orçamento gravado.</div>
+      <div id="gestao-tabela-wrap" style="display:none" class="gest-table-wrap">
+        <table class="gest-table">
+          <thead><tr>
+            <th>Data</th><th>Cliente</th><th>Falecido</th><th>Local</th>
+            <th style="text-align:right">Total</th><th>Estado</th><th style="text-align:right">Acções</th>
+          </tr></thead>
+          <tbody id="gestao-tbody"></tbody>
+        </table>
       </div>
     </div>
   </div>
 </div>
 
 <script>
+let db = null;
+try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch(e) {}
+
 const SERVICOS = [
   {cat:"Gestão Administrativa",items:[
-    {id:"adm-lab",nome:"Administração Técnica — Processo",periodo:"Laboral",preco:175},
-    {id:"adm-esp",nome:"Administração Técnica — Processo",periodo:"Especial",preco:200},
-    {id:"adm-mp",nome:"Administração Técnica — Proc. MP/IML",periodo:"",preco:300},
+    {id:"adm-lab",nome:"Administração Técnica — Processo",periodo:"Laboral",preco:175,qty:1},
+    {id:"adm-esp",nome:"Administração Técnica — Processo",periodo:"Especial",preco:200,qty:1},
+    {id:"adm-mp",nome:"Administração Técnica — Proc. MP/IML",periodo:"",preco:300,qty:1},
   ]},
   {cat:"Serviços Técnicos",items:[
-    {id:"tanato",nome:"Tratamento Tanatoestético",periodo:"",preco:125},
-    {id:"coveiro-in",nome:"Coveiro — Inumação (≤2 covatos)",periodo:"",preco:250,desde:true},
-    {id:"coveiro-ex",nome:"Coveiro — Exumação",periodo:"",preco:500,desde:true},
-    {id:"fecho",nome:"Fecho Hermético (Urnas Zinco)",periodo:"",preco:150,desde:true},
-    {id:"frigorifico",nome:"Conservação Câmara Frigorífica",periodo:"24h",preco:50,qty:true},
+    {id:"tanato",nome:"Tratamento Tanatoestético",periodo:"",preco:125,qty:1},
+    {id:"coveiro-in",nome:"Coveiro — Inumação (≤2 covatos)",periodo:"",preco:250,qty:1,desde:true},
+    {id:"coveiro-ex",nome:"Coveiro — Exumação",periodo:"",preco:500,qty:1,desde:true},
+    {id:"fecho",nome:"Fecho Hermético (Urnas Zinco)",periodo:"",preco:150,qty:1,desde:true},
+    {id:"frigorifico",nome:"Conservação Câmara Frigorífica",periodo:"por 24h",preco:50,qty:1,hasQty:true},
   ]},
   {cat:"Logística e Viaturas",items:[
-    {id:"viat-nc",nome:"Viatura Fúnebre — Recolha/Transladação",periodo:"Não Cerimonial",preco:125},
-    {id:"viat-cer",nome:"Auto-Fúnebre Cerimonial — Recolha",periodo:"Cerimonial",preco:150},
-    {id:"viat-fun",nome:"Auto-Fúnebre Cerimonial — Funeral",periodo:"",preco:150},
-    {id:"viat-ap",nome:"Viatura de Apoio",periodo:"",preco:50},
-    {id:"km-nc",nome:"Km — Viatura Não Cerimonial",periodo:"por km",preco:1.75,qty:true},
-    {id:"km-cer",nome:"Km — Viatura Cerimonial",periodo:"por km",preco:2.00,qty:true},
-    {id:"km-ap",nome:"Km — Viatura de Apoio",periodo:"por km",preco:1.00,qty:true},
+    {id:"viat-nc",nome:"Viatura Fúnebre — Recolha/Transladação",periodo:"Não Cerimonial",preco:125,qty:1},
+    {id:"viat-cer",nome:"Auto-Fúnebre Cerimonial — Recolha",periodo:"Cerimonial",preco:150,qty:1},
+    {id:"viat-fun",nome:"Auto-Fúnebre Cerimonial — Funeral",periodo:"",preco:150,qty:1},
+    {id:"viat-ap",nome:"Viatura de Apoio",periodo:"",preco:50,qty:1},
+    {id:"km-nc",nome:"Km — Viatura Não Cerimonial",periodo:"por km",preco:1.75,qty:1,hasQty:true},
+    {id:"km-cer",nome:"Km — Viatura Cerimonial",periodo:"por km",preco:2.00,qty:1,hasQty:true},
+    {id:"km-ap",nome:"Km — Viatura de Apoio",periodo:"por km",preco:1.00,qty:1,hasQty:true},
   ]},
   {cat:"Recursos Humanos (por colaborador)",items:[
-    {id:"rh-lab",nome:"Serviço de Recolha",periodo:"Laboral",preco:30},
-    {id:"rh-esp",nome:"Serviço de Recolha",periodo:"Especial",preco:45},
-    {id:"rh-not",nome:"Serviço de Recolha",periodo:"Noturno",preco:75},
-    {id:"fun-lab",nome:"Serviço de Funeral (até 3h)",periodo:"Laboral",preco:50},
-    {id:"fun-esp",nome:"Serviço de Funeral (até 3h)",periodo:"Especial",preco:75},
-    {id:"pes-cap",nome:"Pessoal de Apoio",periodo:"Capela/Vigilância",preco:25,desde:true},
-    {id:"hora-extra",nome:"Permanência Adicional",periodo:"hora extra",preco:20,qty:true},
+    {id:"rh-lab",nome:"Serviço de Recolha",periodo:"Laboral",preco:30,qty:1,hasQty:true},
+    {id:"rh-esp",nome:"Serviço de Recolha",periodo:"Especial",preco:45,qty:1,hasQty:true},
+    {id:"rh-not",nome:"Serviço de Recolha",periodo:"Noturno",preco:75,qty:1,hasQty:true},
+    {id:"fun-lab",nome:"Serviço de Funeral (até 3h)",periodo:"Laboral",preco:50,qty:1,hasQty:true},
+    {id:"fun-esp",nome:"Serviço de Funeral (até 3h)",periodo:"Especial",preco:75,qty:1,hasQty:true},
+    {id:"pes-cap",nome:"Pessoal de Apoio",periodo:"Capela/Vigilância",preco:25,qty:1,hasQty:true,desde:true},
+    {id:"hora-extra",nome:"Permanência Adicional",periodo:"hora extra",preco:20,qty:1,hasQty:true},
   ]},
   {cat:"Urnas",items:[
-    {id:"urna-2",nome:"Urna n.º 2 — Mogno (Jazigo)",periodo:"",preco:1405},
-    {id:"urna-3",nome:"Urna n.º 3 — Zinco c/ Filtro",periodo:"",preco:1375},
-    {id:"urna-8",nome:"Urna n.º 8 — Ocomé TV",periodo:"",preco:880},
-    {id:"urna-18c",nome:"Urna n.º 18 — Folheada Castanho",periodo:"",preco:950},
-    {id:"urna-18e",nome:"Urna n.º 18 — Folheada Eucalipto",periodo:"",preco:984},
-    {id:"urna-20",nome:"Urna n.º 20 — Madeira Natural Cremação",periodo:"",preco:750},
-    {id:"urna-21",nome:"Urna n.º 21 — Coimbra",periodo:"",preco:880},
-    {id:"urna-22",nome:"Urna n.º 22 — Folheada/TV",periodo:"",preco:780},
-    {id:"urna-23",nome:"Urna n.º 23",periodo:"",preco:675},
-    {id:"urna-39",nome:"Urna n.º 39 — Ocomé TV Premium",periodo:"",preco:1150},
-    {id:"urna-40",nome:"Urna n.º 40 — Ocomé TV",periodo:"",preco:995},
-    {id:"urna-restos-z",nome:"Urna para restos mortais — Zinco",periodo:"",preco:130},
-    {id:"urna-restos-m",nome:"Urna para restos mortais — Madeira",periodo:"",preco:130},
+    {id:"urna-2",nome:"Urna n.º 2 — Mogno (Jazigo)",periodo:"",preco:1405,qty:1},
+    {id:"urna-3",nome:"Urna n.º 3 — Zinco c/ Filtro",periodo:"",preco:1375,qty:1},
+    {id:"urna-8",nome:"Urna n.º 8 — Ocomé TV",periodo:"",preco:880,qty:1},
+    {id:"urna-18c",nome:"Urna n.º 18 — Folheada Castanho",periodo:"",preco:950,qty:1},
+    {id:"urna-20",nome:"Urna n.º 20 — Cremação",periodo:"",preco:750,qty:1},
+    {id:"urna-21",nome:"Urna n.º 21 — Coimbra",periodo:"",preco:880,qty:1},
+    {id:"urna-39",nome:"Urna n.º 39 — Ocomé TV Premium",periodo:"",preco:1150,qty:1},
   ]},
   {cat:"Câmara Ardente (24h)",items:[
-    {id:"ca-compl",nome:"Câmara Ardente Completa — Igreja/Capela",periodo:"",preco:200},
-    {id:"ca-parc",nome:"Câmara Ardente Parcial",periodo:"",preco:150},
-    {id:"ca-res",nome:"Câmara Ardente em Residência",periodo:"",preco:350},
+    {id:"ca-compl",nome:"Câmara Ardente Completa",periodo:"Igreja/Capela",preco:200,qty:1},
+    {id:"ca-parc",nome:"Câmara Ardente Parcial",periodo:"",preco:150,qty:1},
+    {id:"ca-res",nome:"Câmara Ardente em Residência",periodo:"",preco:350,qty:1},
   ]},
-  {cat:"Serviços Digitais",items:[
-    {id:"foto-base",nome:"Tratamento de Foto — Edição Base",periodo:"",preco:18},
-    {id:"foto-comp",nome:"Tratamento de Foto — Restauro/Complexo",periodo:"",preco:35,desde:true},
-    {id:"pagelas",nome:"Pagelas de Recordação",periodo:"unidade",preco:1.15,qty:true},
-    {id:"folha",nome:"Folha de Rosto",periodo:"",preco:6},
-    {id:"quadro",nome:"Quadro Memória 40×30",periodo:"",preco:35},
-    {id:"livro-cond",nome:"Livro de Condolências",periodo:"",preco:35},
-    {id:"divulg",nome:"Divulgação — Redes Sociais, Montras e Jornal",periodo:"",preco:55},
+  {cat:"Serviços Digitais e Impressos",items:[
+    {id:"foto-base",nome:"Tratamento de Foto — Edição Base",periodo:"",preco:18,qty:1},
+    {id:"foto-comp",nome:"Tratamento de Foto — Restauro",periodo:"",preco:35,qty:1,desde:true},
+    {id:"pagelas",nome:"Pagelas de Recordação",periodo:"unidade",preco:1.15,qty:100,hasQty:true},
+    {id:"folha",nome:"Folha de Rosto",periodo:"",preco:6,qty:1},
+    {id:"quadro",nome:"Quadro Memória 40×30",periodo:"",preco:35,qty:1},
+    {id:"livro-cond",nome:"Livro de Condolências",periodo:"",preco:35,qty:1},
+    {id:"divulg",nome:"Divulgação — Redes, Montras e Jornal",periodo:"",preco:55,qty:1},
   ]},
 ];
 
 const fmtN = v => Number(v).toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2});
 let periodo = 'laboral';
 let seleccionados = {};
+let customItems = []; // artigos não previstos
+let orcId = null;
 
 function setPeriodo(p, btn) {
   periodo = p;
-  document.querySelectorAll('.periodo-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.periodo-btn').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
+}
+
+function toggleSection(header) {
+  header.classList.toggle('collapsed');
+  const body = header.nextElementSibling;
+  body.style.display = body.style.display === 'none' ? '' : 'none';
 }
 
 function renderServicos() {
   const lista = document.getElementById('servicos-lista');
   lista.innerHTML = '';
+
   SERVICOS.forEach(cat => {
     const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `<div class="card-header">${cat.cat}</div><div class="card-body"></div>`;
-    const body = card.querySelector('.card-body');
+    card.className = 'section-card';
+    card.innerHTML = `<div class="section-header" onclick="toggleSection(this)">
+      ${cat.cat}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div><div class="section-body"></div>`;
+    const body = card.querySelector('.section-body');
+
     cat.items.forEach(s => {
-      const checked = seleccionados[s.id] ? 'checked' : '';
-      const qty = seleccionados[s.id]?.qty || (s.qty ? 1 : null);
-      const desde = s.desde ? '<span style="font-size:10px;color:var(--muted)">desde </span>' : '';
-      const qtyHtml = s.qty ? `<div class="servico-qty"><span style="font-size:11px;color:var(--muted)">×</span><input type="number" min="1" value="${qty||1}" oninput="updateQty('${s.id}',this.value)" style="width:52px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:3px;padding:4px 7px;font-size:12px;color:var(--texto);text-align:center;font-family:Inter,sans-serif"></div>` : '';
-      body.innerHTML += `
-        <div class="servico-item">
-          <div class="servico-left">
-            <input type="checkbox" class="servico-check" id="chk-${s.id}" ${checked} onchange="toggleServico('${s.id}')">
-            <div>
-              <div class="servico-nome">${s.nome}</div>
-              ${s.periodo?`<div class="servico-periodo">${s.periodo}</div>`:''}
-            </div>
+      const sel = seleccionados[s.id];
+      const qty = sel?.qty ?? s.qty;
+      const preco = sel?.preco ?? s.preco;
+      const desde = s.desde ? '<span style="font-size:11px;color:var(--muted)">desde </span>' : '';
+
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <div class="item-nome-wrap">
+          <input type="checkbox" class="item-check" ${sel?'checked':''} onchange="toggleItem('${s.id}',${JSON.stringify(s).replace(/"/g,'&quot;')})">
+          <div>
+            <div class="item-nome">${s.nome}</div>
+            ${s.periodo?`<div class="item-periodo">${s.periodo}</div>`:''}
           </div>
-          ${qtyHtml}
-          <div class="servico-preco">${desde}${fmtN(s.preco)} €</div>
-        </div>`;
+        </div>
+        <input type="number" class="item-input" value="${qty}" min="1" step="${s.hasQty?1:1}" title="Quantidade"
+          ${!sel?'disabled':''} onchange="updateItem('${s.id}','qty',this.value)">
+        <input type="number" class="item-input" value="${preco}" min="0" step="0.01" title="Preço unitário"
+          ${!sel?'disabled':''} onchange="updateItem('${s.id}','preco',this.value)">
+        <div class="item-preco-base">${desde}${fmtN(preco)} €</div>
+        <div></div>`;
+      body.appendChild(row);
     });
+
     lista.appendChild(card);
   });
-}
 
-function toggleServico(id) {
-  const s = SERVICOS.flatMap(c=>c.items).find(x=>x.id===id);
-  if (!s) return;
-  if (seleccionados[id]) {
-    delete seleccionados[id];
-  } else {
-    seleccionados[id] = {...s, qty: s.qty ? 1 : null};
-  }
+  // Artigos adicionais
+  const extraCard = document.createElement('div');
+  extraCard.className = 'section-card';
+  extraCard.innerHTML = `<div class="section-header" onclick="toggleSection(this)">
+    Artigos Adicionais / Não Previstos
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+  </div><div class="section-body" id="extra-body"></div>
+  <div class="add-item-row"><button class="add-item-btn" onclick="adicionarExtra()">+ Adicionar artigo não previsto</button></div>`;
+  lista.appendChild(extraCard);
+  renderExtras();
   actualizaTotal();
 }
 
-function updateQty(id, val) {
-  if (seleccionados[id]) seleccionados[id].qty = parseFloat(val)||1;
+function renderExtras() {
+  const body = document.getElementById('extra-body');
+  if(!body) return;
+  body.innerHTML = '';
+  customItems.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+      <div class="item-nome-wrap" style="grid-column:1">
+        <input type="text" class="item-input" value="${item.nome}" placeholder="Descrição..." style="text-align:left;width:100%" onchange="customItems[${i}].nome=this.value;actualizaTotal()">
+      </div>
+      <input type="number" class="item-input" value="${item.qty}" min="1" onchange="customItems[${i}].qty=parseFloat(this.value)||1;actualizaTotal()">
+      <input type="number" class="item-input" value="${item.preco}" min="0" step="0.01" onchange="customItems[${i}].preco=parseFloat(this.value)||0;actualizaTotal()">
+      <div class="item-preco-base">${fmtN(item.preco*item.qty)} €</div>
+      <button class="item-remove" onclick="customItems.splice(${i},1);renderExtras();actualizaTotal()">×</button>`;
+    body.appendChild(row);
+  });
+}
+
+function adicionarExtra() {
+  customItems.push({nome:'Novo artigo',qty:1,preco:0});
+  renderExtras();
+  actualizaTotal();
+}
+
+function toggleItem(id, s) {
+  if(seleccionados[id]) {
+    delete seleccionados[id];
+  } else {
+    seleccionados[id] = {...s};
+  }
+  renderServicos();
+}
+
+function updateItem(id, field, val) {
+  if(!seleccionados[id]) return;
+  seleccionados[id][field] = parseFloat(val) || 0;
   actualizaTotal();
 }
 
@@ -219,27 +377,149 @@ function actualizaTotal() {
   const items = Object.values(seleccionados);
   const totalEl = document.getElementById('total-itens');
   const totalValEl = document.getElementById('total-val');
-  if (items.length === 0) {
+
+  const allItems = [
+    ...items.map(s => ({nome: s.nome + (s.periodo?` (${s.periodo})`:''), subtotal: (s.preco||0)*(s.qty||1)})),
+    ...customItems.map(c => ({nome: c.nome, subtotal: (c.preco||0)*(c.qty||1)})),
+  ].filter(x => x.subtotal > 0);
+
+  if(!allItems.length) {
     totalEl.innerHTML = '<div class="empty-msg">Selecciona serviços</div>';
     totalValEl.textContent = '0,00 €';
     return;
   }
   let total = 0;
   let html = '';
-  items.forEach(s => {
-    const qty = s.qty || 1;
-    const sub = s.preco * qty;
-    total += sub;
-    const label = qty > 1 ? `${s.nome} ×${qty}` : s.nome;
-    html += `<div class="total-linha"><span class="nome">${label}</span><span class="val">${fmtN(sub)} €</span></div>`;
+  allItems.forEach(x => {
+    total += x.subtotal;
+    html += `<div class="total-linha"><span class="nome">${x.nome}</span><span class="val">${fmtN(x.subtotal)} €</span></div>`;
   });
   totalEl.innerHTML = html;
   totalValEl.textContent = fmtN(total) + ' €';
+
+  // Actualizar label cliente
+  const cli = document.getElementById('c-cliente').value.trim();
+  const fal = document.getElementById('c-falecido').value.trim();
+  document.getElementById('total-cliente-label').textContent = cli || fal ? `${cli}${cli&&fal?' · ':''}${fal}` : '';
 }
 
-function imprimirOrcamento() { window.print(); }
+// Adicionar listeners nos campos cliente
+['c-cliente','c-falecido','c-data','c-local'].forEach(id => {
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('input', actualizaTotal);
+});
 
+// GRAVAR / LISTAR
+async function gravarOrcamento() {
+  if(!db) { alert('Firebase não disponível'); return; }
+  let total = 0;
+  Object.values(seleccionados).forEach(s => total += (s.preco||0)*(s.qty||1));
+  customItems.forEach(c => total += (c.preco||0)*(c.qty||1));
+
+  const id = orcId || ('ORC-FUN-'+Date.now());
+  const doc = {
+    data: document.getElementById('c-data').value,
+    cliente: document.getElementById('c-cliente').value,
+    falecido: document.getElementById('c-falecido').value,
+    contacto: document.getElementById('c-contacto').value,
+    local: document.getElementById('c-local').value,
+    estado: document.getElementById('c-estado').value,
+    periodo, total,
+    seleccionados: Object.fromEntries(Object.entries(seleccionados).map(([k,v])=>[k,{...v}])),
+    customItems: [...customItems],
+    gravadoEm: new Date().toISOString()
+  };
+  await db.collection('orcamentos-funerais').doc(id).set(doc);
+  orcId = id;
+  document.getElementById('orcamento-id-label').textContent = 'ID: ' + id;
+  carregarLista();
+  alert('Orçamento gravado!');
+}
+
+function novoOrcamento() {
+  orcId = null;
+  seleccionados = {}; customItems = [];
+  ['c-data','c-cliente','c-falecido','c-contacto','c-local'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('c-estado').value = 'rascunho';
+  document.getElementById('orcamento-id-label').textContent = '';
+  renderServicos();
+}
+
+async function carregarLista() {
+  if(!db) { document.getElementById('gestao-loading').textContent='Firebase não disponível'; return; }
+  document.getElementById('gestao-loading').style.display='';
+  document.getElementById('gestao-loading').textContent='A carregar...';
+  document.getElementById('gestao-vazio').style.display='none';
+  document.getElementById('gestao-tabela-wrap').style.display='none';
+  try {
+    const snap = await db.collection('orcamentos-funerais').get();
+    const docs = [...snap.docs].sort((a,b)=>((b.data().gravadoEm||'').localeCompare(a.data().gravadoEm||'')));
+    document.getElementById('gestao-loading').style.display='none';
+    if(docs.length===0){document.getElementById('gestao-vazio').style.display='';return;}
+    document.getElementById('gestao-tabela-wrap').style.display='';
+    const tbody = document.getElementById('gestao-tbody'); tbody.innerHTML='';
+    docs.forEach(s=>{
+      const d=s.data(), docId=s.id;
+      const dt=d.data?new Date(d.data+'T12:00:00').toLocaleDateString('pt-PT'):'—';
+      const eClass={rascunho:'est-rascunho',enviado:'est-enviado',aprovado:'est-aprovado',cancelado:'est-cancelado'}[d.estado]||'est-rascunho';
+      const eLabel={rascunho:'Rascunho',enviado:'Enviado',aprovado:'Aprovado',cancelado:'Cancelado'}[d.estado]||d.estado;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${dt}</td><td>${d.cliente||'—'}</td><td>${d.falecido||'—'}</td><td style="color:var(--muted)">${d.local||'—'}</td>
+        <td style="text-align:right;font-weight:600">${d.total>0?fmtN(d.total)+' €':'—'}</td>
+        <td><span class="estado-pill ${eClass}">${eLabel}</span></td>
+        <td style="text-align:right;white-space:nowrap">
+          <select style="font-size:12px;background:rgba(255,255,255,0.05);border:1px solid var(--linha);border-radius:3px;padding:4px 8px;color:var(--texto);margin-right:6px" onchange="mudarEstado('${docId}',this.value)">
+            <option value="rascunho" ${d.estado==='rascunho'?'selected':''}>Rascunho</option>
+            <option value="enviado" ${d.estado==='enviado'?'selected':''}>Enviado</option>
+            <option value="aprovado" ${d.estado==='aprovado'?'selected':''}>Aprovado</option>
+            <option value="cancelado" ${d.estado==='cancelado'?'selected':''}>Cancelado</option>
+          </select>
+          <button class="gest-btn" onclick="abrirOrcamento('${docId}')">Abrir</button>
+          <button class="gest-btn danger" onclick="eliminarOrcamento('${docId}',this)">×</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+  } catch(e) { document.getElementById('gestao-loading').textContent='Erro: '+e.message; }
+}
+
+async function mudarEstado(id,estado){
+  if(!db)return;
+  await db.collection('orcamentos-funerais').doc(id).update({estado});
+}
+
+async function abrirOrcamento(id){
+  if(!db)return;
+  const snap=await db.collection('orcamentos-funerais').doc(id).get();
+  if(!snap.exists)return;
+  const d=snap.data();
+  orcId=id;
+  ['c-data','c-cliente','c-falecido','c-contacto','c-local'].forEach(f=>{
+    const el=document.getElementById(f); if(el&&d[f]!=null) el.value=d[f];
+  });
+  document.getElementById('c-estado').value=d.estado||'rascunho';
+  seleccionados=d.seleccionados?JSON.parse(JSON.stringify(d.seleccionados)):{};
+  customItems=d.customItems?[...d.customItems]:[];
+  document.getElementById('orcamento-id-label').textContent='ID: '+id;
+  renderServicos();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function eliminarOrcamento(id,btn){
+  if(!confirm('Eliminar?'))return;
+  if(!db)return;
+  btn.disabled=true;
+  await db.collection('orcamentos-funerais').doc(id).delete();
+  if(orcId===id){orcId=null;document.getElementById('orcamento-id-label').textContent='';}
+  carregarLista();
+}
+
+function imprimirOrcamento(){window.print();}
+
+// INIT
 renderServicos();
+carregarLista();
 </script>
 </body>
 </html>

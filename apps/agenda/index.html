@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agenda de Funerais — MIRA</title>
-<!-- Firebase -->
+<title>Agenda & Planeador — MIRA</title>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="../../assets/firebase-config.js"></script>
@@ -12,121 +11,148 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--castanho:#8b7355;--castanho-claro:#c9a96e;--escuro:#111010;--texto:#f0ebe3;--muted:#7a7068;--linha:rgba(255,255,255,0.07)}
-body{font-family:'Inter',sans-serif;background:var(--escuro);color:var(--texto);min-height:100vh}
+html,body{min-height:100%;background:var(--escuro);color:var(--texto);font-family:'Inter',sans-serif;font-size:16px}
 body::before{content:'';position:fixed;inset:0;z-index:0;background:linear-gradient(165deg,#1a1714 0%,#111010 40%,#0e0d0c 100%);pointer-events:none}
 body::after{content:'';position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--castanho-claro),transparent);z-index:10}
-.main{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:32px 20px 80px}
-h1{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;margin-bottom:6px}
-.subtitle{font-size:12px;color:var(--muted);margin-bottom:28px}
-.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
-.btn{background:rgba(139,115,85,0.2);border:1px solid rgba(139,115,85,0.4);color:var(--castanho-claro);padding:8px 18px;font-size:11px;font-family:'Inter',sans-serif;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:3px;transition:all .2s}
-.btn:hover{background:rgba(139,115,85,0.35)}
+nav{width:100%;background:#0e0d0c;border-bottom:1px solid rgba(255,255,255,0.07);padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:999}
+nav a{display:flex;align-items:center;gap:10px;text-decoration:none;color:rgba(255,255,255,0.5);font-size:14px;letter-spacing:0.08em;text-transform:uppercase;transition:color .2s}
+nav a:hover{color:#c9a96e}
+.main{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:28px 24px 80px}
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+.mes-nav{display:flex;align-items:center;gap:14px}
+.mes-nav button{background:rgba(255,255,255,0.06);border:1px solid var(--linha);color:var(--texto);font-size:20px;cursor:pointer;padding:6px 14px;border-radius:4px;line-height:1;transition:all .15s}
+.mes-nav button:hover{border-color:var(--castanho);color:var(--castanho-claro)}
+.mes-label{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;min-width:220px;text-align:center}
+.toolbar-right{display:flex;gap:10px;flex-wrap:wrap}
+.btn{padding:10px 20px;font-size:13px;font-family:'Inter',sans-serif;font-weight:500;letter-spacing:0.08em;border-radius:4px;cursor:pointer;transition:all .2s;border:1px solid var(--linha);background:rgba(255,255,255,0.04);color:var(--muted)}
+.btn:hover{border-color:var(--castanho);color:var(--castanho-claro)}
 .btn.primary{background:var(--castanho);border-color:var(--castanho);color:#fff}
 .btn.primary:hover{background:var(--castanho-claro)}
-.mes-nav{display:flex;align-items:center;gap:14px}
-.mes-nav button{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:0 4px;line-height:1}
-.mes-nav button:hover{color:var(--castanho-claro)}
-.mes-label{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400;min-width:200px;text-align:center}
+/* LEGENDA */
+.legenda{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.leg-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:1fr 300px;gap:20px}
+@media(max-width:800px){.layout{grid-template-columns:1fr}}
 /* CALENDÁRIO */
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--linha);border:1px solid var(--linha);border-radius:4px;overflow:hidden;margin-bottom:20px}
-.cal-head{background:#0a0908;padding:8px 4px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.cal-day{background:#111010;min-height:80px;padding:6px;cursor:pointer;transition:background .15s;position:relative}
-.cal-day:hover{background:#1a1714}
-.cal-day.outro-mes{opacity:.3}
-.cal-day.hoje{background:#1a1c14}
-.cal-day.hoje .cal-num{color:var(--castanho-claro)}
-.cal-num{font-size:12px;font-weight:500;margin-bottom:4px}
-.cal-evento{font-size:10px;background:rgba(139,115,85,0.25);border-left:2px solid var(--castanho);padding:2px 5px;border-radius:0 2px 2px 0;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
-.cal-evento:hover{background:rgba(139,115,85,0.4)}
-/* LISTA LATERAL */
-.layout{display:grid;grid-template-columns:1fr 280px;gap:20px;align-items:start}
-@media(max-width:700px){.layout{grid-template-columns:1fr}}
-.proximos{background:rgba(255,255,255,0.02);border:1px solid var(--linha);border-radius:4px;overflow:hidden;position:sticky;top:60px}
-.proximos-header{background:rgba(255,255,255,0.04);border-bottom:1px solid var(--linha);padding:10px 14px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--castanho)}
-.proximo-item{padding:12px 14px;border-bottom:1px solid var(--linha);cursor:pointer;transition:background .15s}
-.proximo-item:hover{background:rgba(255,255,255,0.04)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--linha);border:1px solid var(--linha);border-radius:6px;overflow:hidden}
+.cal-head{background:#0a0908;padding:10px 6px;text-align:center;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.cal-day{background:#111010;min-height:90px;padding:8px;cursor:pointer;transition:background .15s;position:relative}
+.cal-day:hover{background:#181614}
+.cal-day.outro-mes{opacity:.25}
+.cal-day.hoje .cal-num{background:var(--castanho);color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center}
+.cal-num{font-size:13px;font-weight:500;margin-bottom:5px;display:inline-flex}
+.cal-evento{font-size:11px;padding:3px 7px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;font-weight:500;line-height:1.3}
+.cal-evento:hover{filter:brightness(1.2)}
+/* PRÓXIMOS */
+.proximos-panel{background:rgba(255,255,255,0.02);border:1px solid var(--linha);border-radius:6px;overflow:hidden;position:sticky;top:66px}
+.proximos-header{background:rgba(255,255,255,0.04);border-bottom:1px solid var(--linha);padding:12px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--castanho)}
+.proximo-item{padding:13px 16px;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:background .15s}
+.proximo-item:hover{background:rgba(255,255,255,0.03)}
 .proximo-item:last-child{border-bottom:none}
-.proximo-data{font-size:10px;color:var(--castanho-claro);font-weight:600;letter-spacing:.08em;margin-bottom:3px}
-.proximo-nome{font-size:13px;font-weight:500;margin-bottom:2px}
-.proximo-local{font-size:11px;color:var(--muted)}
-.empty-proximos{padding:24px;text-align:center;font-size:12px;color:var(--muted)}
+.proximo-data{font-size:11px;color:var(--castanho-claro);font-weight:600;margin-bottom:3px}
+.proximo-nome{font-size:14px;font-weight:500;margin-bottom:2px}
+.proximo-local{font-size:12px;color:var(--muted)}
+.proximo-badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:600;margin-top:4px}
 /* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
-.modal-overlay.open{display:flex}
-.modal{background:#1a1714;border:1px solid rgba(255,255,255,0.1);border-radius:6px;width:100%;max-width:480px;overflow:hidden}
-.modal-header{background:rgba(139,115,85,0.15);border-bottom:1px solid rgba(255,255,255,0.07);padding:14px 20px;display:flex;justify-content:space-between;align-items:center}
-.modal-header h3{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400}
-.modal-close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
-.modal-body{padding:20px}
-.field{margin-bottom:14px}
-.field label{display:block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:5px}
-.field input,.field select,.field textarea{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:3px;padding:9px 12px;font-size:13px;color:var(--texto);font-family:'Inter',sans-serif;outline:none}
-.field textarea{min-height:72px;resize:vertical}
-.modal-footer{padding:14px 20px;border-top:1px solid rgba(255,255,255,0.07);display:flex;gap:10px;justify-content:flex-end}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.estado-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
-.est-agendado{background:rgba(30,50,80,0.5);color:#7aaaee}
-.est-concluido{background:rgba(30,70,40,0.5);color:#7add99}
-.est-cancelado{background:rgba(80,30,30,0.5);color:#ee8888}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.overlay.open{display:flex}
+.modal{background:#1c1a17;border:1px solid rgba(255,255,255,0.1);border-radius:8px;width:100%;max-width:520px;overflow:hidden}
+.modal-header{background:rgba(139,115,85,0.15);border-bottom:1px solid rgba(255,255,255,0.07);padding:16px 22px;display:flex;justify-content:space-between;align-items:center}
+.modal-header h3{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400}
+.modal-close{background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer}
+.modal-body{padding:22px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:4px;padding:10px 14px;font-size:15px;color:var(--texto);font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--castanho-claro)}
+.field textarea{min-height:80px;resize:vertical}
+.field select option{background:#1c1a17}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.modal-footer{padding:16px 22px;border-top:1px solid rgba(255,255,255,0.07);display:flex;gap:10px;justify-content:flex-end}
+.modal-footer button{padding:10px 20px;font-size:13px;font-family:'Inter',sans-serif;font-weight:500;border-radius:4px;cursor:pointer;transition:all .2s}
+.btn-cancel{background:transparent;border:1px solid var(--linha);color:var(--muted)}
+.btn-cancel:hover{border-color:var(--castanho);color:var(--castanho-claro)}
+.btn-save{background:var(--castanho);border:none;color:#fff}
+.btn-save:hover{background:var(--castanho-claro)}
+.btn-del{background:transparent;border:1px solid rgba(200,80,80,0.4);color:#e88;margin-right:auto}
+.btn-del:hover{background:rgba(200,80,80,0.1)}
 </style>
 </head>
 <body>
-<div id="mira-navbar" style="width:100%;background:#0e0d0c;border-bottom:1px solid rgba(255,255,255,0.07);padding:0 24px;height:44px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:9999;box-sizing:border-box;font-family:Inter,sans-serif"><a href="../../index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:rgba(255,255,255,0.5);font-size:11px;letter-spacing:0.1em;text-transform:uppercase" onmouseover="this.style.color='#c9a96e'" onmouseout="this.style.color='rgba(255,255,255,0.5)'"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Plataforma</a><img src="../../assets/logo.png" style="height:20px;filter:brightness(0) invert(1) opacity(.4)" alt="MIRA" onerror="this.style.display='none'"><span style="font-size:10px;color:rgba(255,255,255,0.18);letter-spacing:0.06em">mmira.pt</span></div>
-<div class="main">
-  <h1>Agenda de Funerais</h1>
-  <div class="subtitle">Agência Funerária Mira · Gestão de serviços</div>
+<nav>
+  <a href="../../index.html">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Plataforma
+  </a>
+  <span style="font-size:13px;color:rgba(255,255,255,0.3);letter-spacing:0.1em">Agenda & Planeador</span>
+  <img src="../../assets/logo.png" style="height:22px;filter:brightness(0) invert(1) opacity(.35)" alt="MIRA" onerror="this.style.display='none'">
+</nav>
 
+<div class="main">
   <div class="toolbar">
     <div class="mes-nav">
       <button onclick="mudarMes(-1)">‹</button>
       <div class="mes-label" id="mes-label"></div>
       <button onclick="mudarMes(1)">›</button>
     </div>
-    <div style="display:flex;gap:8px">
+    <div class="toolbar-right">
       <button class="btn" onclick="irHoje()">Hoje</button>
-      <button class="btn primary" onclick="abrirModal()">+ Novo serviço</button>
+      <button class="btn primary" onclick="abrirModal()">+ Novo evento</button>
     </div>
+  </div>
+
+  <div class="legenda">
+    <div class="leg-item"><div class="leg-dot" style="background:#2d5a3d"></div>Funeral</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#1e3d6a"></div>Trabalho</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#6a3d1e"></div>Viatura</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#5a1e5a"></div>Cliente</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#4a4a1e"></div>Ausência</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#1e5a5a"></div>Outro</div>
   </div>
 
   <div class="layout">
     <div>
       <div class="cal-grid" id="cal-grid"></div>
     </div>
-    <div class="proximos">
-      <div class="proximos-header">Próximos Serviços</div>
-      <div id="proximos-lista"><div class="empty-proximos">A carregar...</div></div>
+    <div class="proximos-panel">
+      <div class="proximos-header">Próximos Eventos</div>
+      <div id="proximos-lista"><div style="padding:24px;text-align:center;font-size:14px;color:var(--muted)">A carregar...</div></div>
     </div>
   </div>
 </div>
 
-<!-- MODAL -->
-<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)fecharModal()">
+<div class="overlay" id="overlay" onclick="if(event.target===this)fecharModal()">
   <div class="modal">
     <div class="modal-header">
-      <h3 id="modal-titulo">Novo Serviço</h3>
+      <h3 id="modal-titulo">Novo Evento</h3>
       <button class="modal-close" onclick="fecharModal()">×</button>
     </div>
     <div class="modal-body">
-      <input type="hidden" id="modal-id">
-      <div class="field"><label>Família / Falecido</label><input type="text" id="f-nome" placeholder="Nome do falecido ou família..."></div>
+      <div class="field"><label>Descrição</label><input type="text" id="f-nome" placeholder="Ex: Funeral Família Silva, Manutenção Viatura..."></div>
       <div class="grid-2">
         <div class="field"><label>Data</label><input type="date" id="f-data"></div>
         <div class="field"><label>Hora</label><input type="time" id="f-hora"></div>
       </div>
-      <div class="field"><label>Local</label><input type="text" id="f-local" placeholder="Igreja, cemitério, residência..."></div>
-      <div class="field"><label>Estado</label>
-        <select id="f-estado">
-          <option value="agendado">Agendado</option>
-          <option value="concluido">Concluído</option>
-          <option value="cancelado">Cancelado</option>
+      <div class="field"><label>Categoria</label>
+        <select id="f-cat">
+          <option value="funeral">⚫ Funeral / Serviço Fúnebre</option>
+          <option value="trabalho">🔵 Trabalho / Tarefa</option>
+          <option value="viatura">🟠 Viatura (manutenção/vistoria)</option>
+          <option value="cliente">🟣 Cliente / Visita</option>
+          <option value="ausencia">🟡 Ausência</option>
+          <option value="outro">🔵 Outro</option>
         </select>
       </div>
-      <div class="field"><label>Notas</label><textarea id="f-notas" placeholder="Tarefeiros, instruções especiais..."></textarea></div>
+      <div class="field"><label>Local</label><input type="text" id="f-local" placeholder="Local, endereço..."></div>
+      <div class="field"><label>Responsável / Viatura</label><input type="text" id="f-resp" placeholder="Nome ou matrícula..."></div>
+      <div class="field"><label>Notas</label><textarea id="f-notas" placeholder="Instruções, observações..."></textarea></div>
     </div>
     <div class="modal-footer">
-      <button class="btn" id="btn-eliminar" onclick="eliminarServico()" style="display:none;color:#e88;border-color:#e88">Eliminar</button>
-      <button class="btn" onclick="fecharModal()">Cancelar</button>
-      <button class="btn primary" onclick="gravarServico()">Gravar</button>
+      <button class="btn-del" id="btn-del" onclick="eliminarEvento()" style="display:none">Eliminar</button>
+      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-save" onclick="gravarEvento()">Gravar</button>
     </div>
   </div>
 </div>
@@ -137,131 +163,130 @@ try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch
 
 let anoAtual = new Date().getFullYear();
 let mesAtual = new Date().getMonth();
-let servicos = [];
+let eventos = [];
 let editId = null;
 
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const DIAS_SEMANA = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const DIAS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const CAT_COR = {funeral:'#2d5a3d',trabalho:'#1e3d6a',viatura:'#6a3d1e',cliente:'#5a1e5a',ausencia:'#4a4a1e',outro:'#1e5a5a'};
+const CAT_LABEL = {funeral:'Funeral',trabalho:'Trabalho',viatura:'Viatura',cliente:'Cliente',ausencia:'Ausência',outro:'Outro'};
 
-function mudarMes(delta) { mesAtual += delta; if(mesAtual>11){mesAtual=0;anoAtual++;} if(mesAtual<0){mesAtual=11;anoAtual--;} renderCal(); }
-function irHoje() { const h=new Date(); anoAtual=h.getFullYear(); mesAtual=h.getMonth(); renderCal(); }
+function mudarMes(d){mesAtual+=d;if(mesAtual>11){mesAtual=0;anoAtual++;}if(mesAtual<0){mesAtual=11;anoAtual--;}renderCal();}
+function irHoje(){const h=new Date();anoAtual=h.getFullYear();mesAtual=h.getMonth();renderCal();}
 
-async function carregarServicos() {
+async function carregarEventos(){
   if(!db) return;
-  const snap = await db.collection('agenda-funerais').orderBy('data','asc').get();
-  servicos = snap.docs.map(d => ({id:d.id,...d.data()}));
+  const snap = await db.collection('agenda-geral').orderBy('data','asc').get();
+  eventos = snap.docs.map(d=>({id:d.id,...d.data()}));
   renderCal();
   renderProximos();
 }
 
-function renderCal() {
-  document.getElementById('mes-label').textContent = MESES[mesAtual] + ' ' + anoAtual;
+function renderCal(){
+  document.getElementById('mes-label').textContent = MESES[mesAtual]+' '+anoAtual;
   const grid = document.getElementById('cal-grid');
-  grid.innerHTML = DIAS_SEMANA.map(d=>`<div class="cal-head">${d}</div>`).join('');
-
-  const primeiroDia = new Date(anoAtual, mesAtual, 1).getDay();
-  const diasMes = new Date(anoAtual, mesAtual+1, 0).getDate();
-  const diasMesAnt = new Date(anoAtual, mesAtual, 0).getDate();
+  grid.innerHTML = DIAS.map(d=>`<div class="cal-head">${d}</div>`).join('');
+  const prim = new Date(anoAtual,mesAtual,1).getDay();
+  const dias = new Date(anoAtual,mesAtual+1,0).getDate();
+  const diasAnt = new Date(anoAtual,mesAtual,0).getDate();
   const hoje = new Date();
 
-  for(let i=0; i<primeiroDia; i++) {
-    const d = diasMesAnt - primeiroDia + i + 1;
-    grid.innerHTML += `<div class="cal-day outro-mes"><div class="cal-num">${d}</div></div>`;
+  for(let i=0;i<prim;i++){
+    grid.innerHTML+=`<div class="cal-day outro-mes"><div class="cal-num">${diasAnt-prim+i+1}</div></div>`;
   }
-
-  for(let d=1; d<=diasMes; d++) {
-    const dataStr = `${anoAtual}-${String(mesAtual+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const eHoje = hoje.getFullYear()===anoAtual && hoje.getMonth()===mesAtual && hoje.getDate()===d;
-    const evsDay = servicos.filter(s=>s.data===dataStr);
-    const evsHtml = evsDay.map(s=>`<div class="cal-evento" onclick="editarServico('${s.id}');event.stopPropagation()">${s.hora||''} ${s.nome}</div>`).join('');
-    grid.innerHTML += `<div class="cal-day${eHoje?' hoje':''}" onclick="abrirModal('${dataStr}')"><div class="cal-num">${d}</div>${evsHtml}</div>`;
+  for(let d=1;d<=dias;d++){
+    const dataStr=`${anoAtual}-${String(mesAtual+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const eHoje=hoje.getFullYear()===anoAtual&&hoje.getMonth()===mesAtual&&hoje.getDate()===d;
+    const evs=eventos.filter(e=>e.data===dataStr);
+    const evHtml=evs.slice(0,3).map(e=>{
+      const cor=CAT_COR[e.cat]||CAT_COR.outro;
+      return `<div class="cal-evento" style="background:${cor}20;color:${cor};border-left:2px solid ${cor}" onclick="editarEvento('${e.id}');event.stopPropagation()">${e.hora?e.hora+' ':''} ${e.nome}</div>`;
+    }).join('');
+    const mais=evs.length>3?`<div style="font-size:10px;color:var(--muted);padding:2px 4px">+${evs.length-3} mais</div>`:'';
+    grid.innerHTML+=`<div class="cal-day${eHoje?' hoje':''}" onclick="abrirModal('${dataStr}')"><div class="cal-num">${d}</div>${evHtml}${mais}</div>`;
   }
-
-  const restantes = (7 - (primeiroDia + diasMes) % 7) % 7;
-  for(let i=1; i<=restantes; i++) {
-    grid.innerHTML += `<div class="cal-day outro-mes"><div class="cal-num">${i}</div></div>`;
-  }
+  const rest=(7-(prim+dias)%7)%7;
+  for(let i=1;i<=rest;i++) grid.innerHTML+=`<div class="cal-day outro-mes"><div class="cal-num">${i}</div></div>`;
 }
 
-function renderProximos() {
-  const hoje = new Date().toISOString().split('T')[0];
-  const proximos = servicos.filter(s=>s.data>=hoje && s.estado!=='cancelado').slice(0,8);
-  const el = document.getElementById('proximos-lista');
-  if(!proximos.length) { el.innerHTML='<div class="empty-proximos">Sem serviços agendados</div>'; return; }
-  el.innerHTML = proximos.map(s=>{
-    const d = new Date(s.data+'T12:00:00');
-    const dFmt = d.toLocaleDateString('pt-PT',{day:'numeric',month:'short'});
-    const badge = {agendado:'est-agendado',concluido:'est-concluido',cancelado:'est-cancelado'}[s.estado]||'est-agendado';
-    return `<div class="proximo-item" onclick="editarServico('${s.id}')">
-      <div class="proximo-data">${dFmt} ${s.hora||''}</div>
-      <div class="proximo-nome">${s.nome}</div>
-      <div class="proximo-local">${s.local||'—'}</div>
+function renderProximos(){
+  const hoje=new Date().toISOString().split('T')[0];
+  const prox=eventos.filter(e=>e.data>=hoje).slice(0,10);
+  const el=document.getElementById('proximos-lista');
+  if(!prox.length){el.innerHTML='<div style="padding:24px;text-align:center;font-size:14px;color:var(--muted)">Sem eventos próximos</div>';return;}
+  el.innerHTML=prox.map(e=>{
+    const d=new Date(e.data+'T12:00:00');
+    const dFmt=d.toLocaleDateString('pt-PT',{day:'numeric',month:'short'});
+    const cor=CAT_COR[e.cat]||CAT_COR.outro;
+    return `<div class="proximo-item" onclick="editarEvento('${e.id}')">
+      <div class="proximo-data">${dFmt} ${e.hora||''}</div>
+      <div class="proximo-nome">${e.nome}</div>
+      ${e.local?`<div class="proximo-local">${e.local}</div>`:''}
+      <div class="proximo-badge" style="background:${cor}20;color:${cor}">${CAT_LABEL[e.cat]||e.cat}</div>
     </div>`;
   }).join('');
 }
 
-function abrirModal(data='') {
-  editId = null;
-  document.getElementById('modal-titulo').textContent = 'Novo Serviço';
-  document.getElementById('modal-id').value = '';
-  document.getElementById('f-nome').value = '';
-  document.getElementById('f-data').value = data;
-  document.getElementById('f-hora').value = '';
-  document.getElementById('f-local').value = '';
-  document.getElementById('f-estado').value = 'agendado';
-  document.getElementById('f-notas').value = '';
-  document.getElementById('btn-eliminar').style.display = 'none';
-  document.getElementById('modal-overlay').classList.add('open');
+function abrirModal(data=''){
+  editId=null;
+  document.getElementById('modal-titulo').textContent='Novo Evento';
+  document.getElementById('f-nome').value='';
+  document.getElementById('f-data').value=data;
+  document.getElementById('f-hora').value='';
+  document.getElementById('f-cat').value='funeral';
+  document.getElementById('f-local').value='';
+  document.getElementById('f-resp').value='';
+  document.getElementById('f-notas').value='';
+  document.getElementById('btn-del').style.display='none';
+  document.getElementById('overlay').classList.add('open');
   setTimeout(()=>document.getElementById('f-nome').focus(),100);
 }
 
-function editarServico(id) {
-  const s = servicos.find(x=>x.id===id);
-  if(!s) return;
-  editId = id;
-  document.getElementById('modal-titulo').textContent = 'Editar Serviço';
-  document.getElementById('f-nome').value = s.nome||'';
-  document.getElementById('f-data').value = s.data||'';
-  document.getElementById('f-hora').value = s.hora||'';
-  document.getElementById('f-local').value = s.local||'';
-  document.getElementById('f-estado').value = s.estado||'agendado';
-  document.getElementById('f-notas').value = s.notas||'';
-  document.getElementById('btn-eliminar').style.display = '';
-  document.getElementById('modal-overlay').classList.add('open');
+function editarEvento(id){
+  const e=eventos.find(x=>x.id===id);if(!e)return;
+  editId=id;
+  document.getElementById('modal-titulo').textContent='Editar Evento';
+  document.getElementById('f-nome').value=e.nome||'';
+  document.getElementById('f-data').value=e.data||'';
+  document.getElementById('f-hora').value=e.hora||'';
+  document.getElementById('f-cat').value=e.cat||'outro';
+  document.getElementById('f-local').value=e.local||'';
+  document.getElementById('f-resp').value=e.resp||'';
+  document.getElementById('f-notas').value=e.notas||'';
+  document.getElementById('btn-del').style.display='';
+  document.getElementById('overlay').classList.add('open');
 }
 
-function fecharModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
-  editId = null;
-}
+function fecharModal(){document.getElementById('overlay').classList.remove('open');editId=null;}
 
-async function gravarServico() {
-  if(!db) { alert('Firebase não disponível'); return; }
-  const nome = document.getElementById('f-nome').value.trim();
-  if(!nome) { document.getElementById('f-nome').focus(); return; }
-  const doc = {
-    nome, data:document.getElementById('f-data').value,
+async function gravarEvento(){
+  if(!db){alert('Firebase não disponível');return;}
+  const nome=document.getElementById('f-nome').value.trim();
+  if(!nome){document.getElementById('f-nome').focus();return;}
+  const doc={
+    nome,data:document.getElementById('f-data').value,
     hora:document.getElementById('f-hora').value,
+    cat:document.getElementById('f-cat').value,
     local:document.getElementById('f-local').value,
-    estado:document.getElementById('f-estado').value,
+    resp:document.getElementById('f-resp').value,
     notas:document.getElementById('f-notas').value,
     criadoEm:new Date().toISOString()
   };
-  const id = editId || ('FUN-'+Date.now());
-  await db.collection('agenda-funerais').doc(id).set(doc,{merge:true});
+  const id=editId||('EVT-'+Date.now());
+  await db.collection('agenda-geral').doc(id).set(doc,{merge:true});
   fecharModal();
-  carregarServicos();
+  carregarEventos();
 }
 
-async function eliminarServico() {
-  if(!editId||!db) return;
-  if(!confirm('Eliminar este serviço?')) return;
-  await db.collection('agenda-funerais').doc(editId).delete();
+async function eliminarEvento(){
+  if(!editId||!db)return;
+  if(!confirm('Eliminar evento?'))return;
+  await db.collection('agenda-geral').doc(editId).delete();
   fecharModal();
-  carregarServicos();
+  carregarEventos();
 }
 
-carregarServicos();
+carregarEventos();
 </script>
 </body>
 </html>
