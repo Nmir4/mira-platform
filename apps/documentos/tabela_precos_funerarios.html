@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<title>Tabela de Bens e Serviços Fúnebres – Agência Mira</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
+<style>
+:root { --primary:#1a252f; --accent:#957531; --bg:#ffffff; }
+
+body{
+  font-family:'Lato',sans-serif;
+  margin:0;
+  background:#f0f0f0;
+}
+
+/* A3 horizontal – manter 1 página */
+.page{
+  width:420mm;
+  height:297mm;
+  margin:10mm auto;
+  padding:10mm;
+  background:#fff;
+  box-sizing:border-box;
+  overflow:hidden;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  border-bottom:2px solid var(--primary);
+  padding-bottom:5mm;
+  margin-bottom:3mm;
+}
+
+.company h1{
+  font-family:'Playfair Display',serif;
+  font-size:28px;
+  margin:0;
+  color:var(--primary);
+}
+
+.badge{
+  display:inline-block;
+  background:var(--primary);
+  color:#fff;
+  padding:2px 10px;
+  font-weight:700;
+  margin:4px 0;
+}
+
+h2{
+  text-align:center;
+  font-family:'Playfair Display',serif;
+  letter-spacing:2px;
+  margin:5mm 0 2.5mm;
+}
+
+.iva{
+  text-align:center;
+  border:1px solid #c00;
+  color:#c00;
+  font-weight:700;
+  padding:4px;
+  margin-bottom:2.5mm;
+}
+
+/* REGIMES HORÁRIOS – HORIZONTAL */
+.info-box{
+  border:1px solid #ddd;
+  background:#f8f8f8;
+  padding:5px 10px;
+  font-size:11px;
+  margin-bottom:4mm;
+  display:flex;
+  justify-content:space-between;
+  gap:10mm;
+  line-height:1.35;
+}
+.info-item{
+  flex:1;
+  text-align:center;
+  white-space:nowrap;
+}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:4mm 8mm;
+  grid-template-areas:
+    "s1 s2 s3"
+    "s4 s5 s6"
+    ".  .  s7";
+}
+
+.section{ break-inside:avoid; }
+
+.section h3{
+  margin:0 0 2mm;
+  font-size:13px;
+  text-transform:uppercase;
+  color:var(--accent);
+  border-bottom:1px solid var(--accent);
+  padding-bottom:1mm;
+}
+
+.note{
+  font-size:11px;
+  color:#555;
+  margin-bottom:2mm;
+  line-height:1.25;
+}
+
+table{ width:100%; border-collapse:collapse; }
+td{
+  font-size:11px;
+  padding:2px 4px;
+  border-bottom:1px solid #eee;
+  vertical-align:top;
+  line-height:1.18;
+}
+.price{
+  text-align:right;
+  font-weight:700;
+  white-space:nowrap;
+}
+
+/* áreas */
+.s1{ grid-area:s1; }
+.s2{ grid-area:s2; }
+.s3{ grid-area:s3; }
+.s4{ grid-area:s4; }
+.s5{ grid-area:s5; }
+.s6{ grid-area:s6; }
+
+/* PUXAR O 7 AINDA MAIS PARA CIMA */
+.s7{
+  grid-area:s7;
+  margin-top:-26mm;   /* <<< MAIS UM BOCADO */
+}
+
+/* bloco inferior */
+.bottom{
+  display:grid;
+  grid-template-columns:1.3fr 1.7fr;
+  gap:8mm;
+  margin-top:4mm;
+}
+
+.social{
+  border-left:4px solid var(--accent);
+  background:rgba(149,117,49,0.08);
+  padding:8px;
+  font-size:12px;
+  line-height:1.35;
+}
+
+.footer{
+  font-size:11px;
+  border-top:1px solid #ddd;
+  padding-top:3mm;
+  line-height:1.4;
+}
+
+@media print{
+  @page{ size:A3 landscape; margin:10mm; }
+  body{ background:none; }
+  .page{ margin:0; width:auto; height:auto; padding:10mm; box-shadow:none; }
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="company">
+      <h1>Agência Mira, Lda.</h1>
+      <span class="badge">DGAE N.º 66</span><br>
+      NIF 505 905 434 · T 251 404 114<br>
+      Rua Rio Porto, 53 · 4960-568 Melgaço
+    </div>
+    <img src="logo.png" alt="Logótipo Agência Mira" style="max-width:260px;">
+  </div>
+
+  <h2>TABELA DE BENS E SERVIÇOS FÚNEBRES</h2>
+  <div class="iva">ISENTO DE IVA — ART. 9.º, N.º 26 DO CIVA</div>
+
+  <div class="info-box">
+    <div class="info-item"><strong>Período Laboral</strong> · 2.ª–6.ª · 08h–19h</div>
+    <div class="info-item"><strong>Período Especial</strong> · Sáb., Dom. e Feriados</div>
+    <div class="info-item"><strong>Período Noturno</strong> · 19h–08h</div>
+  </div>
+
+  <div class="grid">
+
+    <div class="section s1">
+      <h3>1. Gestão Administrativa e Burocrática do Óbito</h3>
+      <table><tbody>
+        <tr><td>Administração Técnica – Processo (Laboral)</td><td class="price">175,00 €</td></tr>
+        <tr><td>Administração Técnica – Processo (Especial)</td><td class="price">200,00 €</td></tr>
+        <tr><td>Administração Técnica – Proc. MP / IML</td><td class="price">300,00 €</td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="section s2">
+      <h3>2. Serviços Técnicos Operacionais</h3>
+      <table><tbody>
+        <tr><td>Tratamento Tanato-estético (Preparação do Corpo)</td><td class="price">125,00 €</td></tr>
+        <tr><td>Tanatopraxia (Téc. Especializado)</td><td class="price">Sob consulta</td></tr>
+        <tr><td>Coveiro – Inumação (≤ 2 covatos)</td><td class="price">desde 250,00 €</td></tr>
+        <tr><td>Coveiro – Exumação (Abertura, limpeza e Transladação)</td><td class="price">desde 500,00 €</td></tr>
+        <tr><td>Fecho Hermético (Urnas Zinco/Metálicas)</td><td class="price">desde 150,00 €</td></tr>
+        <tr><td>Conservação em Câmara Frigorífica (24 h)</td><td class="price">50,00 €</td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="section s3">
+      <h3>3. Logística e Mobilidade (Taxas de Saída)</h3>
+      <div class="note">
+        “Não cerimonial” = viatura funerária licenciada, descaracterizada, para recolhas/transladações.<br>
+        “Cerimonial” = auto-fúnebre envidraçado de cerimónia.
+      </div>
+      <table><tbody>
+        <tr><td>Viatura Fúnebre – Recolha/Transladação (Não Cerimonial)</td><td class="price">125,00 €</td></tr>
+        <tr><td>Auto-Fúnebre Cerimonial – Recolha/Transladação</td><td class="price">150,00 €</td></tr>
+        <tr><td>Auto-Fúnebre Cerimonial – Funeral</td><td class="price">150,00 €</td></tr>
+        <tr><td>Viatura de Apoio (Deslc. p/ Documentos,Vestuário,cemitério,etc)</td><td class="price">50,00 €</td></tr>
+        <tr><td>Km – Viatura Não Cerimonial</td><td class="price">1,75 € / km</td></tr>
+        <tr><td>Km – Viatura Cerimonial</td><td class="price">2,00 € / km</td></tr>
+        <tr><td>Km – Viatura de Apoio</td><td class="price">1,00 € / km</td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="section s4">
+      <h3>4. Recursos Humanos (por Colaborador)</h3>
+      <div class="note">Valores exclusivos de recursos humanos, independentes de viaturas.</div>
+      <table><tbody>
+        <tr><td>Serviço de Recolha – Período Laboral (08h–19h)</td><td class="price">30,00 €</td></tr>
+        <tr><td>Serviço de Recolha – Período Especial</td><td class="price">45,00 €</td></tr>
+        <tr><td>Serviço de Recolha – Período Noturno (19h–08h)</td><td class="price">75,00 €</td></tr>
+        <tr><td>Serviço de Funeral – Período Laboral (até 3 h)</td><td class="price">50,00 €</td></tr>
+        <tr><td>Serviço de Funeral – Período Especial (até 3 h)</td><td class="price">75,00 €</td></tr>
+        <tr><td>Pessoal de Apoio (Capela e Vigilância)</td><td class="price">desde 25,00 €</td></tr>
+        <tr><td>Permanência Adicional (hora extra)</td><td class="price">20,00 € / h</td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="section s5">
+      <h3>5. Urnas e Ornamentos (Referência Sequencial)</h3>
+      <table><tbody>
+        <tr><td>Urna n.º 2 (Mogno – Jazigo)</td><td class="price">1 405,00 €</td></tr>
+        <tr><td>Urna n.º 3 (Zinco c/ Filtro)</td><td class="price">1 375,00 €</td></tr>
+        <tr><td>Urna n.º 8 (Ocomé TV)</td><td class="price">880,00 €</td></tr>
+        <tr><td>Urna n.º 18 (Folheada Castanho)</td><td class="price">950,00 €</td></tr>
+        <tr><td>Urna n.º 18 (Folheada Eucalipto)</td><td class="price">984,00 €</td></tr>
+        <tr><td>Urna n.º 20 (Madeira Natural – Cremação)</td><td class="price">750,00 €</td></tr>
+        <tr><td>Urna n.º 21 (Coimbra)</td><td class="price">880,00 €</td></tr>
+        <tr><td>Urna n.º 22 (Folheada / Folheada TV)</td><td class="price">780,00 €</td></tr>
+        <tr><td>Urna n.º 23</td><td class="price">675,00 €</td></tr>
+        <tr><td>Urna n.º 39 (Ocomé TV Premium)</td><td class="price">1 150,00 €</td></tr>
+        <tr><td>Urna n.º 40 (Ocomé TV)</td><td class="price">995,00 €</td></tr>
+        <tr><td>Urna p/ restos mortais em zinco</td><td class="price">130,00 €</td></tr>
+        <tr><td>Urna p/ restos mortais em madeira</td><td class="price">130,00 €</td></tr>
+        <tr><td>Lençol Cetim</td><td class="price">28,00 €</td></tr>
+        <tr><td>Lenço</td><td class="price">20,00 €</td></tr>
+        <tr><td>Véu Tule</td><td class="price">28,00 €</td></tr>
+        <tr><td>Terço</td><td class="price">12,50 €</td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="section s6">
+      <h3>6. Serviços Digitais e Divulgação</h3>
+      <table><tbody>
+        <tr><td>Tratamento de Foto (Edição Base)</td><td class="price">18,00 €</td></tr>
+        <tr><td>Tratamento de Foto (Restauro / Complexo)</td><td class="price">desde 35,00 €</td></tr>
+        <tr><td>Pagelas de Recordação (Unidade)</td><td class="price">1,15 €</td></tr>
+        <tr><td>Folha de Rosto</td><td class="price">6,00 €</td></tr>
+        <tr><td>Quadro Memória 40×30</td><td class="price">35,00 €</td></tr>
+        <tr><td>Livro de Condolências</td><td class="price">35,00 €</td></tr>
+        <tr><td>Divulgação (Redes Sociais, Montras e Jornal Local)</td><td class="price">55,00 €</td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="section s7">
+      <h3>7. Câmara Ardente (Período 24 h)</h3>
+      <table><tbody>
+        <tr><td>Câmara Ardente Completa em Igreja / Capela</td><td class="price">200,00 €</td></tr>
+        <tr><td>Câmara Ardente Parcial</td><td class="price">150,00 €</td></tr>
+        <tr><td>Câmara Ardente em Residência (Montagem completa)</td><td class="price">350,00 €</td></tr>
+      </tbody></table>
+    </div>
+
+  </div><!-- /grid -->
+
+  <div class="bottom">
+    <div class="social">
+      <strong>FUNERAL SOCIAL: 481,00 €</strong><br>
+      Inclui urna em pinho, ferragens, revestimento, lençol, almofada e lenço, transporte e serviços técnicos.<br>
+      <small>Pode acrescer taxa de inumação do cemitério.</small>
+    </div>
+
+    <div class="footer">
+      <strong>Notas:</strong><br>
+      – Serviços “sob consulta” ou “desde” dependem de avaliação técnica específica.<br>
+      – Horas adicionais seguem o regime horário em que ocorrem.<br>
+      – Valores “desde” variam conforme condições técnicas (covatos, terras, urgência, deslocações).<br>
+      – Taxas paroquiais, anúncios de terceiros e taxas de cemitério a cargo do cliente.<br>
+      Atualizado em 13/01/2026.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
