@@ -48,6 +48,13 @@ input:focus,textarea:focus,select:focus{border-color:var(--verde)}
 textarea{resize:vertical;min-height:60px}
 /* TABELA ITENS */
 .items-table{width:100%;border-collapse:collapse}
+.grupo-row td{background:rgba(45,90,61,0.12);font-weight:700;font-size:13px;color:#2d5a3d;padding:8px 10px;border-top:2px solid rgba(45,90,61,0.3);border-bottom:1px solid rgba(45,90,61,0.15)}
+.grupo-row .grupo-nome{font-size:14px;font-weight:700;color:#2d5a3d}
+.grupo-toggle{cursor:pointer;font-size:11px;color:#2d5a3d;padding:3px 8px;border:1px solid rgba(45,90,61,0.4);border-radius:3px;background:rgba(45,90,61,0.1);margin-left:8px;transition:all .15s;white-space:nowrap}
+.grupo-toggle:hover{background:rgba(45,90,61,0.25)}
+.sub-item td{padding-left:28px!important;font-size:12px;opacity:0.85;background:rgba(45,90,61,0.04)}
+.sub-item.oculto{display:none}
+.grupo-total{font-weight:700;font-size:13px;color:#1a1a1a}
 .drag-handle{cursor:grab;color:#ccc;font-size:21px;padding:0 7px 0 2px;user-select:none;flex-shrink:0;line-height:1}
 .drag-handle:active{cursor:grabbing}
 .items-table tr.dragging{opacity:0.4;background:#f0f7f4}
@@ -88,7 +95,7 @@ textarea{resize:vertical;min-height:60px}
 .capa{width:100%;min-height:1123px;background:#dde8ee;position:relative;display:flex;flex-direction:column;overflow:hidden;page-break-after:always}
 .capa-topo{padding:47px 59px 0;display:flex;justify-content:flex-end;position:relative;z-index:1}
 .capa-logo-area{text-align:right}
-.capa-logo{width:130px;margin-bottom:6px}
+.capa-logo{width:200px;margin-bottom:10px}
 .capa-subtitulo{font-size:13px;font-weight:600;letter-spacing:.18em;color:var(--verde);text-transform:uppercase}
 .capa-id-bloco{margin-top:18px;text-align:right;font-size:13px;color:#666}
 .capa-id-bloco strong{color:var(--texto)}
@@ -379,7 +386,7 @@ function abrirChat() {
     <div class="capa-rodape">
       <div class="capa-rodape-logo">
         <img id="p-logo-rodape" src="../../assets/logo-florista.png" alt="" style="filter:brightness(0) invert(1);height:32px">
-        <span>Florista Mira · Desde 1850</span>
+        
       </div>
       <div class="capa-rodape-info">Rua Rio do Porto, 53 · 4960-568 Melgaço<br>251 404 014 · geral@mmira.pt · www.mmira.pt</div>
     </div>
@@ -526,6 +533,37 @@ function renderTabela(){
     const tr=document.createElement('tr');
     const margDefault=item.margem!=null?item.margem:g;
     const pvpDefault=item.pvpManual||'';
+    // Verificar se é grupo
+    if(item.tipo === 'grupo') {
+      const gtotal = totalGrupo(item.id);
+      const fmtG = v => Number(v).toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2});
+      tr.className = 'grupo-row';
+      tr.setAttribute('data-id', item.id);
+      tr.innerHTML = `<td colspan="7">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="text" value="${item.desc}" style="background:transparent;border:none;outline:none;font-weight:700;font-size:14px;color:#2d5a3d;font-family:inherit;width:300px" onchange="itens.find(i=>i.id===${item.id}).desc=this.value">
+            <span class="grupo-toggle" onclick="toggleGrupo(${item.id})">${item.expandido?'▼ Ocultar itens':'▶ Mostrar itens'}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px">
+            <span style="font-size:13px;color:#555">Total: <strong>${fmtG(gtotal)} €</strong></span>
+            <button onclick="removeItem(${item.id})" style="background:none;border:1px solid #e0b0b0;border-radius:3px;cursor:pointer;color:#c0392b;font-size:12px;padding:2px 8px">×</button>
+          </div>
+        </div>
+      </td>`;
+      tbody.appendChild(tr);
+      return;
+    }
+    
+    // Verificar se sub-item de grupo oculto
+    let inGrupo = false, grupoExpandido = true;
+    for(const it of itens) {
+      if(it.id === item.id) break;
+      if(it.tipo === 'grupo') { inGrupo = true; grupoExpandido = it.expandido; }
+    }
+    if(inGrupo && !grupoExpandido) { tr.className = 'sub-item oculto'; }
+    else if(inGrupo) { tr.className = 'sub-item'; }
+    
     tr.setAttribute('draggable','true');
     tr.setAttribute('data-id', item.id);
     tr.innerHTML=`
@@ -545,6 +583,34 @@ function renderTabela(){
   initDragDrop();
 }
 function removeItem(id){ itens=itens.filter(i=>i.id!==id); renderTabela(); }
+
+function criarGrupo() {
+  const nome = prompt('Nome do grupo (ex: Arranjos Igreja):');
+  if(!nome) return;
+  itens.push({
+    id: nextId++,
+    tipo: 'grupo',
+    desc: nome,
+    expandido: true,
+    qty: 1, custo: 0, margem: margGlobal, pvp: 0, lucro: 0
+  });
+  renderTabela();
+}
+
+function toggleGrupo(id) {
+  const g = itens.find(i=>i.id===id);
+  if(g) { g.expandido = !g.expandido; renderTabela(); }
+}
+
+function totalGrupo(grupoId) {
+  let total = 0, inGrupo = false;
+  for(const it of itens) {
+    if(it.id === grupoId) { inGrupo = true; continue; }
+    if(it.tipo === 'grupo') { inGrupo = false; }
+    if(inGrupo && it.tipo !== 'grupo') total += (it.pvp || 0) * (it.qty || 1);
+  }
+  return total;
+}
 
 // ============================================================
 // DRAG & DROP
@@ -764,7 +830,38 @@ function buildProposta(){
   document.getElementById('p-tagline2').textContent=document.getElementById('tagline2').value;
   const tbody=document.getElementById('p-tbody'); tbody.innerHTML='';
   let totalPvp=0;
-  itens.forEach(item=>{ const c=calcItem(item); const ok=c.pvpTotal>0; totalPvp+=ok?c.pvpTotal:0; const tr=document.createElement('tr'); tr.innerHTML=`<td>${item.desc}</td><td class="r">${item.qty}</td><td class="r">${ok?fmt(c.pvpUnit):'—'}</td><td class="pvp">${ok?fmt(c.pvpTotal):'—'}</td>`; tbody.appendChild(tr); });
+  let inGP=false, gNome='', gTotal=0, gExp=true;
+  function flushG(){
+    if(!inGP)return;
+    const trG=document.createElement('tr');
+    trG.style.cssText='background:#eef5f0;border-top:1px solid #c8e0d0';
+    trG.innerHTML=`<td style="font-weight:700;color:#2d5a3d;padding:4px 4px" colspan="2">${gNome}</td><td class="r" style="color:#888">—</td><td class="pvp" style="font-weight:700;color:#2d5a3d">${fmt(gTotal)} €</td>`;
+    tbody.appendChild(trG);
+    totalPvp+=gTotal;
+    inGP=false; gTotal=0;
+  }
+  itens.forEach(item=>{
+    if(item.tipo==='grupo'){
+      flushG();
+      inGP=true; gNome=item.desc; gTotal=0; gExp=item.expandido;
+      return;
+    }
+    const c=calcItem(item); const ok=c.pvpTotal>0;
+    if(inGP){
+      if(ok) gTotal+=c.pvpTotal;
+      if(gExp&&ok){
+        const trS=document.createElement('tr');
+        trS.innerHTML=`<td style="padding-left:16px;font-size:10px;color:#555">${item.desc}</td><td class="r" style="font-size:10px">${item.qty}</td><td class="r" style="font-size:10px;color:#888">${fmt(c.pvpUnit)}</td><td class="pvp" style="font-size:10px;color:#888">${fmt(c.pvpTotal)}</td>`;
+        tbody.appendChild(trS);
+      }
+    } else {
+      totalPvp+=ok?c.pvpTotal:0;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${item.desc}</td><td class="r">${item.qty}</td><td class="r">${ok?fmt(c.pvpUnit):'—'}</td><td class="pvp">${ok?fmt(c.pvpTotal):'—'}</td>`;
+      tbody.appendChild(tr);
+    }
+  });
+  flushG();
   const mao=getMaoTotal(), t=window._totais||{}, iva=t.iva||getTaxaIva();
   document.getElementById('p-total-forn').textContent=fmt(totalPvp);
   document.getElementById('p-mao-desc').textContent=getMaoDesc();
@@ -805,11 +902,12 @@ initDragDrop();
 
 </script>
 
-<!-- Botão Chat flutuante -->
-<button onclick="abrirChat()" style="position:fixed;bottom:24px;right:24px;z-index:9999;width:58px;height:58px;border-radius:50%;background:#8b7355;border:none;color:#fff;font-size:24px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;transition:all .2s" onmouseover="this.style.background='#c9a96e'" onmouseout="this.style.background='#8b7355'" title="Chat interno">💬</button>
-
 <!-- Botão Logout flutuante -->
 <button onclick="sairDaApp()" style="position:fixed;bottom:24px;left:24px;z-index:9999;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);padding:10px 18px;font-size:13px;font-family:Inter,sans-serif;border-radius:4px;cursor:pointer;transition:all .2s" onmouseover="this.style.color='#e88';this.style.borderColor='#e88'" onmouseout="this.style.color='rgba(255,255,255,0.4)';this.style.borderColor='rgba(255,255,255,0.1)'" title="Sair">⬡ Sair</button>
 
+<!-- Botão Chat flutuante -->
+<button onclick="window.open('apps/chat/index.html','mira-chat','width=420,height=580,top=80,left=80,resizable=yes')" style="position:fixed;bottom:24px;right:24px;z-index:9999;width:58px;height:58px;border-radius:50%;background:#8b7355;border:none;color:#fff;font-size:24px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;transition:all .2s" onmouseover="this.style.background='#c9a96e'" onmouseout="this.style.background='#8b7355'" title="Chat interno">💬</button>
+<!-- Botão Logout -->
+<button onclick="if(confirm('Sair da plataforma?')){{sessionStorage.clear();window.location.href='../../index.html';}}" style="position:fixed;bottom:24px;left:24px;z-index:9999;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);padding:11px 20px;font-size:14px;font-family:Inter,sans-serif;border-radius:4px;cursor:pointer;transition:all .2s" onmouseover="this.style.color='#e88';this.style.borderColor='rgba(230,100,100,0.5)'" onmouseout="this.style.color='rgba(255,255,255,0.4)';this.style.borderColor='rgba(255,255,255,0.1)'" title="Sair">⬡ Sair</button>
 </body>
 </html>

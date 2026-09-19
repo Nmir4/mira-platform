@@ -39,6 +39,7 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;height:2px;background
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 <script src="../assets/firebase-config.js"></script>
 <script>
 try { firebase.initializeApp(firebaseConfig); } catch(e) {}
@@ -113,6 +114,60 @@ function abrirChat() {
     </div>
   </div>
 
+  <!-- SECÇÃO DE DOCUMENTOS DINÂMICOS -->
+  <div class="section" id="docs-dinamicos-section">
+    <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span>Documentos Internos</span>
+      <button onclick="abrirUpload()" style="font-size:13px;padding:8px 16px;background:var(--castanho);border:none;color:#fff;border-radius:4px;cursor:pointer;font-family:Inter,sans-serif;font-weight:500;transition:background .2s" onmouseover="this.style.background='var(--castanho-claro)'" onmouseout="this.style.background='var(--castanho)'">+ Carregar documento</button>
+    </div>
+    <div id="docs-dinamicos" class="doc-grid" style="margin-top:14px">
+      <div style="padding:24px;text-align:center;font-size:14px;color:var(--muted)">A carregar...</div>
+    </div>
+  </div>
+
+  <!-- MODAL UPLOAD -->
+  <div id="upload-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:20px">
+    <div style="background:#1c1a17;border:1px solid rgba(255,255,255,0.1);border-radius:8px;width:100%;max-width:480px;overflow:hidden">
+      <div style="background:rgba(139,115,85,0.15);border-bottom:1px solid rgba(255,255,255,0.07);padding:16px 22px;display:flex;justify-content:space-between;align-items:center">
+        <h3 style="font-family:Cormorant Garamond,serif;font-size:20px;font-weight:400">Carregar Documento</h3>
+        <button onclick="fecharUpload()" style="background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer">×</button>
+      </div>
+      <div style="padding:22px;display:flex;flex-direction:column;gap:14px">
+        <div>
+          <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Nome do documento</label>
+          <input type="text" id="upload-nome" placeholder="Ex: Alvará de Utilização 2024" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
+        </div>
+        <div>
+          <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Categoria</label>
+          <select id="upload-cat" style="width:100%;background:#1c1a17;border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
+            <option>Administrativo</option>
+            <option>Frota</option>
+            <option>Imóveis</option>
+            <option>Seguros</option>
+            <option>Licenças</option>
+            <option>Fiscal</option>
+            <option>Recursos Humanos</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Ficheiro</label>
+          <input type="file" id="upload-file" accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx,.zip,.txt" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:10px 14px;font-size:14px;color:var(--texto);font-family:Inter,sans-serif">
+        </div>
+        <div id="upload-progress" style="display:none">
+          <div style="background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;height:8px">
+            <div id="upload-bar" style="background:var(--castanho);height:100%;width:0%;transition:width .3s"></div>
+          </div>
+          <div id="upload-status" style="font-size:13px;color:var(--muted);margin-top:6px">A carregar...</div>
+        </div>
+      </div>
+      <div style="padding:14px 22px;border-top:1px solid rgba(255,255,255,0.07);display:flex;gap:10px;justify-content:flex-end">
+        <button onclick="fecharUpload()" style="background:transparent;border:1px solid var(--linha);color:var(--muted);padding:10px 18px;font-size:14px;border-radius:4px;cursor:pointer;font-family:Inter,sans-serif">Cancelar</button>
+        <button onclick="fazerUpload()" style="background:var(--castanho);border:none;color:#fff;padding:10px 22px;font-size:14px;border-radius:4px;cursor:pointer;font-family:Inter,sans-serif;font-weight:500">Carregar</button>
+      </div>
+    </div>
+  </div>
+
   <div class="section">
     <div class="section-title">Imóveis e Propriedades</div>
     <div class="doc-grid">
@@ -145,11 +200,130 @@ function abrirChat() {
 
 </div>
 
-<!-- Botão Chat flutuante -->
-<button onclick="abrirChat()" style="position:fixed;bottom:24px;right:24px;z-index:9999;width:58px;height:58px;border-radius:50%;background:#8b7355;border:none;color:#fff;font-size:24px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;transition:all .2s" onmouseover="this.style.background='#c9a96e'" onmouseout="this.style.background='#8b7355'" title="Chat interno">💬</button>
-
 <!-- Botão Logout flutuante -->
 <button onclick="sairDaApp()" style="position:fixed;bottom:24px;left:24px;z-index:9999;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);padding:10px 18px;font-size:13px;font-family:Inter,sans-serif;border-radius:4px;cursor:pointer;transition:all .2s" onmouseover="this.style.color='#e88';this.style.borderColor='#e88'" onmouseout="this.style.color='rgba(255,255,255,0.4)';this.style.borderColor='rgba(255,255,255,0.1)'" title="Sair">⬡ Sair</button>
+
+<!-- Botão Chat flutuante -->
+<button onclick="window.open('../chat/index.html','mira-chat','width=420,height=580,top=80,left=80,resizable=yes')" style="position:fixed;bottom:24px;right:24px;z-index:9999;width:58px;height:58px;border-radius:50%;background:#8b7355;border:none;color:#fff;font-size:24px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;transition:all .2s" onmouseover="this.style.background='#c9a96e'" onmouseout="this.style.background='#8b7355'" title="Chat interno">💬</button>
+<!-- Botão Logout -->
+<button onclick="if(confirm('Sair da plataforma?')){{sessionStorage.clear();window.location.href='../index.html';}}" style="position:fixed;bottom:24px;left:24px;z-index:9999;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);padding:11px 20px;font-size:14px;font-family:Inter,sans-serif;border-radius:4px;cursor:pointer;transition:all .2s" onmouseover="this.style.color='#e88';this.style.borderColor='rgba(230,100,100,0.5)'" onmouseout="this.style.color='rgba(255,255,255,0.4)';this.style.borderColor='rgba(255,255,255,0.1)'" title="Sair">⬡ Sair</button>
+
+<script>
+// Firebase init
+let db = null, storage = null;
+try {
+  if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+  storage = firebase.storage();
+} catch(e) { console.error('Firebase:', e); }
+
+// CARREGAR DOCUMENTOS DINÂMICOS
+async function carregarDocsDinamicos() {
+  if(!db) return;
+  try {
+    const snap = await db.collection('documentos-internos').orderBy('criadoEm','desc').get();
+    const el = document.getElementById('docs-dinamicos');
+    if(snap.empty) {
+      el.innerHTML = '<div style="padding:20px;text-align:center;font-size:14px;color:var(--muted)">Sem documentos carregados ainda. Clica em "+ Carregar documento" para adicionar.</div>';
+      return;
+    }
+    
+    // Agrupar por categoria
+    const cats = {};
+    snap.docs.forEach(d => {
+      const doc = {id: d.id, ...d.data()};
+      if(!cats[doc.cat]) cats[doc.cat] = [];
+      cats[doc.cat].push(doc);
+    });
+    
+    let html_out = '';
+    Object.entries(cats).forEach(([cat, docs]) => {
+      html_out += `<div style="margin-bottom:20px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--castanho);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--linha)">${cat}</div>`;
+      docs.forEach(doc => {
+        const ext = doc.nome.split('.').pop().toUpperCase();
+        const icon = ['PDF'].includes(ext)?'📄':['JPG','JPEG','PNG'].includes(ext)?'🖼️':['ZIP'].includes(ext)?'📦':'📎';
+        const data = doc.criadoEm ? new Date(doc.criadoEm).toLocaleDateString('pt-PT') : '';
+        html_out += `<div style="display:flex;align-items:center;gap:14px;padding:13px 16px;background:rgba(255,255,255,0.02);border:1px solid var(--linha);border-radius:3px;margin-bottom:8px;transition:all .2s" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
+          <span style="font-size:20px">${icon}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${doc.nomeFicheiro||doc.nome}</div>
+            <div style="font-size:12px;color:var(--muted)">${data}</div>
+          </div>
+          <a href="${doc.url}" target="_blank" style="color:var(--castanho-claro);text-decoration:none;font-size:13px;padding:6px 14px;border:1px solid rgba(201,169,110,0.3);border-radius:3px;white-space:nowrap">Abrir</a>
+          <button onclick="eliminarDoc('${doc.id}','${doc.storagePath||''}')" style="background:none;border:1px solid rgba(200,80,80,0.3);border-radius:3px;color:#e88;font-size:13px;padding:6px 10px;cursor:pointer">×</button>
+        </div>`;
+      });
+      html_out += '</div>';
+    });
+    el.innerHTML = html_out;
+  } catch(e) {
+    document.getElementById('docs-dinamicos').innerHTML = '<div style="padding:20px;color:#e88;font-size:14px">Erro: '+e.message+'</div>';
+  }
+}
+
+function abrirUpload() {
+  document.getElementById('upload-overlay').style.display = 'flex';
+  document.getElementById('upload-nome').focus();
+}
+
+function fecharUpload() {
+  document.getElementById('upload-overlay').style.display = 'none';
+  document.getElementById('upload-progress').style.display = 'none';
+  document.getElementById('upload-bar').style.width = '0%';
+  document.getElementById('upload-nome').value = '';
+  document.getElementById('upload-file').value = '';
+}
+
+async function fazerUpload() {
+  if(!storage || !db) { alert('Firebase Storage não disponível'); return; }
+  const nome = document.getElementById('upload-nome').value.trim();
+  const cat = document.getElementById('upload-cat').value;
+  const file = document.getElementById('upload-file').files[0];
+  if(!nome) { document.getElementById('upload-nome').focus(); return; }
+  if(!file) { alert('Selecciona um ficheiro'); return; }
+  
+  const progressEl = document.getElementById('upload-progress');
+  const barEl = document.getElementById('upload-bar');
+  const statusEl = document.getElementById('upload-status');
+  progressEl.style.display = 'block';
+  statusEl.textContent = 'A carregar...';
+  
+  const path = 'documentos/' + Date.now() + '_' + file.name;
+  const ref = storage.ref(path);
+  const task = ref.put(file);
+  
+  task.on('state_changed',
+    snap => {
+      const pct = Math.round(snap.bytesTransferred/snap.totalBytes*100);
+      barEl.style.width = pct + '%';
+      statusEl.textContent = 'A carregar... ' + pct + '%';
+    },
+    err => { statusEl.textContent = 'Erro: ' + err.message; statusEl.style.color = '#e88'; },
+    async () => {
+      const url = await task.snapshot.ref.getDownloadURL();
+      await db.collection('documentos-internos').add({
+        nome, cat, nomeFicheiro: file.name, url, storagePath: path,
+        tamanho: file.size, tipo: file.type,
+        criadoEm: new Date().toISOString()
+      });
+      fecharUpload();
+      carregarDocsDinamicos();
+    }
+  );
+}
+
+async function eliminarDoc(id, storagePath) {
+  if(!confirm('Eliminar este documento?')) return;
+  if(storagePath && storage) {
+    try { await storage.ref(storagePath).delete(); } catch(e) {}
+  }
+  if(db) await db.collection('documentos-internos').doc(id).delete();
+  carregarDocsDinamicos();
+}
+
+// Init
+carregarDocsDinamicos();
+</script>
 
 </body>
 </html>
