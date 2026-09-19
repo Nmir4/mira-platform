@@ -338,7 +338,7 @@ textarea{resize:vertical;min-height:60px}
     <img id="p-arvore-wm" src="../../assets/arvore.png" alt="" style="position:absolute;top:0;left:0;height:100%;width:auto;pointer-events:none;z-index:0;display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact">
     <div class="capa-topo">
       <div class="capa-logo-area">
-        <img class="capa-logo" id="p-logo" src="../../assets/logo.png" alt="Florista Mira" style="-webkit-print-color-adjust:exact;print-color-adjust:exact">
+        <img class="capa-logo" id="p-logo" src="../../assets/logo-florista.png" alt="Florista Mira" style="-webkit-print-color-adjust:exact;print-color-adjust:exact">
         <div class="capa-subtitulo">Proposta · Serviço Floral</div>
         <div class="capa-id-bloco">ID &nbsp;<strong id="p-id"></strong></div>
         <div class="capa-dados">
@@ -359,7 +359,7 @@ textarea{resize:vertical;min-height:60px}
     </div>
     <div class="capa-rodape">
       <div class="capa-rodape-logo">
-        <img id="p-logo-rodape" src="../../assets/logo.png" alt="">
+        <img id="p-logo-rodape" src="../../assets/logo-florista.png" alt="" style="filter:brightness(0) invert(1);height:32px">
         <span>Florista Mira · Desde 1850</span>
       </div>
       <div class="capa-rodape-info">Rua Rio do Porto, 53 · 4960-568 Melgaço<br>251 404 014 · geral@mmira.pt · www.mmira.pt</div>
@@ -422,7 +422,7 @@ textarea{resize:vertical;min-height:60px}
 
     <!-- RODAPÉ — em fluxo normal, não absoluto -->
     <div class="pc-rodape-flow">
-      <div class="pc-rodape-logo"><img id="p-logo-pc" src="../../assets/logo.png" alt=""><span>Florista Mira · Desde 1850</span></div>
+      <div class="pc-rodape-logo"><img id="p-logo-pc" src="../../assets/logo-florista.png" alt="" style="filter:brightness(0) invert(1);height:28px"><span>Florista Mira · Desde 1850</span></div>
       <div class="pc-rodape-info">Rua Rio do Porto, 53 · 4960-568 Melgaço · 251 404 014 · geral@mmira.pt</div>
     </div>
   </div>
@@ -728,7 +728,7 @@ async function eliminarOrcamento(id,btn){
 }
 
 function buildProposta(){
-  [document.getElementById('p-logo'),document.getElementById('p-logo-rodape'),document.getElementById('p-logo-pc')].forEach(el=>{ if(el) el.src='../../assets/logo.png'; });
+  [document.getElementById('p-logo'),document.getElementById('p-logo-rodape'),document.getElementById('p-logo-pc')].forEach(el=>{ if(el) el.src='../../assets/logo-florista.png'; });
   // árvore carregada via src fixo no HTML
   ['p-id','p-id2'].forEach(id=>document.getElementById(id).textContent=document.getElementById('propId').value||'—');
   document.getElementById('p-cliente').textContent=document.getElementById('cliente').value||'—';
