@@ -434,13 +434,13 @@ function iniciarChat() {
 const CAT_COR = {funeral:'#2d5a3d',trabalho:'#1e3d6a',viatura:'#6a3d1e',cliente:'#5a1e5a',ausencia:'#4a4a1e',outro:'#1e5a5a'};
 const MESES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const DIAS_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-let calAno = new Date().getFullYear(), calMes = new Date().getMonth();
+let calAnoAtual = new Date().getFullYear(), calMesAtual = new Date().getMonth();
 let todosEvts = [], diaSel = null;
 
 function calMes(delta) {
-  calMes += delta;
-  if(calMes>11){calMes=0;calAno++;}
-  if(calMes<0){calMes=11;calAno--;}
+  calMesAtual += delta;
+  if(calMesAtual>11){calMesAtual=0;calAnoAtual++;}
+  if(calMesAtual<0){calMesAtual=11;calAnoAtual--;}
   renderMiniCal();
 }
 
@@ -454,21 +454,21 @@ async function carregarMiniAgenda() {
 }
 
 function renderMiniCal() {
-  document.getElementById('cal-label').textContent = MESES_PT[calMes] + ' ' + calAno;
+  document.getElementById('cal-label').textContent = MESES_PT[calMesAtual] + ' ' + calAnoAtual;
   const grid = document.getElementById('mini-cal-grid');
   grid.innerHTML = DIAS_PT.map(d=>`<div class="mini-cal-head">${d}</div>`).join('');
 
-  const prim = new Date(calAno,calMes,1).getDay();
-  const dias = new Date(calAno,calMes+1,0).getDate();
-  const diasAnt = new Date(calAno,calMes,0).getDate();
+  const prim = new Date(calAnoAtual,calMesAtual,1).getDay();
+  const dias = new Date(calAnoAtual,calMesAtual+1,0).getDate();
+  const diasAnt = new Date(calAnoAtual,calMesAtual,0).getDate();
   const hoje = new Date();
 
   for(let i=0;i<prim;i++){
     grid.innerHTML+=`<div class="mini-cal-day outro-mes"><div class="cal-num-d">${diasAnt-prim+i+1}</div></div>`;
   }
   for(let d=1;d<=dias;d++){
-    const dataStr=`${calAno}-${String(calMes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const eHoje=hoje.getFullYear()===calAno&&hoje.getMonth()===calMes&&hoje.getDate()===d;
+    const dataStr=`${calAnoAtual}-${String(calMesAtual+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const eHoje=hoje.getFullYear()===calAnoAtual&&hoje.getMonth()===calMesAtual&&hoje.getDate()===d;
     const eSel=diaSel===dataStr;
     const evts=todosEvts.filter(e=>e.data===dataStr);
     const dots=evts.slice(0,4).map(e=>`<div class="cal-dot" style="background:${CAT_COR[e.cat]||CAT_COR.outro}"></div>`).join('');
