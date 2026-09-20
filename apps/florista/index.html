@@ -576,6 +576,7 @@ function renderTabela(){
             </label>
           </div>
           <div style="display:flex;align-items:center;gap:16px">
+            <button onclick="addItemToGrupo(${item.id})" style="background:none;border:1px solid #2d5a3d;border-radius:3px;cursor:pointer;color:#2d5a3d;font-size:11px;font-weight:600;padding:2px 8px" title="Adicionar artigo dentro deste grupo">+ item</button>
             <span style="font-size:13px;color:#555">Total: <strong>${fmtG(gtotal)} €</strong></span>
             <button onclick="removeItem(${item.id})" style="background:none;border:1px solid #e0b0b0;border-radius:3px;cursor:pointer;color:#c0392b;font-size:12px;padding:2px 8px">×</button>
           </div>
@@ -613,23 +614,21 @@ function renderTabela(){
 }
 function removeItem(id){ itens=itens.filter(i=>i.id!==id); renderTabela(); }
 
-let grupoActivoId = null; // id do grupo actualmente activo para novos itens
-
 function criarGrupo() {
   const nome = window.prompt('Nome do grupo (ex: Arranjos Igreja):\n\nDica: os itens seleccionados (checkbox) entram automaticamente no grupo.');
   if(!nome || !nome.trim()) return;
   const novoId = nextId++;
-  
+
   // Recolher ids dos itens seleccionados (que têm checkbox marcada)
   const selIds = [];
   document.querySelectorAll('#tbody-itens input[type="checkbox"]:checked').forEach(cb => {
     const tr = cb.closest('tr');
     if(tr) selIds.push(parseInt(tr.getAttribute('data-id')));
   });
-  
+
   // Criar o grupo
   const grupoItem = {id: novoId, tipo: 'grupo', desc: nome.trim(), expandido: true, qty:1, custo:0, margem:0, pvp:0, lucro:0, grupoId:null};
-  
+
   if(selIds.length > 0) {
     // Inserir grupo antes do primeiro item seleccionado
     const firstSelIdx = itens.findIndex(i => selIds.includes(i.id));
@@ -637,30 +636,43 @@ function criarGrupo() {
     // Atribuir grupoId aos itens seleccionados
     itens.forEach(it => { if(selIds.includes(it.id)) it.grupoId = novoId; });
   } else {
-    // Adicionar grupo no fim — novos itens ficam dentro
+    // Adicionar grupo vazio no fim — usa o botão "+ item" do próprio grupo para o preencher
     itens.push(grupoItem);
-    grupoActivoId = novoId;
   }
-  
+
+  renderTabela();
+  atualizaTotais();
+}
+
+// Adiciona um novo artigo directamente dentro de um grupo específico (associação
+// sempre explícita — nunca por posição ou por um "grupo activo" global).
+function addItemToGrupo(grupoId) {
+  const grupo = itens.find(i => i.id === grupoId && i.tipo === 'grupo');
+  if(!grupo) return;
+  const nId = nextId++;
+  const novoItem = {id: nId, grupoId: grupoId, desc: 'Novo item', qty: 1, custo: '', pvpManual: '', margem: null};
+  // Inserir logo a seguir ao último artigo já existente do grupo (ou a seguir ao próprio grupo, se ainda vazio)
+  const membros = itens.filter(i => i.grupoId === grupoId && i.tipo !== 'grupo');
+  const ultimo = membros.length ? membros[membros.length - 1] : grupo;
+  const idx = itens.findIndex(i => i.id === ultimo.id);
+  itens.splice(idx + 1, 0, novoItem);
+  if(!grupo.expandido) grupo.expandido = true;
   renderTabela();
   atualizaTotais();
 }
 
 function actualizarGrupoIds() {
-  // Percorrer por posição — items após um grupo e antes do próximo grupo pertencem a esse grupo
-  // MAS respeita grupoId já explicitamente definido
-  let grupoActual = null;
-  for(const it of itens) {
-    if(it.tipo === 'grupo') {
-      grupoActual = it.id;
+  // A associação a um grupo é sempre explícita (definida ao criar o grupo com
+  // itens seleccionados, ou ao adicionar um item directamente a um grupo).
+  // NUNCA se infere por posição — arrastar um grupo ou um item não deve
+  // "prender" automaticamente artigos que não lhe pertencem.
+  // Aqui só limpamos referências a grupos que já não existem (ex: grupo apagado).
+  const idsGrupo = new Set(itens.filter(i => i.tipo === 'grupo').map(i => i.id));
+  itens.forEach(it => {
+    if(it.tipo !== 'grupo' && it.grupoId != null && !idsGrupo.has(it.grupoId)) {
       it.grupoId = null;
-    } else {
-      // Só sobrescrever grupoId se ainda for null (não foi explicitamente atribuído)
-      if(it.grupoId === null || it.grupoId === undefined) {
-        it.grupoId = grupoActual;
-      }
     }
-  }
+  });
 }
 
 function toggleGrupo(id) {
@@ -774,7 +786,7 @@ function initDragDrop() {
     initDragDrop();
   });
 }
-function addItem(){ const nId=nextId++; itens.push({id:nId,grupoId:grupoActivoId,desc:'Novo item',qty:1,custo:'',pvpManual:'',margem:null}); renderTabela(); }
+function addItem(){ const nId=nextId++; itens.push({id:nId,grupoId:null,desc:'Novo item',qty:1,custo:'',pvpManual:'',margem:null}); renderTabela(); }
 
 function calcMao(){
   const h=parseFloat(document.getElementById('moHoras').value)||0;
