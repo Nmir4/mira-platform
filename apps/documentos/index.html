@@ -35,19 +35,21 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;height:2px;background
 .imovel-count{font-size:13px;color:var(--castanho);background:rgba(139,115,85,0.15);padding:4px 12px;border-radius:10px;flex-shrink:0}
 </style>
 
-<!-- Firebase Auth para logout -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 <script src="../assets/firebase-config.js"></script>
 <script>
 try { firebase.initializeApp(firebaseConfig); } catch(e) {}
-// Proteger app — redirecionar se não autenticado
-firebase.auth().onAuthStateChanged(user => {
-  if(!user) window.location.href = '../index.html';
-});
+// Proteger app — verificar sessão
+if(sessionStorage.getItem('mira_ok') !== '1') {
+  window.location.href = '../index.html';
+}
 function sairDaApp() {
-  if(confirm('Tens a certeza que queres sair?')) firebase.auth().signOut().then(() => window.location.href = '../index.html');
+  if(confirm('Tens a certeza que queres sair?')) {
+    sessionStorage.removeItem('mira_ok');
+    window.location.href = '../index.html';
+  }
 }
 function abrirChat() {
   window.open('../index.html#chat', '_blank', 'width=420,height=600,top=100,left=100');
