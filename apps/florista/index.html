@@ -216,6 +216,10 @@ function abrirChat() {
   <div class="tb-right">
     <button class="btn-tool" onclick="gravarOrcamento()">💾 Gravar</button>
     <button class="btn-tool" onclick="previewProposta()">👁 Pré-visualizar</button>
+    <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(255,255,255,0.6);cursor:pointer;margin-left:8px">
+      <input type="checkbox" id="toggle-precos" checked onchange="buildProposta()" style="width:16px;height:16px;cursor:pointer">
+      Mostrar preços por artigo
+    </label>
     <button class="btn-tool primary" onclick="imprimirProposta()">🖨 Imprimir</button>
   </div>
 </div>
@@ -907,8 +911,13 @@ function buildProposta(){
     if(inGP){
       if(ok) gTotal+=c.pvpTotal;
       if(gExp&&ok){
+        const mostrarPrecos = document.getElementById('toggle-precos')?.checked !== false;
         const trS=document.createElement('tr');
-        trS.innerHTML=`<td style="padding-left:16px;font-size:10px;color:#555">${item.desc}</td><td class="r" style="font-size:10px">${item.qty}</td><td class="r" style="font-size:10px;color:#888">${fmt(c.pvpUnit)}</td><td class="pvp" style="font-size:10px;color:#888">${fmt(c.pvpTotal)}</td>`;
+        if(mostrarPrecos){
+          trS.innerHTML=`<td style="padding-left:16px;font-size:10px;color:#555">${item.desc}</td><td class="r" style="font-size:10px">${item.qty}</td><td class="r" style="font-size:10px;color:#888">${fmt(c.pvpUnit)}</td><td class="pvp" style="font-size:10px;color:#888">${fmt(c.pvpTotal)}</td>`;
+        } else {
+          trS.innerHTML=`<td style="padding-left:16px;font-size:10px;color:#555">${item.desc}</td><td class="r" style="font-size:10px">${item.qty} un.</td><td class="r" style="font-size:10px;color:#bbb">—</td><td class="pvp" style="font-size:10px;color:#bbb">—</td>`;
+        }
         tbody.appendChild(trS);
       }
     } else {
