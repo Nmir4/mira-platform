@@ -553,7 +553,7 @@ function renderTabela(){
   actualizarGrupoIds();
   const g=getMargemGlobal();
   const tbody=document.getElementById('tbody-itens'); tbody.innerHTML='';
-  itens.forEach(item=>{
+  getOrdemExibicao().forEach(item=>{
     const tr=document.createElement('tr');
     const margDefault=item.margem!=null?item.margem:g;
     const pvpDefault=item.pvpManual||'';
@@ -562,8 +562,10 @@ function renderTabela(){
       const gtotal = totalGrupo(item.id);
       const fmtG = v => Number(v).toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2});
       tr.className = 'grupo-row';
+      tr.setAttribute('draggable','true');
       tr.setAttribute('data-id', item.id);
-      tr.innerHTML = `<td colspan="10">
+      tr.setAttribute('data-tipo', 'grupo');
+      tr.innerHTML = `<td class="td-handle" title="Arrastar para mover o grupo e os artigos que o compõem"><span class="drag-handle">⠿</span></td><td colspan="8">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div style="display:flex;align-items:center;gap:8px">
             <input type="text" value="${item.desc}" style="background:transparent;border:none;outline:none;font-weight:700;font-size:14px;color:#2d5a3d;font-family:inherit;width:300px" onchange="itens.find(i=>i.id===${item.id}).desc=this.value">
@@ -592,6 +594,7 @@ function renderTabela(){
     
     tr.setAttribute('draggable','true');
     tr.setAttribute('data-id', item.id);
+    tr.setAttribute('data-tipo', 'item');
     tr.innerHTML=`
       <td class="td-handle" title="Arrastar para reordenar"><span class="drag-handle">⠿</span></td>
       <td><input type="text" value="${item.desc}" style="width:100%;border:none;background:transparent;font-size:15px;padding:2px 0;outline:none" onchange="itens.find(i=>i.id===${item.id}).desc=this.value"></td>
@@ -665,6 +668,26 @@ function toggleGrupo(id) {
   if(g) { g.expandido = !g.expandido; renderTabela(); }
 }
 
+// Ordem de exibição: cada grupo aparece seguido imediatamente dos artigos
+// que o compõem (independentemente da posição de cada artigo em `itens`),
+// para que o editor e a proposta impressa mostrem sempre a mesma ordem:
+// primeiro o grupo, depois os artigos.
+function getOrdemExibicao() {
+  const vistos = new Set();
+  const ordem = [];
+  itens.forEach(item => {
+    if (vistos.has(item.id)) return;
+    vistos.add(item.id);
+    ordem.push(item);
+    if (item.tipo === 'grupo') {
+      itens.filter(i => i.grupoId === item.id && i.tipo !== 'grupo').forEach(sub => {
+        if (!vistos.has(sub.id)) { vistos.add(sub.id); ordem.push(sub); }
+      });
+    }
+  });
+  return ordem;
+}
+
 function totalGrupo(grupoId) {
   actualizarGrupoIds(); // garantir que grupoIds estão actualizados
   let total = 0;
@@ -711,11 +734,35 @@ function initDragDrop() {
     if (!tr) return;
     const targetId = parseInt(tr.getAttribute('data-id'));
     if (!targetId || targetId === dragSrcId) return;
-    const srcIdx    = itens.findIndex(i => i.id === dragSrcId);
-    const targetIdx = itens.findIndex(i => i.id === targetId);
-    if (srcIdx === -1 || targetIdx === -1) return;
-    const [moved] = itens.splice(srcIdx, 1);
-    itens.splice(targetIdx, 0, moved);
+    const srcItem = itens.find(i => i.id === dragSrcId);
+    if (!srcItem) return;
+
+    if (srcItem.tipo === 'grupo') {
+      // Mover o grupo em bloco, arrastando consigo todos os artigos que o compõem
+      const blockIds = [dragSrcId, ...itens.filter(i => i.grupoId === dragSrcId && i.tipo !== 'grupo').map(i => i.id)];
+      const blockSet = new Set(blockIds);
+      if (blockSet.has(targetId)) return; // não largar dentro do próprio bloco
+      const block = blockIds.map(id => itens.find(i => i.id === id));
+      itens = itens.filter(i => !blockSet.has(i.id));
+      let targetIdx = itens.findIndex(i => i.id === targetId);
+      if (targetIdx === -1) { targetIdx = itens.length; }
+      else {
+        // Se o alvo for um artigo pertencente a outro grupo, inserir o bloco antes desse grupo
+        // (nunca partir um grupo ao meio)
+        const targetItem = itens[targetIdx];
+        if (targetItem && targetItem.grupoId && targetItem.tipo !== 'grupo') {
+          const outroGrupoIdx = itens.findIndex(i => i.id === targetItem.grupoId);
+          if (outroGrupoIdx !== -1) targetIdx = outroGrupoIdx;
+        }
+      }
+      itens.splice(targetIdx, 0, ...block);
+    } else {
+      const srcIdx    = itens.findIndex(i => i.id === dragSrcId);
+      const targetIdx = itens.findIndex(i => i.id === targetId);
+      if (srcIdx === -1 || targetIdx === -1) return;
+      const [moved] = itens.splice(srcIdx, 1);
+      itens.splice(targetIdx, 0, moved);
+    }
     // Actualizar grupoId baseado na nova posição
     actualizarGrupoIds();
     renderTabela();
@@ -897,45 +944,45 @@ function buildProposta(){
   document.getElementById('p-tagline2').textContent=document.getElementById('tagline2').value;
   const tbody=document.getElementById('p-tbody'); tbody.innerHTML='';
   let totalPvp=0;
-  let inGP=false, gNome='', gTotal=0, gExp=true;
-  let grupoAtualId = null;
-  function flushG(){
-    if(!inGP)return;
-    const trG=document.createElement('tr');
-    trG.style.cssText='background:#eef5f0;border-top:1px solid #c8e0d0';
-    trG.innerHTML=`<td style="font-weight:700;color:#2d5a3d;padding:4px 4px" colspan="2">${gNome}</td><td class="r" style="color:#888">—</td><td class="pvp" style="font-weight:700;color:#2d5a3d">${fmt(gTotal)} €</td>`;
-    tbody.appendChild(trG);
-    totalPvp+=gTotal;
-    inGP=false; gTotal=0; grupoAtualId=null;
-  }
-  itens.forEach(item=>{
+  const renderados = new Set(); // ids já colocados na tabela (evita duplicar sub-itens de grupos)
+  getOrdemExibicao().forEach(item=>{
+    if(renderados.has(item.id)) return;
+
     if(item.tipo==='grupo'){
-      flushG();
-      inGP=true; gNome=item.desc; gTotal=0; gExp=item.expandido; grupoAtualId=item.id;
+      renderados.add(item.id);
+      const gTotal = totalGrupo(item.id);
+      totalPvp += gTotal;
+      // 1) Primeiro a linha do grupo (nome + total)
+      const trG=document.createElement('tr');
+      trG.style.cssText='background:#eef5f0;border-top:1px solid #c8e0d0';
+      trG.innerHTML=`<td style="font-weight:700;color:#2d5a3d;padding:4px 4px" colspan="2">${item.desc}</td><td class="r" style="color:#888">—</td><td class="pvp" style="font-weight:700;color:#2d5a3d">${fmt(gTotal)} €</td>`;
+      tbody.appendChild(trG);
+
+      // 2) Depois os artigos que compõem o grupo (se estiver expandido)
+      const subItens = itens.filter(i => i.grupoId===item.id && i.tipo!=='grupo');
+      subItens.forEach(sub => renderados.add(sub.id));
+      if(item.expandido){
+        const mostrarPrecos = item.mostrarPrecos !== false;
+        subItens.forEach(sub=>{
+          const c=calcItem(sub); const ok=c.pvpTotal>0;
+          const trS=document.createElement('tr');
+          if(mostrarPrecos){
+            trS.innerHTML=`<td style="padding-left:16px;font-size:10px;color:#555">${sub.desc}</td><td class="r" style="font-size:10px">${sub.qty}</td><td class="r" style="font-size:10px;color:#888">${ok?fmt(c.pvpUnit):'—'}</td><td class="pvp" style="font-size:10px;color:#888">${ok?fmt(c.pvpTotal):'—'}</td>`;
+          } else {
+            trS.innerHTML=`<td style="padding-left:16px;font-size:10px;color:#555">${sub.desc}</td><td class="r" style="font-size:10px">${sub.qty} un.</td><td class="r" style="font-size:10px;color:#bbb">—</td><td class="pvp" style="font-size:10px;color:#bbb">—</td>`;
+          }
+          tbody.appendChild(trS);
+        });
+      }
       return;
     }
+
     const c=calcItem(item); const ok=c.pvpTotal>0;
-    if(inGP){
-      if(ok) gTotal+=c.pvpTotal;
-      if(gExp&&ok){
-        const grupoItem = itens.find(i=>i.id===grupoAtualId);
-        const mostrarPrecos = grupoItem?.mostrarPrecos !== false;
-        const trS=document.createElement('tr');
-        if(mostrarPrecos){
-          trS.innerHTML=`<td style="padding-left:16px;font-size:10px;color:#555">${item.desc}</td><td class="r" style="font-size:10px">${item.qty}</td><td class="r" style="font-size:10px;color:#888">${fmt(c.pvpUnit)}</td><td class="pvp" style="font-size:10px;color:#888">${fmt(c.pvpTotal)}</td>`;
-        } else {
-          trS.innerHTML=`<td style="padding-left:16px;font-size:10px;color:#555">${item.desc}</td><td class="r" style="font-size:10px">${item.qty} un.</td><td class="r" style="font-size:10px;color:#bbb">—</td><td class="pvp" style="font-size:10px;color:#bbb">—</td>`;
-        }
-        tbody.appendChild(trS);
-      }
-    } else {
-      totalPvp+=ok?c.pvpTotal:0;
-      const tr=document.createElement('tr');
-      tr.innerHTML=`<td>${item.desc}</td><td class="r">${item.qty}</td><td class="r">${ok?fmt(c.pvpUnit):'—'}</td><td class="pvp">${ok?fmt(c.pvpTotal):'—'}</td>`;
-      tbody.appendChild(tr);
-    }
+    totalPvp+=ok?c.pvpTotal:0;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${item.desc}</td><td class="r">${item.qty}</td><td class="r">${ok?fmt(c.pvpUnit):'—'}</td><td class="pvp">${ok?fmt(c.pvpTotal):'—'}</td>`;
+    tbody.appendChild(tr);
   });
-  flushG();
   const mao=getMaoTotal(), t=window._totais||{}, iva=t.iva||getTaxaIva();
   document.getElementById('p-total-forn').textContent=fmt(totalPvp);
   document.getElementById('p-mao-desc').textContent=getMaoDesc();
