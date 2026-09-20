@@ -594,9 +594,9 @@ function togglePreview() {
     const preview = document.getElementById('preview-container');
     preview.innerHTML = '';
     const clone = printDoc.cloneNode(true);
-    clone.style.display = 'block';
-    clone.style.background = 'white';
-    clone.style.color = '#1a1a1a';
+    clone.style.cssText = 'display:block!important;background:white!important;color:#1a1a1a!important;font-family:Helvetica Neue,Arial,sans-serif;font-size:11px;line-height:1.5;padding:0';
+    // Remover quaisquer estilos que escondam elementos
+    clone.querySelectorAll('[style*="display:none"]').forEach(el => el.style.display = '');
     preview.appendChild(clone);
     sec.style.display = 'block';
     btn.textContent = '✕ Fechar';
