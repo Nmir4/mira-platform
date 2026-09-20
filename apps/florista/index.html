@@ -95,7 +95,7 @@ textarea{resize:vertical;min-height:60px}
 .capa{width:100%;min-height:1123px;background:#dde8ee;position:relative;display:flex;flex-direction:column;overflow:hidden;page-break-after:always}
 .capa-topo{padding:47px 59px 0;display:flex;justify-content:flex-end;position:relative;z-index:1}
 .capa-logo-area{text-align:right}
-.capa-logo{width:112px;margin-bottom:8px}
+.capa-logo{height:90px;width:auto;margin-bottom:8px}
 .capa-subtitulo{font-size:13px;font-weight:600;letter-spacing:.18em;color:var(--verde);text-transform:uppercase}
 .capa-id-bloco{margin-top:18px;text-align:right;font-size:13px;color:#666}
 .capa-id-bloco strong{color:var(--texto)}
@@ -107,7 +107,7 @@ textarea{resize:vertical;min-height:60px}
 .capa-tagline h1{font-family:'Playfair Display',serif;font-size:45px;font-weight:400;color:var(--verde-escuro);line-height:1.25}
 .capa-rodape{position:absolute;bottom:0;left:0;right:0;background:var(--verde-escuro);padding:17px 59px;display:flex;justify-content:space-between;align-items:center;z-index:1}
 .capa-rodape-logo{display:flex;align-items:center;gap:12px}
-.capa-rodape-logo img{width:72px;height:auto;filter:brightness(0) invert(1)}
+.capa-rodape-logo img{height:36px;width:auto;filter:brightness(0) invert(1)}
 .capa-rodape-logo span{font-size:13px;color:rgba(255,255,255,.6);letter-spacing:.06em}
 .capa-rodape-info{font-size:12px;color:rgba(255,255,255,.45);text-align:right;line-height:1.7}
 .pagina-conteudo{width:100%;min-height:1123px;background:#fff;padding:42px 54px 71px;position:relative;display:flex;flex-direction:column;font-family:'Inter',sans-serif;page-break-after:always}
@@ -143,7 +143,7 @@ textarea{resize:vertical;min-height:60px}
 .pc-rodape-logo{display:flex;align-items:center;gap:9px}
 .pc-rodape-flow .pc-rodape-logo span,.pc-rodape-flow .pc-rodape-info{color:rgba(255,255,255,0.55)!important;font-size:12px}
 .pc-rodape-flow .pc-rodape-logo img{opacity:0.9}
-.pc-rodape-logo img{width:64px;height:auto;filter:brightness(0) invert(1)}
+.pc-rodape-logo img{height:32px;width:auto;filter:brightness(0) invert(1)}
 .pc-rodape-logo span{font-size:12px;color:rgba(255,255,255,.55);letter-spacing:.05em}
 .pc-rodape-info{font-size:9.5px;color:rgba(255,255,255,.4);text-align:right;line-height:1.7}
 @media print{
@@ -388,7 +388,7 @@ function abrirChat() {
     </div>
     <div class="capa-rodape">
       <div class="capa-rodape-logo">
-        <img id="p-logo-rodape" src="../../assets/logo-florista.png" alt="" style="filter:brightness(0) invert(1);height:32px">
+        <img id="p-logo-rodape" src="../../assets/logo-florista.png" alt="" style="filter:brightness(0) invert(1);height:32px;width:auto">
         
       </div>
       <div class="capa-rodape-info">Rua Rio do Porto, 53 · 4960-568 Melgaço<br>251 404 014 · geral@mmira.pt · www.mmira.pt</div>
@@ -451,7 +451,7 @@ function abrirChat() {
 
     <!-- RODAPÉ — em fluxo normal, não absoluto -->
     <div class="pc-rodape-flow">
-      <div class="pc-rodape-logo"><img id="p-logo-pc" src="../../assets/logo-florista.png" alt="" style="filter:brightness(0) invert(1);height:28px"></div>
+      <div class="pc-rodape-logo"><img id="p-logo-pc" src="../../assets/logo-florista.png" alt="" style="filter:brightness(0) invert(1);height:32px;width:auto"></div>
       <div class="pc-rodape-info">Rua Rio do Porto, 53 · 4960-568 Melgaço · 251 404 014 · geral@mmira.pt</div>
     </div>
   </div>
