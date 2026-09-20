@@ -194,7 +194,7 @@ function sairDaApp() {
   }
 }
 function abrirChat() {
-  window.open('../../index.html#chat', '_blank', 'width=420,height=600,top=100,left=100');
+  window.open('../../apps/chat/index.html', 'mira-chat', 'width=420,height=580,top=80,left=80,resizable=yes');
 }
 </script>
 </head>
@@ -279,6 +279,7 @@ function abrirChat() {
     </div>
     <div style="padding:14px 21px;border-top:1px solid var(--linha)">
       <button class="btn-tool" style="color:var(--verde);border-color:var(--verde)" onclick="addItem()">+ Adicionar item</button>
+      <button onclick="criarGrupo()" style="margin-left:8px;padding:9px 16px;font-size:13px;font-family:Inter,sans-serif;font-weight:600;letter-spacing:.06em;border:1px solid #2d5a3d;color:#2d5a3d;background:rgba(45,90,61,0.1);border-radius:4px;cursor:pointer;transition:all .15s" onmouseover="this.style.background='rgba(45,90,61,0.25)'" onmouseout="this.style.background='rgba(45,90,61,0.1)'" title="Criar grupo de artigos">⊞ Criar Grupo</button>
     </div>
   </div>
 
@@ -449,7 +450,7 @@ function abrirChat() {
 
     <!-- RODAPÉ — em fluxo normal, não absoluto -->
     <div class="pc-rodape-flow">
-      <div class="pc-rodape-logo"><img id="p-logo-pc" src="../../assets/logo-florista.png" alt="" style="filter:brightness(0) invert(1);height:28px"><span>Florista Mira · Desde 1850</span></div>
+      <div class="pc-rodape-logo"><img id="p-logo-pc" src="../../assets/logo-florista.png" alt="" style="filter:brightness(0) invert(1);height:28px"></div>
       <div class="pc-rodape-info">Rua Rio do Porto, 53 · 4960-568 Melgaço · 251 404 014 · geral@mmira.pt</div>
     </div>
   </div>
