@@ -19,7 +19,7 @@
 }
 body{font-family:'Inter',sans-serif;background:#e8e4de;color:var(--texto);min-height:100vh}
 /* TOPBAR */
-#topbar{background:var(--verde-escuro);color:#fff;padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:58px;border-bottom:2px solid var(--dourado)}
+#topbar{background:var(--verde-escuro);color:#fff;padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:58px;border-bottom:2px solid var(--dourado);position:sticky;top:0;z-index:100}
 #topbar a{color:rgba(255,255,255,0.6);font-size:13px;letter-spacing:0.1em;text-decoration:none;text-transform:uppercase}
 #topbar a:hover{color:#fff}
 /* TOOLBAR */
@@ -95,7 +95,7 @@ textarea{resize:vertical;min-height:60px}
 .capa{width:100%;min-height:1123px;background:#dde8ee;position:relative;display:flex;flex-direction:column;overflow:hidden;page-break-after:always}
 .capa-topo{padding:47px 59px 0;display:flex;justify-content:flex-end;position:relative;z-index:1}
 .capa-logo-area{text-align:right}
-.capa-logo{width:200px;margin-bottom:10px}
+.capa-logo{width:112px;margin-bottom:8px}
 .capa-subtitulo{font-size:13px;font-weight:600;letter-spacing:.18em;color:var(--verde);text-transform:uppercase}
 .capa-id-bloco{margin-top:18px;text-align:right;font-size:13px;color:#666}
 .capa-id-bloco strong{color:var(--texto)}
@@ -107,7 +107,7 @@ textarea{resize:vertical;min-height:60px}
 .capa-tagline h1{font-family:'Playfair Display',serif;font-size:45px;font-weight:400;color:var(--verde-escuro);line-height:1.25}
 .capa-rodape{position:absolute;bottom:0;left:0;right:0;background:var(--verde-escuro);padding:17px 59px;display:flex;justify-content:space-between;align-items:center;z-index:1}
 .capa-rodape-logo{display:flex;align-items:center;gap:12px}
-.capa-rodape-logo img{width:36px;filter:brightness(0) invert(1)}
+.capa-rodape-logo img{width:72px;height:auto;filter:brightness(0) invert(1)}
 .capa-rodape-logo span{font-size:13px;color:rgba(255,255,255,.6);letter-spacing:.06em}
 .capa-rodape-info{font-size:12px;color:rgba(255,255,255,.45);text-align:right;line-height:1.7}
 .pagina-conteudo{width:100%;min-height:1123px;background:#fff;padding:42px 54px 71px;position:relative;display:flex;flex-direction:column;font-family:'Inter',sans-serif;page-break-after:always}
@@ -143,7 +143,7 @@ textarea{resize:vertical;min-height:60px}
 .pc-rodape-logo{display:flex;align-items:center;gap:9px}
 .pc-rodape-flow .pc-rodape-logo span,.pc-rodape-flow .pc-rodape-info{color:rgba(255,255,255,0.55)!important;font-size:12px}
 .pc-rodape-flow .pc-rodape-logo img{opacity:0.9}
-.pc-rodape-logo img{width:30px;filter:brightness(0) invert(1)}
+.pc-rodape-logo img{width:64px;height:auto;filter:brightness(0) invert(1)}
 .pc-rodape-logo span{font-size:12px;color:rgba(255,255,255,.55);letter-spacing:.05em}
 .pc-rodape-info{font-size:9.5px;color:rgba(255,255,255,.4);text-align:right;line-height:1.7}
 @media print{
@@ -151,6 +151,7 @@ textarea{resize:vertical;min-height:60px}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
   body{background:white!important;margin:0!important;padding:0!important}
   #topbar,#toolbar,#editor,#gestao-area,#mira-navbar{display:none!important}
+  button[onclick*="sairDaApp"],button[onclick*="chat"],button[title="Sair"],button[title="Chat interno"]{display:none!important}
   #proposta-preview{display:block!important;width:210mm!important}
   .capa{page-break-after:always!important;break-after:page!important;height:297mm!important;min-height:unset!important;overflow:hidden!important;background:#dde8ee!important}
   .capa-rodape{background:#1e3d2a!important;position:absolute!important;bottom:0!important}
@@ -179,8 +180,8 @@ textarea{resize:vertical;min-height:60px}
 </style>
 
 
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="../../assets/firebase-config.js"></script>
+
+
 <script>
 try { firebase.initializeApp(firebaseConfig); } catch(e) {}
 // Proteger app — verificar sessão
@@ -516,7 +517,21 @@ function recalcRow(id) {
   item.custo=custoEl.value; item.pvpManual=pvpUnit.toFixed(2); item.margem=margem;
   if(pvpTEl) pvpTEl.textContent=pvpTotal>0?fmtN(pvpTotal)+' €':'—';
   if(lucroEl){ lucroEl.textContent=pvpTotal>0?fmtN(lucro)+' €':'—'; lucroEl.style.color=lucro>=0?'#2d6a4f':'#c0392b'; }
+  // Actualizar total do grupo pai se este item for sub-item
+  actualizarTotalGrupoPai(id);
   atualizaTotais();
+}
+
+function actualizarTotalGrupoPai(itemId) {
+  const item = itens.find(i => i.id === itemId);
+  if(!item || !item.grupoId) return;
+  const grupoPaiId = item.grupoId;
+  const total = totalGrupo(grupoPaiId);
+  const grupoRow = document.querySelector('tr[data-id="' + grupoPaiId + '"]');
+  if(grupoRow) {
+    const totalEl = grupoRow.querySelector('strong');
+    if(totalEl) totalEl.textContent = fmtN(total) + ' €';
+  }
 }
 
 function calcItem(item){
@@ -529,6 +544,7 @@ function calcItem(item){
 }
 
 function renderTabela(){
+  actualizarGrupoIds();
   const g=getMargemGlobal();
   const tbody=document.getElementById('tbody-itens'); tbody.innerHTML='';
   itens.forEach(item=>{
@@ -541,7 +557,7 @@ function renderTabela(){
       const fmtG = v => Number(v).toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2});
       tr.className = 'grupo-row';
       tr.setAttribute('data-id', item.id);
-      tr.innerHTML = `<td colspan="7">
+      tr.innerHTML = `<td colspan="10">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div style="display:flex;align-items:center;gap:8px">
             <input type="text" value="${item.desc}" style="background:transparent;border:none;outline:none;font-weight:700;font-size:14px;color:#2d5a3d;font-family:inherit;width:300px" onchange="itens.find(i=>i.id===${item.id}).desc=this.value">
@@ -557,14 +573,12 @@ function renderTabela(){
       return;
     }
     
-    // Verificar se sub-item de grupo oculto
-    let inGrupo = false, grupoExpandido = true;
-    for(const it of itens) {
-      if(it.id === item.id) break;
-      if(it.tipo === 'grupo') { inGrupo = true; grupoExpandido = it.expandido; }
+    // Verificar se é sub-item
+    if(item.grupoId) {
+      const grupo = itens.find(i => i.id === item.grupoId);
+      if(grupo && !grupo.expandido) { tr.className = 'sub-item oculto'; }
+      else { tr.className = 'sub-item'; }
     }
-    if(inGrupo && !grupoExpandido) { tr.className = 'sub-item oculto'; }
-    else if(inGrupo) { tr.className = 'sub-item'; }
     
     tr.setAttribute('draggable','true');
     tr.setAttribute('data-id', item.id);
@@ -586,18 +600,54 @@ function renderTabela(){
 }
 function removeItem(id){ itens=itens.filter(i=>i.id!==id); renderTabela(); }
 
+let grupoActivoId = null; // id do grupo actualmente activo para novos itens
+
 function criarGrupo() {
-  const nome = window.prompt('Nome do grupo (ex: Arranjos Igreja):');
+  const nome = window.prompt('Nome do grupo (ex: Arranjos Igreja):\n\nDica: os itens seleccionados (checkbox) entram automaticamente no grupo.');
   if(!nome || !nome.trim()) return;
-  itens.push({
-    id: nextId++,
-    tipo: 'grupo',
-    desc: nome.trim(),
-    expandido: true,
-    qty: 1, custo: 0, margem: margGlobal, pvp: 0, lucro: 0
+  const novoId = nextId++;
+  
+  // Recolher ids dos itens seleccionados (que têm checkbox marcada)
+  const selIds = [];
+  document.querySelectorAll('#tbody-itens input[type="checkbox"]:checked').forEach(cb => {
+    const tr = cb.closest('tr');
+    if(tr) selIds.push(parseInt(tr.getAttribute('data-id')));
   });
+  
+  // Criar o grupo
+  const grupoItem = {id: novoId, tipo: 'grupo', desc: nome.trim(), expandido: true, qty:1, custo:0, margem:0, pvp:0, lucro:0, grupoId:null};
+  
+  if(selIds.length > 0) {
+    // Inserir grupo antes do primeiro item seleccionado
+    const firstSelIdx = itens.findIndex(i => selIds.includes(i.id));
+    itens.splice(firstSelIdx, 0, grupoItem);
+    // Atribuir grupoId aos itens seleccionados
+    itens.forEach(it => { if(selIds.includes(it.id)) it.grupoId = novoId; });
+  } else {
+    // Adicionar grupo no fim — novos itens ficam dentro
+    itens.push(grupoItem);
+    grupoActivoId = novoId;
+  }
+  
   renderTabela();
   atualizaTotais();
+}
+
+function actualizarGrupoIds() {
+  // Percorrer por posição — items após um grupo e antes do próximo grupo pertencem a esse grupo
+  // MAS respeita grupoId já explicitamente definido
+  let grupoActual = null;
+  for(const it of itens) {
+    if(it.tipo === 'grupo') {
+      grupoActual = it.id;
+      it.grupoId = null;
+    } else {
+      // Só sobrescrever grupoId se ainda for null (não foi explicitamente atribuído)
+      if(it.grupoId === null || it.grupoId === undefined) {
+        it.grupoId = grupoActual;
+      }
+    }
+  }
 }
 
 function toggleGrupo(id) {
@@ -606,11 +656,13 @@ function toggleGrupo(id) {
 }
 
 function totalGrupo(grupoId) {
-  let total = 0, inGrupo = false;
+  actualizarGrupoIds(); // garantir que grupoIds estão actualizados
+  let total = 0;
   for(const it of itens) {
-    if(it.id === grupoId) { inGrupo = true; continue; }
-    if(it.tipo === 'grupo') { inGrupo = false; }
-    if(inGrupo && it.tipo !== 'grupo') total += (it.pvp || 0) * (it.qty || 1);
+    if(it.grupoId === grupoId && it.tipo !== 'grupo') {
+      const c = calcItem(it);
+      total += c.pvpTotal || 0;
+    }
   }
   return total;
 }
@@ -654,11 +706,13 @@ function initDragDrop() {
     if (srcIdx === -1 || targetIdx === -1) return;
     const [moved] = itens.splice(srcIdx, 1);
     itens.splice(targetIdx, 0, moved);
+    // Actualizar grupoId baseado na nova posição
+    actualizarGrupoIds();
     renderTabela();
     initDragDrop();
   });
 }
-function addItem(){ itens.push({id:nextId++,desc:'Novo item',qty:1,custo:'',pvpManual:'',margem:null}); renderTabela(); }
+function addItem(){ const nId=nextId++; itens.push({id:nId,grupoId:grupoActivoId,desc:'Novo item',qty:1,custo:'',pvpManual:'',margem:null}); renderTabela(); }
 
 function calcMao(){
   const h=parseFloat(document.getElementById('moHoras').value)||0;
@@ -907,5 +961,31 @@ initDragDrop();
 
 <!-- Botão Logout -->
 <button onclick="if(confirm('Sair da plataforma?')){{sessionStorage.clear();window.location.href='../../index.html';}}" style="position:fixed;bottom:24px;left:24px;z-index:9999;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);padding:11px 20px;font-size:14px;font-family:Inter,sans-serif;border-radius:4px;cursor:pointer;transition:all .2s" onmouseover="this.style.color='#e88';this.style.borderColor='rgba(230,100,100,0.5)'" onmouseout="this.style.color='rgba(255,255,255,0.4)';this.style.borderColor='rgba(255,255,255,0.1)'" title="Sair">⬡ Sair</button>
+
+<!-- MODAL CRIAR GRUPO -->
+<div id="modal-criar-grupo" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:6px;padding:24px;width:380px;box-shadow:0 8px 32px rgba(0,0,0,0.2)">
+    <div style="font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:14px">Criar Grupo de Artigos</div>
+    <input type="text" id="input-nome-grupo" placeholder="Ex: Arranjos Igreja, Decoração Altar..."
+      style="width:100%;border:1px solid #ddd;border-radius:4px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;margin-bottom:14px"
+      onkeydown="if(event.key==='Enter'){confirmarGrupo()}"
+      onfocus="this.style.borderColor='#2d5a3d'" onblur="this.style.borderColor='#ddd'">
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="document.getElementById('modal-criar-grupo').style.display='none'"
+        style="padding:9px 18px;border:1px solid #ddd;border-radius:4px;background:transparent;cursor:pointer;font-size:13px">Cancelar</button>
+      <button onclick="confirmarGrupo()"
+        style="padding:9px 18px;border:none;border-radius:4px;background:#2d5a3d;color:#fff;cursor:pointer;font-size:13px;font-weight:600">Criar Grupo</button>
+    </div>
+  </div>
+</div>
+<script>
+function confirmarGrupo() {
+  const nome = document.getElementById('input-nome-grupo').value.trim();
+  if(!nome) return;
+  document.getElementById('modal-criar-grupo').style.display = 'none';
+  adicionarGrupo(nome);
+}
+</script>
+
 </body>
 </html>
