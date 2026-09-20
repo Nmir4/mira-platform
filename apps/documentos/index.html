@@ -37,7 +37,6 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;height:2px;background
 
 <!-- Firebase Auth para logout -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 <script src="../assets/firebase-config.js"></script>
@@ -152,7 +151,7 @@ function abrirChat() {
         </div>
         <div>
           <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Ficheiro</label>
-          <input type="file" id="upload-file" accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx,.zip,.txt" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:10px 14px;font-size:14px;color:var(--texto);font-family:Inter,sans-serif">
+          <input type="file" id="upload-file" accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx,.zip,.txt" onchange="if(this.files[0]&&!document.getElementById('upload-nome').value){document.getElementById('upload-nome').value=this.files[0].name.replace(/\.[^.]+$/,'')}" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:10px 14px;font-size:14px;color:var(--texto);font-family:Inter,sans-serif">
         </div>
         <div id="upload-progress" style="display:none">
           <div style="background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;height:8px">
@@ -214,7 +213,7 @@ let db = null, storage = null;
 try {
   if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   db = firebase.firestore();
-  storage = firebase.storage();
+  try { storage = firebase.storage(); } catch(se) { console.warn('Storage não disponível:', se); }
 } catch(e) { console.error('Firebase:', e); }
 
 // CARREGAR DOCUMENTOS DINÂMICOS
@@ -275,12 +274,13 @@ function fecharUpload() {
 }
 
 async function fazerUpload() {
-  if(!storage || !db) { alert('Firebase Storage não disponível'); return; }
+  if(!storage || !db) { alert('Firebase Storage não disponível. Verifica se o plano Blaze está activo.'); return; }
   const nome = document.getElementById('upload-nome').value.trim();
   const cat = document.getElementById('upload-cat').value;
   const file = document.getElementById('upload-file').files[0];
   if(!nome) { document.getElementById('upload-nome').focus(); return; }
   if(!file) { alert('Selecciona um ficheiro'); return; }
+  if(file.size > 50 * 1024 * 1024) { alert('Ficheiro demasiado grande (máx. 50 MB)'); return; }
   
   const progressEl = document.getElementById('upload-progress');
   const barEl = document.getElementById('upload-bar');
