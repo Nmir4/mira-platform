@@ -675,8 +675,13 @@ function toggleGrupo(id) {
 function getOrdemExibicao() {
   const vistos = new Set();
   const ordem = [];
+  const idsGrupo = new Set(itens.filter(i => i.tipo === 'grupo').map(i => i.id));
   itens.forEach(item => {
     if (vistos.has(item.id)) return;
+    // Um artigo que pertence a um grupo só é colocado na ordem quando
+    // processarmos esse grupo — mesmo que, no array `itens`, o artigo
+    // apareça fisicamente antes do seu grupo (ex: depois de arrastado).
+    if (item.tipo !== 'grupo' && item.grupoId != null && idsGrupo.has(item.grupoId)) return;
     vistos.add(item.id);
     ordem.push(item);
     if (item.tipo === 'grupo') {
