@@ -42,12 +42,12 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;height:2px;background
 <script>
 try { firebase.initializeApp(firebaseConfig); } catch(e) {}
 // Proteger app — verificar sessão
-if(sessionStorage.getItem('mira_ok') !== '1') {
+if(localStorage.getItem('mira_ok') !== '1') {
   window.location.href = '../index.html';
 }
 function sairDaApp() {
   if(confirm('Tens a certeza que queres sair?')) {
-    sessionStorage.removeItem('mira_ok');
+    localStorage.removeItem('mira_ok');
     window.location.href = '../index.html';
   }
 }
@@ -202,7 +202,7 @@ function abrirChat() {
 </div>
 
 <!-- Botão Logout -->
-<button onclick="if(confirm('Sair da plataforma?')){{sessionStorage.clear();window.location.href='../index.html';}}" style="position:fixed;bottom:24px;left:24px;z-index:9999;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);padding:11px 20px;font-size:14px;font-family:Inter,sans-serif;border-radius:4px;cursor:pointer;transition:all .2s" onmouseover="this.style.color='#e88';this.style.borderColor='rgba(230,100,100,0.5)'" onmouseout="this.style.color='rgba(255,255,255,0.4)';this.style.borderColor='rgba(255,255,255,0.1)'" title="Sair">⬡ Sair</button>
+<button onclick="if(confirm('Sair da plataforma?')){{localStorage.clear();window.location.href='../index.html';}}" style="position:fixed;bottom:24px;left:24px;z-index:9999;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);padding:11px 20px;font-size:14px;font-family:Inter,sans-serif;border-radius:4px;cursor:pointer;transition:all .2s" onmouseover="this.style.color='#e88';this.style.borderColor='rgba(230,100,100,0.5)'" onmouseout="this.style.color='rgba(255,255,255,0.4)';this.style.borderColor='rgba(255,255,255,0.1)'" title="Sair">⬡ Sair</button>
 
 <script>
 // Firebase init

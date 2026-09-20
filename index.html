@@ -272,7 +272,7 @@ async function login() {
   if (!pw) { e.textContent = 'Introduz a password.'; return; }
   const h = await sha256(pw);
   if (h === HASH) {
-    sessionStorage.setItem(KEY, '1');
+    localStorage.setItem(KEY, '1');
     mostrar();
   } else {
     e.textContent = 'Password incorrecta.';
@@ -286,7 +286,7 @@ function recuperar() {
 }
 
 function sair() {
-  sessionStorage.removeItem(KEY);
+  localStorage.removeItem(KEY);
   document.getElementById('login').style.display = 'flex';
   document.getElementById('platform').style.display = 'none';
   document.getElementById('chat-btn').style.display = 'none';
@@ -308,7 +308,7 @@ function mostrar() {
 }
 
 // Verificar sessão
-if (sessionStorage.getItem(KEY) === '1') {
+if (localStorage.getItem(KEY) === '1') {
   mostrar();
 } else {
   document.getElementById('pw').focus();
