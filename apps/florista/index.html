@@ -216,10 +216,6 @@ function abrirChat() {
   <div class="tb-right">
     <button class="btn-tool" onclick="gravarOrcamento()">💾 Gravar</button>
     <button class="btn-tool" onclick="previewProposta()">👁 Pré-visualizar</button>
-    <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(255,255,255,0.6);cursor:pointer;margin-left:8px">
-      <input type="checkbox" id="toggle-precos" checked onchange="buildProposta()" style="width:16px;height:16px;cursor:pointer">
-      Mostrar preços por artigo
-    </label>
     <button class="btn-tool primary" onclick="imprimirProposta()">🖨 Imprimir</button>
   </div>
 </div>
@@ -566,6 +562,10 @@ function renderTabela(){
           <div style="display:flex;align-items:center;gap:8px">
             <input type="text" value="${item.desc}" style="background:transparent;border:none;outline:none;font-weight:700;font-size:14px;color:#2d5a3d;font-family:inherit;width:300px" onchange="itens.find(i=>i.id===${item.id}).desc=this.value">
             <span class="grupo-toggle" onclick="toggleGrupo(${item.id})">${item.expandido?'▼ Ocultar itens':'▶ Mostrar itens'}</span>
+            <label onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:5px;font-size:11px;color:#2d5a3d;cursor:pointer;margin-left:4px;font-weight:500">
+              <input type="checkbox" ${item.mostrarPrecos!==false?'checked':''} onchange="itens.find(i=>i.id===${item.id}).mostrarPrecos=this.checked;buildProposta()" style="cursor:pointer">
+              Preços visíveis
+            </label>
           </div>
           <div style="display:flex;align-items:center;gap:16px">
             <span style="font-size:13px;color:#555">Total: <strong>${fmtG(gtotal)} €</strong></span>
@@ -892,6 +892,7 @@ function buildProposta(){
   const tbody=document.getElementById('p-tbody'); tbody.innerHTML='';
   let totalPvp=0;
   let inGP=false, gNome='', gTotal=0, gExp=true;
+  let grupoAtualId = null;
   function flushG(){
     if(!inGP)return;
     const trG=document.createElement('tr');
@@ -899,19 +900,20 @@ function buildProposta(){
     trG.innerHTML=`<td style="font-weight:700;color:#2d5a3d;padding:4px 4px" colspan="2">${gNome}</td><td class="r" style="color:#888">—</td><td class="pvp" style="font-weight:700;color:#2d5a3d">${fmt(gTotal)} €</td>`;
     tbody.appendChild(trG);
     totalPvp+=gTotal;
-    inGP=false; gTotal=0;
+    inGP=false; gTotal=0; grupoAtualId=null;
   }
   itens.forEach(item=>{
     if(item.tipo==='grupo'){
       flushG();
-      inGP=true; gNome=item.desc; gTotal=0; gExp=item.expandido;
+      inGP=true; gNome=item.desc; gTotal=0; gExp=item.expandido; grupoAtualId=item.id;
       return;
     }
     const c=calcItem(item); const ok=c.pvpTotal>0;
     if(inGP){
       if(ok) gTotal+=c.pvpTotal;
       if(gExp&&ok){
-        const mostrarPrecos = document.getElementById('toggle-precos')?.checked !== false;
+        const grupoItem = itens.find(i=>i.id===grupoAtualId);
+        const mostrarPrecos = grupoItem?.mostrarPrecos !== false;
         const trS=document.createElement('tr');
         if(mostrarPrecos){
           trS.innerHTML=`<td style="padding-left:16px;font-size:10px;color:#555">${item.desc}</td><td class="r" style="font-size:10px">${item.qty}</td><td class="r" style="font-size:10px;color:#888">${fmt(c.pvpUnit)}</td><td class="pvp" style="font-size:10px;color:#888">${fmt(c.pvpTotal)}</td>`;
