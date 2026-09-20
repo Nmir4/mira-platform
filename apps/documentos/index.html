@@ -55,6 +55,12 @@ function abrirChat() {
   window.open('../chat/index.html', '_blank');
 }
 </script>
+<script>
+// Verificação inline de sessão
+if (localStorage.getItem('mira_ok') !== '1') {
+  window.location.replace('../index.html');
+}
+</script>
 </head>
 <body>
 <div style="width:100%;background:#0e0d0c;border-bottom:1px solid rgba(255,255,255,0.07);padding:0 28px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:999;box-sizing:border-box;font-family:Inter,sans-serif">

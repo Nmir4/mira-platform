@@ -198,6 +198,12 @@ function abrirChat() {
   window.open('../../apps/chat/index.html', '_blank');
 }
 </script>
+<script>
+// Verificação inline de sessão
+if (localStorage.getItem('mira_ok') !== '1') {
+  window.location.replace('../../index.html');
+}
+</script>
 </head>
 <body>
 
