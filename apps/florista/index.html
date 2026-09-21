@@ -607,7 +607,19 @@ function renderTabela(){
       <td class="r" id="l_${item.id}" style="font-size:14px;color:#2d6a4f">—</td>
       <td><button onclick="removeItem(${item.id})" style="background:none;border:1px solid #e0b0b0;border-radius:3px;cursor:pointer;color:#c0392b;font-size:17px;padding:2px 8px;margin-left:4px;transition:background .15s" onmouseover="this.style.background='#fdecea'" onmouseout="this.style.background='none'" title="Remover linha">×</button></td>`;
     tbody.appendChild(tr);
-    if(item.custo||item.pvpManual) recalcRow(item.id);
+    // Apenas apresentar os totais já gravados (PVP total / lucro) — NUNCA recalcular/
+    // sobrescrever o preço ou a margem aqui. recalcRow() só deve correr quando o
+    // utilizador edita mesmo um campo (custo, margem ou PVP); ao renderizar um orçamento
+    // gravado, isto chamava antes "recalcRow(id)" em modo margem por omissão, o que,
+    // sempre que um artigo tinha PVP definido manualmente sem custo, reduzia o preço a 0
+    // e apagava o valor gravado.
+    if(item.custo||item.pvpManual) {
+      const c = calcItem(item);
+      const ptEl = document.getElementById('pt_'+item.id);
+      const lEl = document.getElementById('l_'+item.id);
+      if(ptEl) ptEl.textContent = c.pvpTotal>0 ? fmtN(c.pvpTotal)+' €' : '—';
+      if(lEl){ lEl.textContent = c.pvpTotal>0 ? fmtN(c.lucro)+' €' : '—'; lEl.style.color = c.lucro>=0?'#2d6a4f':'#c0392b'; }
+    }
   });
   atualizaTotais();
   initDragDrop();
