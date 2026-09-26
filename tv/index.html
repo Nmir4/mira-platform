@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Mira · Ecrã</title>
+<link href="https://fonts.googleapis.com/css?family=Montserrat:600,700|Nunito:400,600&amp;display=swap" rel="stylesheet">
+<!--
+  ECRÃ TV — Agência Funerária Mira
+  Página pública (sem login) para abrir em ecrã inteiro na TV exterior.
+  Escrita em JavaScript antigo (ES5) + Firestore REST, para funcionar
+  também em browsers de Smart TV mais antigos.
+  Parâmetros opcionais:  ?rot=20  (segundos por aviso)
+                         ?preview=1 (usado pela plataforma para pré-visualizar)
+-->
+<style>
+*{margin:0;padding:0;-webkit-box-sizing:border-box;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#fff;cursor:none}
+body{font-family:'Nunito',Arial,sans-serif;color:#003a5f;-webkit-font-smoothing:antialiased}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;background:#fff;overflow:hidden;
+  -webkit-transform-origin:0 0;transform-origin:0 0}
+.frame{position:absolute;left:36px;top:36px;right:36px;bottom:36px;border:3px solid #856551;z-index:5;pointer-events:none}
+.wm{position:absolute;left:-150px;top:300px;width:900px;height:900px;z-index:0}
+.slide{position:absolute;left:0;top:0;width:1920px;height:1080px;opacity:0;z-index:1;
+  -webkit-transition:opacity 1.2s ease;transition:opacity 1.2s ease}
+.slide.on{opacity:1;z-index:2}
+
+/* coluna esquerda */
+.foto{position:absolute;left:140px;top:110px;width:500px;height:625px;background:#f2f2f2 center center no-repeat;
+  background-size:cover;
+  -webkit-mask-image:-webkit-radial-gradient(center,ellipse cover,#000 62%,rgba(0,0,0,0) 100%);
+  -webkit-mask-image:radial-gradient(ellipse 72% 72% at center,#000 70%,rgba(0,0,0,0) 100%);
+          mask-image:radial-gradient(ellipse 72% 72% at center,#000 70%,rgba(0,0,0,0) 100%)}
+.foto.vazia{background:none}
+.marca{position:absolute;left:140px;top:785px;width:500px}
+.marca img{height:150px;display:block}
+.marca .agf{font-family:'Montserrat',Arial,sans-serif;font-weight:600;font-size:15px;letter-spacing:4px;color:#856551;margin-bottom:10px;padding-left:4px}
+.marca .www{font-family:'Montserrat',Arial,sans-serif;font-weight:700;font-size:20px;letter-spacing:1px;color:#856551;margin-top:16px}
+
+/* coluna direita */
+.info{position:absolute;left:760px;top:95px;width:1040px;height:890px}
+.nome{font-family:'Montserrat',Arial,sans-serif;font-weight:700;color:#856551;text-transform:uppercase;
+  text-align:center;font-size:78px;line-height:1.1;letter-spacing:2px}
+.idade{text-align:center;font-size:38px;color:#003a5f;margin-top:18px}
+.idade span{color:#856551;padding:0 14px}
+.terra{text-align:center;font-size:38px;color:#003a5f;margin-top:10px}
+.titulo{font-family:'Montserrat',Arial,sans-serif;font-weight:700;font-size:42px;letter-spacing:2px;color:#003a5f;
+  margin-top:44px;display:inline-block;position:relative;padding-bottom:10px}
+.titulo:after{content:'';position:absolute;left:0;bottom:0;width:110px;height:3px;background:#003a5f}
+.cols{position:relative;margin-top:44px;height:420px}
+.col{position:absolute;top:0;width:500px}
+.col.c1{left:0}.col.c2{left:540px}
+.col.solo{left:130px;width:800px}
+.col h3{font-family:'Montserrat',Arial,sans-serif;font-weight:700;font-size:36px;color:#003a5f;margin:0 0 18px 70px}
+.linha{position:relative;padding-left:70px;font-size:34px;line-height:1.3;margin-bottom:14px;color:#003a5f}
+.linha svg{position:absolute;left:4px;top:4px;width:40px;height:40px}
+.linha .dot{color:#856551;padding:0 10px}
+.nota{position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:30px;color:#63869a;font-style:italic}
+
+/* indicador de rotação */
+.dots{position:absolute;right:90px;bottom:70px;z-index:6}
+.dots i{display:inline-block;width:14px;height:14px;border-radius:7px;background:#d9dfe5;margin-left:10px}
+.dots i.on{background:#856551}
+
+/* ecrã institucional */
+.inst{text-align:center}
+.inst .logo{position:absolute;left:0;right:0;top:250px}
+.inst .logo img{height:330px}
+.inst .agf{font-family:'Montserrat',Arial,sans-serif;font-weight:600;font-size:26px;letter-spacing:10px;color:#856551;margin-bottom:26px}
+.inst .serv{position:absolute;left:0;right:0;top:700px;font-family:'Montserrat',Arial,sans-serif;font-weight:700;
+  font-size:30px;letter-spacing:6px;color:#003a5f}
+.inst .serv span{color:#856551;padding:0 22px}
+.inst .www{position:absolute;left:0;right:0;top:780px;font-family:'Montserrat',Arial,sans-serif;font-weight:700;font-size:30px;letter-spacing:3px;color:#856551}
+.relogio{position:absolute;right:90px;top:70px;z-index:6;font-size:28px;color:#63869a;text-align:right}
+.relogio b{display:block;font-family:'Montserrat',Arial,sans-serif;font-size:44px;color:#003a5f}
+.offline{position:absolute;left:90px;bottom:60px;width:14px;height:14px;border-radius:7px;background:#e3b04b;z-index:6;display:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg class="wm" viewBox="0 0 900 900" fill="none" stroke="#eef2f6" stroke-width="46">
+    <path d="M450 450 C 300 330, 300 120, 450 20 C 600 120, 600 330, 450 450 Z"/>
+    <path d="M450 450 C 270 470, 120 360, 60 190 C 250 150, 400 260, 450 450 Z"/>
+    <path d="M450 450 C 630 470, 780 360, 840 190 C 650 150, 500 260, 450 450 Z"/>
+    <path d="M450 450 C 300 520, 200 700, 260 880 C 420 800, 480 640, 450 450 Z"/>
+    <path d="M450 450 C 600 520, 700 700, 640 880 C 480 800, 420 640, 450 450 Z"/>
+  </svg>
+  <div class="frame"></div>
+  <div id="slides"></div>
+  <div class="dots" id="dots"></div>
+  <div class="relogio" id="relogio" style="display:none"></div>
+  <div class="offline" id="offline"></div>
+</div>
+
+<script>
+(function(){
+  var PROJ = 'mmira-tarefeiros';
+  var KEY  = 'AIzaSyBF-aJAQTqG7xB4icmHV0nU2Jf_7LApM4c';
+  var BASE = 'https://firestore.googleapis.com/v1/projects/' + PROJ + '/databases/(default)/documents';
+  var LOGO = (location.pathname.indexOf('/tv') >= 0 ? '../' : '') + 'assets/logo-mira-navy.png';
+  var q = parseQuery();
+  var ROT = Math.max(8, parseInt(q.rot, 10) || 20) * 1000;
+  var PREVIEW = q.preview === '1';
+
+  var avisos = [];      // avisos activos (ordenados)
+  var fotos = {};       // cache id -> {v, url}
+  var idx = 0, rotTimer = null, lastSig = '';
+
+  var DIAS = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+  var MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+  var ICON = {
+    cal:  '<svg viewBox="0 0 24 24" fill="none" stroke="#856551" stroke-width="1.4"><rect x="3.5" y="5" width="17" height="15" rx="1"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>',
+    hora: '<svg viewBox="0 0 24 24" fill="none" stroke="#856551" stroke-width="1.4"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2.5"/></svg>',
+    vela: '<svg viewBox="0 0 24 24" fill="none" stroke="#856551" stroke-width="1.4"><path d="M7 21V10h4v11M14 21v-7h3.5v7M5 21h14"/><path d="M9 7.5c-1-1-.6-2.3 0-3.5.6 1.2 1 2.5 0 3.5zM15.7 11.5c-.8-.8-.5-1.8 0-2.7.5.9.8 1.9 0 2.7z"/></svg>',
+    igreja:'<svg viewBox="0 0 24 24" fill="none" stroke="#856551" stroke-width="1.4"><path d="M12 2.5v4M10.3 4.2h3.4M7 21v-9l5-4.5 5 4.5v9M3.5 21v-6L7 13M20.5 21v-6L17 13M2.5 21h19"/><path d="M10.5 21v-3.5a1.5 1.5 0 013 0V21"/></svg>',
+    cemit:'<svg viewBox="0 0 24 24" fill="none" stroke="#856551" stroke-width="1.4"><path d="M6.5 18V9.5a5.5 5.5 0 0111 0V18M4 18h16v3H4zM12 8v5M10 10h4"/></svg>'
+  };
+
+  function parseQuery(){
+    var o = {}, s = location.search.replace(/^\?/, '').split('&');
+    for (var i = 0; i < s.length; i++) { var p = s[i].split('='); if (p[0]) o[decodeURIComponent(p[0])] = decodeURIComponent(p[1] || ''); }
+    return o;
+  }
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function pad(n){ return n < 10 ? '0' + n : '' + n; }
+  function parseData(s){ if (!s) return null; var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function fmtData(s){ var d = parseData(s); if (!d) return ''; return pad(d.getDate()) + '-' + pad(d.getMonth() + 1) + '-' + d.getFullYear() + '<span class="dot">·</span>' + DIAS[d.getDay()]; }
+  function fmtHora(s){ if (!s) return ''; var p = s.split(':'); return p[0] + 'h' + (p[1] || '00'); }
+
+  /* ---------- escala 1920x1080 -> ecrã ---------- */
+  function escala(){
+    var w = window.innerWidth || document.documentElement.clientWidth;
+    var h = window.innerHeight || document.documentElement.clientHeight;
+    var s = Math.min(w / 1920, h / 1080);
+    var st = document.getElementById('stage');
+    var tx = Math.round((w - 1920 * s) / 2), ty = Math.round((h - 1080 * s) / 2);
+    var t = 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')';
+    st.style.webkitTransform = t; st.style.transform = t;
+  }
+  window.onresize = escala; escala();
+
+  /* ---------- REST Firestore ---------- */
+  function xhr(method, url, body, ok, fail){
+    var r = new XMLHttpRequest();
+    r.open(method, url, true);
+    r.timeout = 20000;
+    r.onreadystatechange = function(){
+      if (r.readyState !== 4) return;
+      if (r.status >= 200 && r.status < 300) { try { ok(JSON.parse(r.responseText)); } catch(e){ fail && fail(e); } }
+      else if (fail) fail(r.status);
+    };
+    r.ontimeout = function(){ fail && fail('timeout'); };
+    if (body) { r.setRequestHeader('Content-Type', 'application/json'); r.send(JSON.stringify(body)); } else r.send();
+  }
+  function val(v){
+    if (!v) return null;
+    if ('stringValue' in v) return v.stringValue;
+    if ('integerValue' in v) return parseInt(v.integerValue, 10);
+    if ('doubleValue' in v) return v.doubleValue;
+    if ('booleanValue' in v) return v.booleanValue;
+    return null;
+  }
+  function doc2obj(d){
+    var o = { id: d.name.split('/').pop() }, f = d.fields || {};
+    for (var k in f) if (f.hasOwnProperty(k)) o[k] = val(f[k]);
+    return o;
+  }
+  function chaveOrdem(a){ return (a.funData || '9999') + ' ' + (a.funHora || '99'); }
+
+  function carregar(){
+    var agora = new Date().getTime();
+    var body = { structuredQuery: {
+      from: [{ collectionId: 'avisos-tv' }],
+      where: { fieldFilter: { field: { fieldPath: 'expiraMs' }, op: 'GREATER_THAN', value: { integerValue: String(agora) } } },
+      limit: 30 } };
+    xhr('POST', BASE + ':runQuery?key=' + KEY, body, function(res){
+      document.getElementById('offline').style.display = 'none';
+      var lista = [];
+      for (var i = 0; i < res.length; i++) {
+        if (!res[i].document) continue;
+        var a = doc2obj(res[i].document);
+        if (a.ativo === true && a.consentimento === true) lista.push(a);
+      }
+      lista.sort(function(x, y){ return chaveOrdem(x) < chaveOrdem(y) ? -1 : 1; });
+      carregarFotos(lista, function(){ aplicar(lista); });
+    }, function(){
+      document.getElementById('offline').style.display = 'block'; // mantém o que está no ecrã
+    });
+  }
+  function carregarFotos(lista, done){
+    var pend = 0;
+    function fim(){ if (--pend <= 0) done(); }
+    for (var i = 0; i < lista.length; i++) (function(a){
+      if (!a.fotoV) return;
+      var c = fotos[a.id];
+      if (c && c.v === a.fotoV) return;
+      pend++;
+      xhr('GET', BASE + '/avisos-tv-fotos/' + a.id + '?key=' + KEY, null, function(d){
+        var o = doc2obj(d); fotos[a.id] = { v: a.fotoV, url: o.dataUrl || '' }; fim();
+      }, fim);
+    })(lista[i]);
+    if (pend === 0) done();
+  }
+  function assinatura(lista){
+    var s = [];
+    for (var i = 0; i < lista.length; i++) s.push(lista[i].id + ':' + (lista[i].atualizadoMs || 0) + ':' + (lista[i].fotoV || 0));
+    return s.join('|');
+  }
+  function aplicar(lista){
+    var sig = assinatura(lista);
+    if (sig === lastSig) return;
+    lastSig = sig; avisos = lista; idx = 0;
+    render();
+  }
+  function limparExpirados(){
+    var agora = new Date().getTime(), l = [];
+    for (var i = 0; i < avisos.length; i++) if (avisos[i].expiraMs > agora) l.push(avisos[i]);
+    if (l.length !== avisos.length) aplicar(l);
+  }
+
+  /* ---------- render ---------- */
+  function htmlAviso(a){
+    var foto = a.fotoUrl || (fotos[a.id] && fotos[a.id].url) || '';
+    var temVel = !!(a.velData || a.velHora || a.velLocal);
+    var h = '';
+    h += '<div class="foto' + (foto ? '' : ' vazia') + '"' + (foto ? ' style="background-image:url(' + foto + ')"' : '') + '></div>';
+    h += '<div class="marca"><div class="agf">AGÊNCIA FUNERÁRIA</div><img src="' + LOGO + '" alt="Mira"><div class="www">WWW.MMIRA.PT</div></div>';
+    h += '<div class="info">';
+    h += '<div class="nome">' + esc(a.nome) + '</div>';
+    if (a.idade) h += '<div class="idade"><span>·</span>' + esc(a.idade) + ' Anos<span>·</span></div>';
+    if (a.localidade) h += '<div class="terra">' + esc(a.localidade) + '</div>';
+    h += '<div class="titulo">FALECIMENTO</div>';
+    h += '<div class="cols">';
+    if (temVel) {
+      h += '<div class="col c1"><h3>Velório</h3>';
+      if (a.velData) h += '<div class="linha">' + ICON.cal + fmtData(a.velData) + '</div>';
+      if (a.velHora) h += '<div class="linha">' + ICON.hora + fmtHora(a.velHora) + '</div>';
+      if (a.velLocal) h += '<div class="linha">' + ICON.vela + esc(a.velLocal) + '</div>';
+      h += '</div>';
+    }
+    h += '<div class="col ' + (temVel ? 'c2' : 'solo') + '"><h3>Funeral</h3>';
+    if (a.funData) h += '<div class="linha">' + ICON.cal + fmtData(a.funData) + '</div>';
+    if (a.funHora) h += '<div class="linha">' + ICON.hora + fmtHora(a.funHora) + '</div>';
+    if (a.funIgreja) h += '<div class="linha">' + ICON.igreja + esc(a.funIgreja) + '</div>';
+    if (a.funDestino) h += '<div class="linha">' + ICON.cemit + esc(a.funDestino) + '</div>';
+    h += '</div></div>';
+    if (a.nota) h += '<div class="nota">' + esc(a.nota) + '</div>';
+    h += '</div>';
+    return h;
+  }
+  function htmlInst(){
+    return '<div class="inst"><div class="logo"><div class="agf">AGÊNCIA FUNERÁRIA</div><img src="' + LOGO + '" alt="Mira"></div>' +
+      '<div class="serv">SERVIÇOS FUNERÁRIOS<span>·</span>ARTE FÚNEBRE<span>·</span>FLORISTA</div>' +
+      '<div class="www">WWW.MMIRA.PT</div></div>';
+  }
+  function ajustarNome(slide){
+    var n = slide.querySelector('.nome'); if (!n) return;
+    var fs = 78;
+    while (n.offsetHeight > 190 && fs > 44) { fs -= 4; n.style.fontSize = fs + 'px'; }
+    // colunas: se o texto for demasiado largo, reduzir
+    var ls = slide.querySelectorAll('.linha'), max = 34;
+    for (var i = 0; i < ls.length; i++) if (ls[i].offsetHeight > 60) { max = 28; break; }
+    if (max < 34) for (var j = 0; j < ls.length; j++) ls[j].style.fontSize = max + 'px';
+  }
+  function render(){
+    var box = document.getElementById('slides');
+    if (rotTimer) { clearInterval(rotTimer); rotTimer = null; }
+    var html = '';
+    if (!avisos.length) html = '<div class="slide on">' + htmlInst() + '</div>';
+    else for (var i = 0; i < avisos.length; i++) html += '<div class="slide' + (i === 0 ? ' on' : '') + '">' + htmlAviso(avisos[i]) + '</div>';
+    box.innerHTML = html;
+    var sl = box.childNodes;
+    for (var k = 0; k < sl.length; k++) ajustarNome(sl[k]);
+    document.getElementById('relogio').style.display = avisos.length ? 'none' : 'block';
+    desenharDots();
+    if (avisos.length > 1) rotTimer = setInterval(proximo, ROT);
+  }
+  function proximo(){
+    var sl = document.getElementById('slides').childNodes;
+    if (sl.length < 2) return;
+    sl[idx].className = 'slide';
+    idx = (idx + 1) % sl.length;
+    sl[idx].className = 'slide on';
+    desenharDots();
+  }
+  function desenharDots(){
+    var h = '';
+    if (avisos.length > 1) for (var i = 0; i < avisos.length; i++) h += '<i' + (i === idx ? ' class="on"' : '') + '></i>';
+    document.getElementById('dots').innerHTML = h;
+  }
+  function relogio(){
+    var d = new Date();
+    document.getElementById('relogio').innerHTML = '<b>' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + '</b>' +
+      DIAS[d.getDay()] + ', ' + d.getDate() + ' de ' + MESES[d.getMonth()];
+  }
+
+  /* ---------- arranque ---------- */
+  if (PREVIEW) {
+    document.body.style.cursor = 'default';
+    window.addEventListener('message', function(ev){
+      var m = ev.data;
+      if (!m || m.tipo !== 'preview') return;
+      avisos = m.aviso ? [m.aviso] : [];
+      lastSig = ''; idx = 0; render();
+    });
+    avisos = []; render();
+    if (window.parent !== window) window.parent.postMessage({ tipo: 'tv-pronta' }, '*');
+  } else {
+    render();                              // ecrã institucional enquanto carrega
+    relogio(); setInterval(relogio, 15000);
+    carregar();
+    setInterval(carregar, 60000);          // verifica novidades a cada minuto
+    setInterval(limparExpirados, 30000);   // retira expirados mesmo sem internet
+    setTimeout(function(){                  // recarrega a página a cada 6 h (memória)
+      if (navigator.onLine !== false) location.reload();
+    }, 6 * 3600 * 1000);
+  }
+})();
+</script>
+</body>
+</html>

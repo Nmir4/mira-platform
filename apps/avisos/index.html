@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avisos TV — MIRA</title>
+<script>
+// Verificação inline de sessão
+if (localStorage.getItem('mira_ok') !== '1') { window.location.replace('../../index.html'); }
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="../../assets/firebase-config.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--castanho:#8b7355;--cc:#c9a96e;--escuro:#111010;--texto:#f0ebe3;--muted:#8a8078;--linha:rgba(255,255,255,0.08);--verde:#6fbf8e;--amarelo:#d9b25a;--vermelho:#e88}
+html,body{min-height:100%;background:var(--escuro);color:var(--texto);font-family:'Inter',sans-serif;font-size:17px}
+body::before{content:'';position:fixed;inset:0;z-index:0;background:linear-gradient(165deg,#1a1714 0%,#111010 40%,#0e0d0c 100%);pointer-events:none}
+body::after{content:'';position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cc),transparent);z-index:10}
+nav{width:100%;background:#0e0d0c;border-bottom:1px solid var(--linha);padding:0 28px;height:62px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:999}
+nav a{display:flex;align-items:center;gap:12px;text-decoration:none;color:rgba(255,255,255,0.5);font-size:16px;letter-spacing:0.08em;text-transform:uppercase;transition:color .2s}
+nav a:hover{color:var(--cc)}
+.main{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:30px 24px 90px}
+h1{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:34px}
+.sub{color:var(--muted);font-size:15px;margin-top:4px}
+.toolbar{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.tb-r{display:flex;gap:10px;flex-wrap:wrap}
+.btn{padding:11px 20px;font-size:14px;font-family:'Inter',sans-serif;font-weight:500;letter-spacing:0.06em;border-radius:4px;cursor:pointer;transition:all .2s;border:1px solid var(--linha);background:rgba(255,255,255,0.04);color:var(--texto);text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{border-color:var(--castanho);color:var(--cc)}
+.btn.pri{background:var(--castanho);border-color:var(--castanho);color:#fff}
+.btn.pri:hover{background:var(--cc);border-color:var(--cc);color:#111}
+.btn.del{border-color:rgba(200,80,80,.4);color:var(--vermelho);background:transparent}
+.btn.del:hover{background:rgba(200,80,80,.1)}
+.btn[disabled]{opacity:.45;pointer-events:none}
+
+/* link do ecrã */
+.tvlink{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:rgba(139,115,85,.1);border:1px solid rgba(201,169,110,.25);border-radius:6px;padding:14px 18px;margin-bottom:24px;font-size:15px}
+.tvlink code{font-family:ui-monospace,Consolas,monospace;color:var(--cc);font-size:15px;word-break:break-all}
+.tvlink .lbl{color:var(--muted);text-transform:uppercase;font-size:12px;letter-spacing:.14em;font-weight:600}
+
+/* lista */
+.filtros{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.filtros button{background:transparent;border:1px solid var(--linha);color:var(--muted);padding:7px 14px;border-radius:20px;font-size:14px;cursor:pointer;font-family:inherit}
+.filtros button.on{border-color:var(--cc);color:var(--cc);background:rgba(201,169,110,.08)}
+.lista{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px}
+.card{display:flex;gap:16px;background:rgba(255,255,255,.03);border:1px solid var(--linha);border-radius:6px;padding:14px;cursor:pointer;transition:all .2s}
+.card:hover{border-color:rgba(201,169,110,.35);background:rgba(255,255,255,.05)}
+.card .ft{width:72px;height:90px;border-radius:3px;background:#222 center/cover no-repeat;flex-shrink:0}
+.card .nm{font-size:17px;font-weight:600;margin-bottom:4px}
+.card .dt{font-size:14px;color:var(--muted);line-height:1.5}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px;margin-top:8px}
+.b-tv{background:rgba(111,191,142,.15);color:var(--verde)}
+.b-exp{background:rgba(255,255,255,.07);color:var(--muted)}
+.b-ret{background:rgba(217,178,90,.14);color:var(--amarelo)}
+.vazio{color:var(--muted);padding:40px 0;text-align:center}
+
+/* editor */
+#editor{display:none}
+.ed{display:grid;grid-template-columns:minmax(0,520px) minmax(0,1fr);gap:28px;align-items:start}
+@media(max-width:1000px){.ed{grid-template-columns:1fr}}
+.sec{background:rgba(255,255,255,.025);border:1px solid var(--linha);border-radius:6px;padding:20px;margin-bottom:16px}
+.sec h4{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--castanho);margin-bottom:14px}
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:16px;color:var(--texto);font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cc)}
+.field select option{background:#1c1a17}
+input[type=date],input[type=time],input[type=datetime-local]{color-scheme:dark}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.hint{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5}
+.field label.chk,.chk{display:flex;gap:12px;align-items:flex-start;font-size:15px;line-height:1.5;cursor:pointer;text-transform:none;letter-spacing:0;font-weight:400;color:var(--texto)}
+.chk input{width:20px;height:20px;margin-top:2px;accent-color:var(--castanho);flex-shrink:0}
+
+/* foto */
+.fotobox{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+#crop{width:200px;height:250px;background:#1a1816;border:1px dashed rgba(255,255,255,.2);border-radius:4px;cursor:grab;touch-action:none;display:block}
+#crop.drag{cursor:grabbing}
+.fotoctl{flex:1;min-width:180px}
+.fotoctl input[type=range]{width:100%;accent-color:var(--castanho)}
+
+/* preview */
+.prev{position:sticky;top:80px}
+.prev .lbl{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--castanho);margin-bottom:10px;display:flex;justify-content:space-between}
+.tvframe{position:relative;width:100%;padding-top:56.25%;background:#000;border:10px solid #1b1b1b;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.tvframe iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
+.estado{margin-top:14px;font-size:14px;color:var(--muted);line-height:1.6}
+.acoes{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.acoes .sp{flex:1}
+.erro{color:var(--vermelho);font-size:14px;margin-top:10px;min-height:20px}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#2a2520;border:1px solid var(--castanho);color:var(--texto);padding:12px 22px;border-radius:6px;font-size:15px;opacity:0;transition:all .3s;z-index:2000;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:600px){.g2,.g3{grid-template-columns:1fr}.lista{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../../index.html">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Plataforma
+  </a>
+  <span style="font-size:15px;color:rgba(255,255,255,0.3);letter-spacing:0.1em">Avisos TV</span>
+  <span></span>
+</nav>
+
+<div class="main">
+
+  <!-- ===== LISTA ===== -->
+  <div id="vista-lista">
+    <div class="toolbar">
+      <div>
+        <h1>Avisos de Falecimento · TV</h1>
+        <div class="sub">O que estiver publicado aparece no ecrã exterior em menos de um minuto e sai sozinho quando expira.</div>
+      </div>
+      <div class="tb-r">
+        <button class="btn pri" onclick="novo()">＋ Novo aviso</button>
+      </div>
+    </div>
+
+    <div class="tvlink">
+      <span class="lbl">Endereço do ecrã</span>
+      <code id="tv-url"></code>
+      <button class="btn" onclick="copiarUrl()">Copiar</button>
+      <a class="btn" id="tv-abrir" target="_blank">Abrir ecrã ↗</a>
+    </div>
+
+    <div class="filtros" id="filtros">
+      <button data-f="tv" class="on">Na TV</button>
+      <button data-f="ret">Retirados</button>
+      <button data-f="exp">Expirados</button>
+      <button data-f="all">Todos</button>
+    </div>
+    <div class="lista" id="lista"><div class="vazio">A carregar…</div></div>
+  </div>
+
+  <!-- ===== EDITOR ===== -->
+  <div id="editor">
+    <div class="toolbar">
+      <div>
+        <h1 id="ed-titulo">Novo aviso</h1>
+        <div class="sub">Preenche os dados. A pré-visualização mostra exactamente o que vai aparecer na TV.</div>
+      </div>
+      <div class="tb-r"><button class="btn" onclick="voltar()">← Voltar à lista</button></div>
+    </div>
+
+    <div class="ed">
+      <div>
+        <div class="sec">
+          <h4>Falecido/a</h4>
+          <div class="field"><label>Nome completo *</label><input id="f-nome" maxlength="80" placeholder="Armando Augusto Caldas"></div>
+          <div class="g2">
+            <div class="field"><label>Idade</label><input id="f-idade" inputmode="numeric" maxlength="3" placeholder="89"></div>
+            <div class="field"><label>Localidade</label><input id="f-localidade" maxlength="60" placeholder="Real, São Paio – Melgaço"></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h4>Fotografia</h4>
+          <div class="fotobox">
+            <canvas id="crop" width="400" height="500"></canvas>
+            <div class="fotoctl">
+              <input type="file" id="f-foto" accept="image/*" style="display:none">
+              <button class="btn" onclick="document.getElementById('f-foto').click()">Escolher fotografia</button>
+              <div class="field" style="margin-top:14px"><label>Zoom</label><input type="range" id="f-zoom" min="1" max="3" step="0.01" value="1"></div>
+              <div class="hint">Arrasta a imagem para enquadrar o rosto.</div>
+              <button class="btn del" style="margin-top:12px" onclick="removerFoto()">Remover foto</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h4>Velório <span style="font-weight:400;letter-spacing:0;text-transform:none;color:var(--muted)">(opcional)</span></h4>
+          <div class="g2">
+            <div class="field"><label>Data</label><input type="date" id="f-velData"></div>
+            <div class="field"><label>Hora</label><input type="time" id="f-velHora"></div>
+          </div>
+          <div class="field"><label>Local</label><input id="f-velLocal" maxlength="60" placeholder="Casa Mortuária de São Paio"></div>
+        </div>
+
+        <div class="sec">
+          <h4>Funeral</h4>
+          <div class="g2">
+            <div class="field"><label>Data *</label><input type="date" id="f-funData"></div>
+            <div class="field"><label>Hora *</label><input type="time" id="f-funHora"></div>
+          </div>
+          <div class="field"><label>Igreja / cerimónia</label><input id="f-funIgreja" maxlength="60" placeholder="Igreja Paroquial de São Paio"></div>
+          <div class="field"><label>Cemitério / crematório</label><input id="f-funDestino" maxlength="60" placeholder="Cemitério de S. Paio"></div>
+          <div class="field"><label>Nota (opcional)</label><input id="f-nota" maxlength="110" placeholder="A família agradece a todos quantos se dignem acompanhar o funeral."></div>
+        </div>
+
+        <div class="sec">
+          <h4>Publicação</h4>
+          <div class="field">
+            <label>Sai da TV</label>
+            <select id="f-expModo">
+              <option value="dia">No fim do dia do funeral (23:59)</option>
+              <option value="2h">2 horas depois da hora do funeral</option>
+              <option value="man">Data e hora à escolha</option>
+            </select>
+          </div>
+          <div class="field" id="wrap-expMan" style="display:none"><label>Data e hora de saída</label><input type="datetime-local" id="f-expMan"></div>
+          <div class="hint" id="exp-txt"></div>
+          <div class="field" style="margin-top:16px">
+            <label class="chk"><input type="checkbox" id="f-consent"> A família autorizou a publicação do nome, fotografia e cerimónias no ecrã exterior.</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="prev">
+        <div class="lbl"><span>Pré-visualização · TV</span><span id="prev-res" style="color:var(--muted);letter-spacing:.05em">1920 × 1080</span></div>
+        <div class="tvframe"><iframe id="prev" title="Pré-visualização"></iframe></div>
+        <div class="estado" id="ed-estado"></div>
+        <div class="erro" id="ed-erro"></div>
+        <div class="acoes">
+          <button class="btn pri" id="b-publicar" onclick="guardar(true)">Publicar na TV</button>
+          <button class="btn" id="b-guardar" onclick="guardar(false)">Guardar sem publicar</button>
+          <span class="sp"></span>
+          <button class="btn" id="b-retirar" onclick="retirar()" style="display:none">Retirar da TV</button>
+          <button class="btn del" id="b-apagar" onclick="apagar()" style="display:none">Apagar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+try { if (!firebase.apps.length) firebase.initializeApp(firebaseConfig); } catch(e) { console.error(e); }
+const db = firebase.firestore();
+const COL = 'avisos-tv', COL_FOTO = 'avisos-tv-fotos';
+const TV_URL = new URL('../../tv/', location.href).href;
+document.getElementById('tv-url').textContent = TV_URL;
+document.getElementById('tv-abrir').href = TV_URL;
+
+let todos = [], filtro = 'tv', editId = null, editDoc = null;
+let foto = { img: null, zoom: 1, ox: 0, oy: 0, mudou: false, url: '' };
+
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, '0');
+const DIAS = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+
+function toast(t){ const el=$('toast'); el.textContent=t; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),2600); }
+function copiarUrl(){ navigator.clipboard.writeText(TV_URL).then(()=>toast('Endereço copiado')); }
+function esc(s){ return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function fmtData(s){ if(!s) return '—'; const [y,m,d]=s.split('-').map(Number); const dt=new Date(y,m-1,d); return `${pad(d)}-${pad(m)}-${y} (${DIAS[dt.getDay()]})`; }
+function fmtDT(ms){ const d=new Date(ms); return `${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()} às ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+
+/* ---------------- LISTA ---------------- */
+function estadoDe(a){
+  if (!a.ativo) return 'ret';
+  return (a.expiraMs || 0) > Date.now() ? 'tv' : 'exp';
+}
+db.collection(COL).orderBy('criadoEm','desc').limit(100).onSnapshot(snap => {
+  todos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  desenharLista();
+}, err => { $('lista').innerHTML = `<div class="vazio">Erro a ler avisos: ${esc(err.message)}</div>`; });
+setInterval(desenharLista, 60000);
+
+$('filtros').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  filtro = b.dataset.f;
+  [...$('filtros').children].forEach(x => x.classList.toggle('on', x === b));
+  desenharLista();
+});
+
+const miniFotos = {};
+async function miniFoto(id){
+  if (miniFotos[id] !== undefined) return miniFotos[id];
+  miniFotos[id] = '';
+  try { const d = await db.collection(COL_FOTO).doc(id).get(); miniFotos[id] = d.exists ? d.data().dataUrl : ''; } catch(e){}
+  return miniFotos[id];
+}
+function desenharLista(){
+  const l = todos.filter(a => filtro === 'all' || estadoDe(a) === filtro)
+                 .sort((a,b) => filtro === 'tv' ? ((a.funData+a.funHora) < (b.funData+b.funHora) ? -1 : 1) : 0);
+  if (!l.length) {
+    $('lista').innerHTML = `<div class="vazio">${filtro==='tv' ? 'Nenhum aviso na TV neste momento. O ecrã mostra a imagem institucional.' : 'Sem avisos.'}</div>`;
+    return;
+  }
+  const BADGE = { tv:['b-tv','Na TV'], ret:['b-ret','Retirado'], exp:['b-exp','Expirado'] };
+  $('lista').innerHTML = l.map(a => {
+    const [cls,txt] = BADGE[estadoDe(a)];
+    return `<div class="card" onclick="editar('${a.id}')">
+      <div class="ft" id="mf-${a.id}"></div>
+      <div>
+        <div class="nm">${esc(a.nome)}</div>
+        <div class="dt">Funeral: ${fmtData(a.funData)} ${esc(a.funHora||'')}<br>${a.ativo ? 'Sai da TV: '+fmtDT(a.expiraMs) : 'Não publicado'}</div>
+        <span class="badge ${cls}">${txt}</span>
+      </div></div>`;
+  }).join('');
+  l.forEach(async a => { if (!a.fotoV) return; const u = await miniFoto(a.id); const el = $('mf-'+a.id); if (el && u) el.style.backgroundImage = `url(${u})`; });
+}
+
+/* ---------------- EDITOR ---------------- */
+const CAMPOS = ['nome','idade','localidade','velData','velHora','velLocal','funData','funHora','funIgreja','funDestino','nota'];
+
+function abrirEditor(){
+  $('vista-lista').style.display = 'none';
+  $('editor').style.display = 'block';
+  window.scrollTo(0,0);
+  const fr = $('prev');
+  if (!fr.src) fr.src = '../../tv/index.html?preview=1';
+  else atualizarPreview();
+}
+function voltar(){
+  $('editor').style.display = 'none';
+  $('vista-lista').style.display = 'block';
+}
+function limparForm(){
+  CAMPOS.forEach(c => $('f-'+c).value = '');
+  $('f-expModo').value = 'dia'; $('f-expMan').value = ''; $('wrap-expMan').style.display = 'none';
+  $('f-consent').checked = false;
+  foto = { img: null, zoom: 1, ox: 0, oy: 0, mudou: false, url: '' };
+  $('f-zoom').value = 1; $('ed-erro').textContent = '';
+  desenharCrop();
+}
+function novo(){
+  editId = null; editDoc = null; limparForm();
+  $('ed-titulo').textContent = 'Novo aviso';
+  $('b-retirar').style.display = 'none'; $('b-apagar').style.display = 'none';
+  $('ed-estado').textContent = '';
+  abrirEditor();
+  setTimeout(()=>$('f-nome').focus(), 50);
+}
+async function editar(id){
+  const a = todos.find(x => x.id === id); if (!a) return;
+  editId = id; editDoc = a; limparForm();
+  CAMPOS.forEach(c => $('f-'+c).value = a[c] || '');
+  $('f-expModo').value = a.expModo || 'dia';
+  if (a.expModo === 'man' && a.expiraMs) { const d = new Date(a.expiraMs); $('f-expMan').value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+  $('wrap-expMan').style.display = $('f-expModo').value === 'man' ? 'block' : 'none';
+  $('f-consent').checked = !!a.consentimento;
+  $('ed-titulo').textContent = a.nome || 'Editar aviso';
+  $('b-retirar').style.display = estadoDe(a) === 'tv' ? '' : 'none';
+  $('b-apagar').style.display = '';
+  const est = { tv:'Publicado — está no ecrã.', ret:'Retirado — não aparece no ecrã.', exp:'Expirado — já saiu do ecrã.' }[estadoDe(a)];
+  $('ed-estado').textContent = est + (a.autor ? ` Última alteração por ${a.autor}.` : '');
+  abrirEditor();
+  if (a.fotoV) {
+    const u = await miniFoto(id) || (await db.collection(COL_FOTO).doc(id).get()).data()?.dataUrl;
+    if (u) carregarImagem(u, false);
+  }
+  atualizarPreview();
+}
+
+/* expiração */
+function calcExpira(){
+  const modo = $('f-expModo').value, d = $('f-funData').value, h = $('f-funHora').value;
+  if (modo === 'man') { const v = $('f-expMan').value; return v ? new Date(v).getTime() : null; }
+  if (!d) return null;
+  const [y,m,dd] = d.split('-').map(Number);
+  if (modo === 'dia') return new Date(y, m-1, dd, 23, 59, 0).getTime();
+  if (!h) return null;
+  const [hh,mm] = h.split(':').map(Number);
+  return new Date(y, m-1, dd, hh + 2, mm, 0).getTime();
+}
+function atualizarExpTxt(){
+  const e = calcExpira();
+  $('exp-txt').textContent = e ? `Sai automaticamente em ${fmtDT(e)}.` + (e < Date.now() ? ' ⚠ Esta data já passou.' : '') : 'Indica a data (e hora) do funeral para calcular a saída.';
+}
+$('f-expModo').addEventListener('change', () => { $('wrap-expMan').style.display = $('f-expModo').value === 'man' ? 'block' : 'none'; atualizarExpTxt(); });
+
+/* ---------------- FOTO / RECORTE ---------------- */
+const OUT_W = 640, OUT_H = 800;
+const cv = $('crop'), cx = cv.getContext('2d');
+$('f-foto').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => carregarImagem(r.result, true);
+  r.readAsDataURL(f);
+  e.target.value = '';
+});
+function carregarImagem(src, nova){
+  const img = new Image();
+  img.onload = () => { foto.img = img; foto.zoom = 1; foto.ox = 0; foto.oy = 0; foto.mudou = nova; $('f-zoom').value = 1; desenharCrop(); if (nova) exportarFoto(); else foto.url = src; atualizarPreview(); };
+  img.src = src;
+}
+function removerFoto(){ foto = { img:null, zoom:1, ox:0, oy:0, mudou:true, url:'' }; desenharCrop(); atualizarPreview(); }
+function geometria(W, H){
+  // offsets (ox, oy) guardados em píxeis do canvas de recorte; escalados para W x H
+  const img = foto.img, CW = cv.width, CH = cv.height;
+  const sC = Math.max(CW / img.width, CH / img.height) * foto.zoom;
+  const maxX = (img.width * sC - CW) / 2, maxY = (img.height * sC - CH) / 2;
+  foto.ox = Math.max(-maxX, Math.min(maxX, foto.ox));
+  foto.oy = Math.max(-maxY, Math.min(maxY, foto.oy));
+  const k = W / CW, w = img.width * sC * k, h = img.height * sC * k;
+  return { x: (W - w) / 2 + foto.ox * k, y: (H - h) / 2 + foto.oy * k, w, h };
+}
+function desenharCrop(){
+  cx.fillStyle = '#1a1816'; cx.fillRect(0, 0, cv.width, cv.height);
+  if (!foto.img) {
+    cx.fillStyle = '#6b625a'; cx.font = '26px Inter, sans-serif'; cx.textAlign = 'center';
+    cx.fillText('Sem fotografia', cv.width/2, cv.height/2);
+    return;
+  }
+  const g = geometria(cv.width, cv.height);
+  cx.drawImage(foto.img, g.x, g.y, g.w, g.h);
+}
+function exportarFoto(){
+  if (!foto.img) { foto.url = ''; return; }
+  const c = document.createElement('canvas'); c.width = OUT_W; c.height = OUT_H;
+  const g = geometria(OUT_W, OUT_H);
+  const k = c.getContext('2d'); k.fillStyle = '#fff'; k.fillRect(0,0,OUT_W,OUT_H);
+  k.imageSmoothingQuality = 'high';
+  k.drawImage(foto.img, g.x, g.y, g.w, g.h);
+  foto.url = c.toDataURL('image/jpeg', 0.84);
+}
+let drag = null, tExp = null;
+function agendarExport(){ foto.mudou = true; clearTimeout(tExp); tExp = setTimeout(()=>{ exportarFoto(); atualizarPreview(); }, 250); }
+cv.addEventListener('pointerdown', e => { if (!foto.img) return; drag = { x: e.clientX, y: e.clientY, ox: foto.ox, oy: foto.oy }; cv.setPointerCapture(e.pointerId); cv.classList.add('drag'); });
+cv.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const k = cv.width / cv.getBoundingClientRect().width;
+  foto.ox = drag.ox + (e.clientX - drag.x) * k; foto.oy = drag.oy + (e.clientY - drag.y) * k;
+  desenharCrop();
+});
+cv.addEventListener('pointerup', () => { if (!drag) return; drag = null; cv.classList.remove('drag'); agendarExport(); });
+$('f-zoom').addEventListener('input', e => { foto.zoom = +e.target.value; desenharCrop(); agendarExport(); });
+
+/* ---------------- PRÉ-VISUALIZAÇÃO ---------------- */
+function lerForm(){
+  const o = {}; CAMPOS.forEach(c => o[c] = $('f-'+c).value.trim());
+  o.idade = o.idade.replace(/\D/g,'');
+  return o;
+}
+function atualizarPreview(){
+  atualizarExpTxt();
+  const fr = $('prev'); if (!fr.contentWindow) return;
+  const a = lerForm(); a.fotoUrl = foto.url || '';
+  fr.contentWindow.postMessage({ tipo: 'preview', aviso: a }, '*');
+}
+window.addEventListener('message', e => { if (e.data && e.data.tipo === 'tv-pronta') atualizarPreview(); });
+let tPrev = null;
+document.querySelectorAll('#editor input, #editor select').forEach(el => {
+  if (el.id === 'f-foto' || el.id === 'f-zoom') return;
+  el.addEventListener('input', () => { clearTimeout(tPrev); tPrev = setTimeout(atualizarPreview, 200); });
+});
+
+/* ---------------- GUARDAR ---------------- */
+async function guardar(publicar){
+  const a = lerForm(), erro = $('ed-erro'); erro.textContent = '';
+  if (!a.nome) return erro.textContent = 'Falta o nome.';
+  if (!a.funData || !a.funHora) return erro.textContent = 'Falta a data e hora do funeral.';
+  const expiraMs = calcExpira();
+  if (!expiraMs) return erro.textContent = 'Falta a data de saída.';
+  if (publicar) {
+    if (!$('f-consent').checked) return erro.textContent = 'Para publicar é preciso confirmar a autorização da família.';
+    if (expiraMs <= Date.now()) return erro.textContent = 'A data de saída já passou — o aviso não apareceria na TV.';
+  }
+  const btns = ['b-publicar','b-guardar'].map($); btns.forEach(b => b.disabled = true);
+  try {
+    const id = editId || ('AV-' + Date.now());
+    const agora = Date.now();
+    const doc = { ...a, expModo: $('f-expModo').value, expiraMs, consentimento: $('f-consent').checked,
+      ativo: publicar,
+      atualizadoMs: agora, autor: localStorage.getItem('mira_nome') || '' };
+    if (!editId) doc.criadoEm = agora;
+    if (foto.mudou) {
+      if (foto.url) { await db.collection(COL_FOTO).doc(id).set({ dataUrl: foto.url, v: agora }); doc.fotoV = agora; miniFotos[id] = foto.url; }
+      else { await db.collection(COL_FOTO).doc(id).delete().catch(()=>{}); doc.fotoV = 0; miniFotos[id] = ''; }
+    }
+    await db.collection(COL).doc(id).set(doc, { merge: true });
+    toast(publicar ? 'Publicado — aparece na TV dentro de 1 minuto.' : 'Guardado (não está na TV).');
+    voltar();
+  } catch(e) {
+    console.error(e); erro.textContent = 'Erro a guardar: ' + e.message;
+  } finally { btns.forEach(b => b.disabled = false); }
+}
+async function retirar(){
+  if (!editId || !confirm('Retirar este aviso do ecrã agora?')) return;
+  await db.collection(COL).doc(editId).update({ ativo: false, atualizadoMs: Date.now() });
+  toast('Retirado — sai do ecrã dentro de 1 minuto.'); voltar();
+}
+async function apagar(){
+  if (!editId || !confirm('Apagar definitivamente este aviso e a fotografia?')) return;
+  await db.collection(COL_FOTO).doc(editId).delete().catch(()=>{});
+  await db.collection(COL).doc(editId).delete();
+  toast('Aviso apagado.'); voltar();
+}
+desenharCrop();
+</script>
+</body>
+</html>
