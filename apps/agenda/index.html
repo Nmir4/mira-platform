@@ -56,6 +56,14 @@ nav a:hover{color:#c9a96e}
 .proximo-nome{font-size:17px;font-weight:500;margin-bottom:2px}
 .proximo-local{font-size:14px;color:var(--muted)}
 .proximo-badge{display:inline-block;padding:2px 9px;border-radius:3px;font-size:13px;font-weight:600;margin-top:4px}
+/* ALERTA DE VENCIMENTOS (viaturas) */
+.alerta-vencimentos{background:rgba(200,80,80,0.08);border:1px solid rgba(200,80,80,0.35);border-radius:6px;padding:16px 20px;margin-bottom:18px}
+.alerta-titulo{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#e88;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.alerta-item{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:9px 0;border-top:1px solid rgba(200,80,80,0.18);cursor:pointer}
+.alerta-item:first-of-type{border-top:none}
+.alerta-item:hover .alerta-nome{color:var(--castanho-claro)}
+.alerta-nome{font-size:16px;font-weight:500}
+.alerta-prazo{font-size:14px;font-weight:600;white-space:nowrap;flex-shrink:0}
 /* MODAL */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;display:none;align-items:center;justify-content:center;padding:24px}
 .overlay.open{display:flex}
@@ -139,6 +147,8 @@ if (localStorage.getItem('mira_ok') !== '1') {
     <div class="leg-item"><div class="leg-dot" style="background:#4a4a1e"></div>Ausência</div>
     <div class="leg-item"><div class="leg-dot" style="background:#1e5a5a"></div>Outro</div>
   </div>
+
+  <div class="alerta-vencimentos" id="alerta-vencimentos" style="display:none"></div>
 
   <div class="layout">
     <div>
@@ -236,6 +246,31 @@ async function carregarEventos(){
   eventos = snap.docs.map(d=>({id:d.id,...d.data()}));
   renderCal();
   renderProximos();
+  renderAlertaVencimentos();
+}
+
+function renderAlertaVencimentos(){
+  const el = document.getElementById('alerta-vencimentos');
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const limite = new Date(hoje); limite.setDate(limite.getDate()+30);
+  const viaturas = eventos.filter(e=>e.cat==='viatura' && e.data).map(e=>{
+    const d = new Date(e.data+'T00:00:00');
+    const dias = Math.round((d-hoje)/86400000);
+    return {...e, dias};
+  }).filter(e=>e.dias<=30).sort((a,b)=>a.dias-b.dias);
+  if(!viaturas.length){ el.style.display='none'; return; }
+  el.style.display='block';
+  el.innerHTML = `<div class="alerta-titulo">⚠️ Vencimentos de viaturas (30 dias)</div>` + viaturas.map(e=>{
+    let prazoTxt, cor;
+    if(e.dias<0){ prazoTxt = 'VENCIDO há '+Math.abs(e.dias)+(Math.abs(e.dias)===1?' dia':' dias'); cor='#e85555'; }
+    else if(e.dias===0){ prazoTxt = 'Vence hoje'; cor='#e85555'; }
+    else if(e.dias===1){ prazoTxt = 'Vence amanhã'; cor='#e8a855'; }
+    else { prazoTxt = 'Vence em '+e.dias+' dias'; cor='#e8a855'; }
+    return `<div class="alerta-item" onclick="editarEvento('${e.id}')">
+      <span class="alerta-nome">${e.nome}${e.resp?' · '+e.resp:''}</span>
+      <span class="alerta-prazo" style="color:${cor}">${prazoTxt}</span>
+    </div>`;
+  }).join('');
 }
 
 function renderCal(){

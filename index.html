@@ -71,6 +71,10 @@ header{text-align:center;margin-bottom:48px;width:100%}
 /* ── DASHBOARD BOTTOM ── */
 .dash-bottom{width:100%;max-width:1040px;margin-top:32px}
 .mini-card{background:rgba(255,255,255,0.03);border:1px solid var(--lin);border-radius:4px;overflow:hidden}
+.dash-alerta{background:rgba(200,80,80,0.08);border-bottom:1px solid rgba(200,80,80,0.3);padding:12px 20px}
+.dash-alerta-titulo{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#e88;margin-bottom:6px}
+.dash-alerta-item{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:4px 0;cursor:pointer}
+.dash-alerta-item:hover{color:var(--cl)}
 .mini-header{background:rgba(255,255,255,0.04);border-bottom:1px solid var(--lin);padding:14px 20px;display:flex;justify-content:space-between;align-items:center}
 .mini-header h3{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--castanho)}
 .mini-header a{font-size:13px;color:var(--mut);text-decoration:none}
@@ -221,6 +225,7 @@ footer span{font-size:14px;color:var(--mut)}
   <!-- MINI CALENDÁRIO -->
   <div class="dash-bottom" id="dash-bottom" style="display:none">
     <div class="mini-card">
+      <div class="dash-alerta" id="dash-alerta" style="display:none"></div>
       <div class="mini-header">
         <div style="display:flex;align-items:center;gap:16px">
           <h3>📅 Agenda</h3>
@@ -455,7 +460,30 @@ async function carregarAgenda() {
     renderCal();
     const hoje = new Date().toISOString().split('T')[0];
     mostrarDia(hoje);
+    renderAlertaVencimentosDash();
   } catch(e) {}
+}
+
+function renderAlertaVencimentosDash() {
+  const el = document.getElementById('dash-alerta');
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const viaturas = eventos.filter(e => e.cat === 'viatura' && e.data).map(e => {
+    const d = new Date(e.data + 'T00:00:00');
+    const dias = Math.round((d - hoje) / 86400000);
+    return {...e, dias};
+  }).filter(e => e.dias <= 30).sort((a,b) => a.dias - b.dias);
+  if (!viaturas.length) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  el.innerHTML = `<div class="dash-alerta-titulo">⚠️ Vencimentos de viaturas</div>` + viaturas.slice(0,4).map(e => {
+    let prazoTxt;
+    if (e.dias < 0) prazoTxt = 'VENCIDO há ' + Math.abs(e.dias) + (Math.abs(e.dias)===1?' dia':' dias');
+    else if (e.dias === 0) prazoTxt = 'Hoje';
+    else if (e.dias === 1) prazoTxt = 'Amanhã';
+    else prazoTxt = 'em ' + e.dias + ' dias';
+    return `<div class="dash-alerta-item" onclick="window.location='apps/agenda/index.html'">
+      <span>${e.nome}${e.resp?' · '+e.resp:''}</span><span style="color:#e88;font-weight:600;white-space:nowrap">${prazoTxt}</span>
+    </div>`;
+  }).join('');
 }
 
 function renderCal() {

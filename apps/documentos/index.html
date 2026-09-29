@@ -158,7 +158,7 @@ if (localStorage.getItem('mira_ok') !== '1') {
         </div>
         <div>
           <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Categoria</label>
-          <select id="upload-cat" style="width:100%;background:#1c1a17;border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
+          <select id="upload-cat" onchange="onCategoriaChange()" style="width:100%;background:#1c1a17;border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
             <option>Administrativo</option>
             <option>Dados Bancários</option>
             <option>Frota</option>
@@ -171,6 +171,28 @@ if (localStorage.getItem('mira_ok') !== '1') {
             <option>Recursos Humanos</option>
             <option>Outro</option>
           </select>
+        </div>
+        <div id="upload-viatura-fields" style="display:none;flex-direction:column;gap:14px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:6px">
+          <div style="font-size:12px;color:var(--castanho-claro);letter-spacing:.05em">🚚 Este documento é de uma viatura — se tiver um prazo a cumprir (vistoria, selo, seguro...), preenche abaixo e crio logo o lembrete na Agenda.</div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Matrícula</label>
+            <input type="text" id="upload-matricula" placeholder="Ex: AA-00-BB" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none;text-transform:uppercase">
+          </div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Este documento tem prazo?</label>
+            <select id="upload-prazo-tipo" style="width:100%;background:#1c1a17;border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
+              <option value="">Não tem prazo (só arquivo)</option>
+              <option value="Vistoria">Vistoria</option>
+              <option value="Selo">Imposto Único de Circulação (Selo)</option>
+              <option value="Seguro">Seguro</option>
+              <option value="Manutenção">Manutenção</option>
+              <option value="Outro">Outro prazo</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Data limite</label>
+            <input type="date" id="upload-prazo-data" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
+          </div>
         </div>
         <div>
           <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Ficheiro</label>
@@ -296,8 +318,15 @@ async function carregarDocsDinamicos() {
   }
 }
 
+function onCategoriaChange() {
+  const ehFrota = document.getElementById('upload-cat').value === 'Frota';
+  const bloco = document.getElementById('upload-viatura-fields');
+  bloco.style.display = ehFrota ? 'flex' : 'none';
+}
+
 function abrirUpload() {
   document.getElementById('upload-overlay').style.display = 'flex';
+  onCategoriaChange();
   document.getElementById('upload-nome').focus();
 }
 
@@ -307,6 +336,9 @@ function fecharUpload() {
   document.getElementById('upload-bar').style.width = '0%';
   document.getElementById('upload-nome').value = '';
   document.getElementById('upload-file').value = '';
+  document.getElementById('upload-matricula').value = '';
+  document.getElementById('upload-prazo-tipo').value = '';
+  document.getElementById('upload-prazo-data').value = '';
 }
 
 async function fazerUpload() {
@@ -337,11 +369,30 @@ async function fazerUpload() {
     err => { statusEl.textContent = 'Erro: ' + err.message; statusEl.style.color = '#e88'; },
     async () => {
       const url = await task.snapshot.ref.getDownloadURL();
-      await db.collection('documentos-internos').add({
+      const matricula = document.getElementById('upload-matricula').value.trim();
+      const prazoTipo = document.getElementById('upload-prazo-tipo').value;
+      const prazoData = document.getElementById('upload-prazo-data').value;
+      const novoDoc = await db.collection('documentos-internos').add({
         nome, cat, nomeFicheiro: file.name, url, storagePath: path,
         tamanho: file.size, tipo: file.type,
+        matricula: matricula || null, prazoTipo: prazoTipo || null, prazoData: prazoData || null,
         criadoEm: new Date().toISOString()
       });
+      if (cat === 'Frota' && prazoData) {
+        try {
+          await db.collection('agenda-geral').doc('DOC-' + novoDoc.id).set({
+            nome: (prazoTipo || 'Prazo') + ' — ' + (matricula || nome),
+            data: prazoData,
+            hora: '',
+            cat: 'viatura',
+            local: '',
+            resp: matricula || '',
+            notas: 'Criado automaticamente a partir do documento "' + nome + '" (Documentos › Frota).',
+            origemDocumento: novoDoc.id,
+            criadoEm: new Date().toISOString()
+          }, { merge: true });
+        } catch(erroAgenda) { console.warn('Não foi possível criar o lembrete na agenda:', erroAgenda); }
+      }
       fecharUpload();
       carregarDocsDinamicos();
     }
@@ -354,6 +405,7 @@ async function eliminarDoc(id, storagePath) {
     try { await storage.ref(storagePath).delete(); } catch(e) {}
   }
   if(db) await db.collection('documentos-internos').doc(id).delete();
+  if(db) await db.collection('agenda-geral').doc('DOC-' + id).delete().catch(()=>{});
   carregarDocsDinamicos();
 }
 

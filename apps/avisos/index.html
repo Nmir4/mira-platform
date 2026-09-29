@@ -464,6 +464,19 @@ async function guardar(publicar){
       else { await db.collection(COL_FOTO).doc(id).delete().catch(()=>{}); doc.fotoV = 0; miniFotos[id] = ''; }
     }
     await db.collection(COL).doc(id).set(doc, { merge: true });
+    try {
+      await db.collection('agenda-geral').doc(id).set({
+        nome: 'Funeral de ' + a.nome,
+        data: a.funData,
+        hora: a.funHora,
+        cat: 'funeral',
+        local: a.funIgreja || a.funDestino || '',
+        resp: '',
+        notas: [a.funIgreja ? ('Igreja/cerimónia: ' + a.funIgreja) : '', a.funDestino ? ('Cemitério/crematório: ' + a.funDestino) : '', a.velLocal ? ('Velório: ' + a.velLocal + (a.velData ? (' · ' + a.velData + ' ' + (a.velHora || '')) : '')) : ''].filter(Boolean).join('\n'),
+        origemAviso: id,
+        criadoEm: doc.criadoEm || agora
+      }, { merge: true });
+    } catch(erroAgenda) { console.warn('Não foi possível sincronizar com a agenda:', erroAgenda); }
     toast(publicar ? 'Publicado — aparece na TV dentro de 1 minuto.' : 'Guardado (não está na TV).');
     voltar();
   } catch(e) {
@@ -479,6 +492,7 @@ async function apagar(){
   if (!editId || !confirm('Apagar definitivamente este aviso e a fotografia?')) return;
   await db.collection(COL_FOTO).doc(editId).delete().catch(()=>{});
   await db.collection(COL).doc(editId).delete();
+  await db.collection('agenda-geral').doc(editId).delete().catch(()=>{});
   toast('Aviso apagado.'); voltar();
 }
 desenharCrop();
