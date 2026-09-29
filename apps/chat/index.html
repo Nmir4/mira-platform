@@ -107,6 +107,10 @@ if(db) {
   db.collection('chat-interno').orderBy('ts','asc').limit(200).onSnapshot(snap => {
     renderMsgs(snap.docs);
     document.getElementById('chat-status').textContent='Em linha · '+snap.docs.length+' mensagens';
+    // Esta janela está aberta e visível -- marcar tudo como visto (limpa o aviso nas outras apps)
+    let newest = 0;
+    snap.docs.forEach(d => { const t = d.data().ts; const ms = (t && t.toMillis) ? t.toMillis() : 0; if (ms > newest) newest = ms; });
+    if (newest) { try { localStorage.setItem('mira_chat_seen', String(newest)); } catch(e) {} }
   }, ()=> document.getElementById('chat-status').textContent='Erro de ligação');
 }
 

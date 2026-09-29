@@ -190,6 +190,33 @@ let db = null;
 try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch(e) {}
   firebase.auth().onAuthStateChanged(function(user){ if(!user){ try{ localStorage.removeItem('mira_ok'); }catch(e){} window.location.replace('../../index.html'); } });
 
+  // Aviso de mensagens novas no chat (consistente em todas as apps).
+  // Adiado para depois do DOM estar pronto: numa pagina grande, a 1a resposta do
+  // Firestore pode chegar antes do botao do chat existir ainda no documento.
+  if (db) {
+    function iniciarBadgeChat() {
+      db.collection('chat-interno').orderBy('ts','desc').limit(30).onSnapshot(function(snap){
+        var seen = parseInt(localStorage.getItem('mira_chat_seen')||'0', 10);
+        var unread = 0;
+        snap.forEach(function(d){
+          var t = d.data().ts;
+          var ms = (t && t.toMillis) ? t.toMillis() : 0;
+          if (ms > seen) unread++;
+        });
+        var b = document.getElementById('chat-badge');
+        if (b) {
+          if (unread > 0) { b.style.display = 'flex'; b.textContent = unread > 9 ? '9+' : String(unread); }
+          else { b.style.display = 'none'; }
+        }
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', iniciarBadgeChat);
+    } else {
+      iniciarBadgeChat();
+    }
+  }
+
 let anoAtual = new Date().getFullYear();
 let mesAtual = new Date().getMonth();
 let eventos = [];
@@ -322,7 +349,7 @@ carregarEventos();
 
 
 <!-- BOTÕES FIXOS: CHAT + SAIR -->
-<button onclick="abrirChat()" style="position:fixed;bottom:24px;right:24px;z-index:9999;width:56px;height:56px;border-radius:50%;background:#8b7355;border:none;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center" title="Chat interno">💬</button>
+<button onclick="abrirChat()" style="position:fixed;bottom:24px;right:24px;z-index:9999;width:56px;height:56px;border-radius:50%;background:#8b7355;border:none;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center" title="Chat interno">💬<span id="chat-badge" style="display:none;position:absolute;top:-2px;right:-2px;background:#c0392b;color:#fff;font-size:11px;font-weight:700;min-width:18px;height:18px;border-radius:9px;align-items:center;justify-content:center;padding:0 4px;border:2px solid #1a1714;box-shadow:0 1px 4px rgba(0,0,0,.4)"></span></button>
 <button onclick="sairDaApp()" style="position:fixed;bottom:24px;left:24px;z-index:9999;background:rgba(20,20,20,0.85);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);padding:10px 18px;font-size:13px;font-family:Inter,sans-serif;border-radius:4px;cursor:pointer" title="Sair">⬡ Sair</button>
 
 </body>

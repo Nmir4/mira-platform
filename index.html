@@ -358,6 +358,7 @@ function toggleChat() {
   document.getElementById('chat-panel').classList.toggle('open', chatOpen);
   if (chatOpen) {
     document.getElementById('cbadge').style.display = 'none';
+    try { localStorage.setItem('mira_chat_seen', String(Date.now())); } catch(e) {}
     document.getElementById('chat-input').focus();
     setTimeout(() => { const m = document.getElementById('chat-msgs'); m.scrollTop = m.scrollHeight; }, 50);
   }
@@ -403,10 +404,17 @@ function iniciarChat() {
   if (unsub) unsub();
   unsub = db.collection('chat-interno').orderBy('ts','asc').limit(200).onSnapshot(snap => {
     renderMsgs(snap.docs);
-    if (!chatOpen && snap.docs.length > lastCount) {
+    let newest = 0;
+    snap.docs.forEach(d => { const t = d.data().ts; const ms = (t && t.toMillis) ? t.toMillis() : 0; if (ms > newest) newest = ms; });
+    if (chatOpen) {
+      if (newest) { try { localStorage.setItem('mira_chat_seen', String(newest)); } catch(e) {} }
+      document.getElementById('cbadge').style.display = 'none';
+    } else {
+      const seen = parseInt(localStorage.getItem('mira_chat_seen') || '0', 10);
+      const unread = snap.docs.filter(d => { const t = d.data().ts; const ms = (t && t.toMillis) ? t.toMillis() : 0; return ms > seen; }).length;
       const b = document.getElementById('cbadge');
-      b.style.display = 'flex';
-      b.textContent = snap.docs.length - lastCount;
+      if (unread > 0) { b.style.display = 'flex'; b.textContent = unread > 9 ? '9+' : unread; }
+      else { b.style.display = 'none'; }
     }
     lastCount = snap.docs.length;
   });
