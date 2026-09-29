@@ -6,6 +6,7 @@
 <title>Contactos — MIRA</title>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="../../assets/firebase-config.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap');
@@ -186,6 +187,7 @@ if (localStorage.getItem('mira_ok') !== '1') {
 <script>
 let db = null, editId = null, todos = [], catActiva = 'TODOS';
 try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch(e) {}
+  try{ firebase.auth().signInAnonymously().catch(function(e){ console.error('Auth anon falhou:', e); }); }catch(e){ console.error('Auth anon falhou:', e); }
 
 const CAT_ICON = {'Emergência':'🆘','Autarquia':'🏛','Junta de Freguesia':'🏘','Saúde':'🏥','Segurança':'🛡','Justiça / Notariado':'⚖️','Serviços Públicos':'📋','Igreja / Religioso':'⛪','Parceiro / Fornecedor':'🤝','Advogado / Solicitador':'📜','Frota / Mecânica':'🚗','Cliente':'👤','Outro':'📌'};
 
