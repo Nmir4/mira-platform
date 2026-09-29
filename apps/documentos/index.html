@@ -104,14 +104,6 @@ if (localStorage.getItem('mira_ok') !== '1') {
   <div class="section">
     <div class="section-title">Dados Bancários</div>
     <div class="doc-grid">
-      <a class="doc-card" href="informacao_de_conta.pdf" target="_blank">
-        <div class="doc-icon">🏦</div>
-        <div class="doc-info">
-          <div class="doc-name">Informação de Conta</div>
-          <div class="doc-meta">CA Crédito Agrícola · PDF</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
       <div class="doc-card" onclick="navigator.clipboard.writeText('PT50004514234015856197952').then(()=>{const m=this.querySelector('.doc-meta');m.textContent='✓ Copiado!';setTimeout(()=>m.textContent='Clique para copiar',2000)})" style="cursor:pointer">
         <div class="doc-icon">📋</div>
         <div class="doc-info">
@@ -150,8 +142,11 @@ if (localStorage.getItem('mira_ok') !== '1') {
           <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Categoria</label>
           <select id="upload-cat" style="width:100%;background:#1c1a17;border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
             <option>Administrativo</option>
+            <option>Dados Bancários</option>
             <option>Frota</option>
-            <option>Imóveis</option>
+            <option>Imóveis · Centro Logístico</option>
+            <option>Imóveis · Lojas Rio do Porto</option>
+            <option>Imóveis · Terreno Monte Prado</option>
             <option>Seguros</option>
             <option>Licenças</option>
             <option>Fiscal</option>
@@ -176,37 +171,6 @@ if (localStorage.getItem('mira_ok') !== '1') {
       </div>
     </div>
   </div>
-
-  <div class="section">
-    <div class="section-title">Imóveis e Propriedades</div>
-    <div class="doc-grid">
-      <a class="imovel-card" href="imoveis/centro-logistico/index.html">
-        <div class="imovel-icon" style="background:rgba(40,60,80,0.4)">🏭</div>
-        <div class="imovel-info">
-          <div class="imovel-name">Centro Logístico · Penso</div>
-          <div class="imovel-meta">Zona Industrial · Melgaço</div>
-        </div>
-        <div class="imovel-count">10 docs</div>
-      </a>
-      <a class="imovel-card" href="imoveis/lojas-rio-porto/index.html">
-        <div class="imovel-icon" style="background:rgba(60,40,20,0.4)">🏪</div>
-        <div class="imovel-info">
-          <div class="imovel-name">Lojas · Rio do Porto</div>
-          <div class="imovel-meta">Fracções F e G · Melgaço</div>
-        </div>
-        <div class="imovel-count">17 docs</div>
-      </a>
-      <a class="imovel-card" href="imoveis/terreno-monte-prado/index.html">
-        <div class="imovel-icon" style="background:rgba(30,60,30,0.4)">🌿</div>
-        <div class="imovel-info">
-          <div class="imovel-name">Terreno · Monte Prado</div>
-          <div class="imovel-meta">Monte Prado · Melgaço</div>
-        </div>
-        <div class="imovel-count">8 docs</div>
-      </a>
-    </div>
-  </div>
-
 </div>
 
 <!-- Botão Logout -->
