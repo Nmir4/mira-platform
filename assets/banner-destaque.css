@@ -1,0 +1,15 @@
+/* ===== Banner de Destaque — partilhado entre a Agenda e o Dashboard =====
+   Mostra, em rotação, os eventos mais urgentes da agenda-geral: o que
+   acontece hoje, prazos de viatura dentro da janela de aviso, e qualquer
+   evento marcado manualmente para destaque. Ver assets/banner-destaque.js */
+.destaque-banner{background:rgba(201,169,110,0.07);border:1px solid rgba(201,169,110,0.28);border-radius:6px;padding:14px 20px;margin-bottom:18px;cursor:pointer;transition:opacity .2s,background .2s}
+.destaque-banner:hover{opacity:.88}
+.destaque-banner--embutido{border:none;border-bottom:1px solid rgba(201,169,110,0.22);border-radius:0;margin-bottom:0}
+.destaque-conteudo{display:flex;justify-content:space-between;align-items:center;gap:14px}
+.destaque-msg{display:flex;align-items:center;gap:9px;min-width:0}
+.destaque-icone{flex-shrink:0}
+.destaque-nome{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.destaque-prazo{font-weight:600;white-space:nowrap;flex-shrink:0;font-size:.92em}
+.destaque-pontos{display:flex;gap:5px;margin-top:9px;justify-content:center}
+.destaque-ponto{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.18);transition:background .2s}
+.destaque-ponto.ativo{background:#c9a96e}
