@@ -3,10 +3,13 @@
  * destaque, sem exigir marcação manual para o essencial:
  *
  *   - "hoje"    -> qualquer evento cuja data seja hoje, qualquer categoria
- *   - "viatura" -> eventos de categoria "viatura" dentro da janela de aviso
- *                  (hoje: janela fixa de 30 dias; quando existir a "ficha
- *                  da viatura" com o motor de prazos legais IPO/IUC, esta
- *                  janela passa a vir de lá — ver calcularJanelaViatura)
+ *   - "viatura" -> eventos de categoria "viatura" dentro da janela de aviso.
+ *                  Eventos gerados pela ficha da viatura (motor de prazos
+ *                  legais IPO/IUC) trazem `subtipoViatura`: "inspecao" avisa
+ *                  a partir de 3 meses antes (pode ser feita até lá), "selo"
+ *                  a partir do início do mês do aniversário da matrícula.
+ *                  Um evento de viatura sem subtipoViatura (criado à mão)
+ *                  usa a janela genérica de 30 dias.
  *   - "manual"  -> qualquer evento com destaque:true, dentro de uma janela
  *                  de antecedência configurável (JANELA_MANUAL)
  *
@@ -17,8 +20,10 @@
  *   MiraBannerDestaque.montarBannerDestaque('destaque-banner-dash', eventos, {compacto:true});
  */
 (function (global) {
-  var JANELA_VIATURA_PADRAO = 30; // dias — placeholder até existir o motor de prazos legais
-  var JANELA_MANUAL = 14;         // dias de antecedência para destaques marcados manualmente
+  var JANELA_VIATURA_PADRAO = 30;  // dias — eventos de viatura sem subtipo (criados à mão)
+  var JANELA_VIATURA_INSPECAO = 90; // dias — inspeção pode ser feita até 3 meses antes
+  var JANELA_VIATURA_SELO = 35;     // dias — cobre o mês inteiro do aniversário + folga
+  var JANELA_MANUAL = 14;          // dias de antecedência para destaques marcados manualmente
   var ROTACAO_MS = 4500;
 
   var ICONE_MOTIVO = { hoje: '📌', viatura: '🚗', manual: '⭐' };
@@ -29,10 +34,9 @@
   }
 
   function calcularJanelaViatura(evento) {
-    // Ponto único de extensão: quando a ficha da viatura calcular a
-    // inspeção/selo por matrícula, esta função passa a devolver a janela
-    // certa por evento (3 meses p/ inspeção, mês da matrícula p/ selo).
-    return JANELA_VIATURA_PADRAO;
+    if (evento.subtipoViatura === 'inspecao') return JANELA_VIATURA_INSPECAO;
+    if (evento.subtipoViatura === 'selo') return JANELA_VIATURA_SELO;
+    return JANELA_VIATURA_PADRAO; // evento de viatura antigo/manual, sem subtipo
   }
 
   function recolherDestaques(eventos, opts) {

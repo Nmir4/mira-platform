@@ -50,6 +50,19 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;height:2px;background
 .imovel-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400;margin-bottom:4px}
 .imovel-meta{font-size:13px;color:var(--muted)}
 .imovel-count{font-size:13px;color:var(--castanho);background:rgba(139,115,85,0.15);padding:4px 12px;border-radius:10px;flex-shrink:0}
+/* FICHA DE VIATURAS (Frota) */
+.viatura-card{display:flex;flex-direction:column;gap:12px;padding:16px 18px;background:rgba(255,255,255,0.02);border:1px solid var(--linha);border-radius:5px;margin-bottom:10px}
+.viatura-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.viatura-matricula{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;letter-spacing:.03em}
+.viatura-categoria{font-size:12px;color:var(--muted);margin-top:2px}
+.viatura-del{font-size:12px;color:#e88;background:none;border:none;cursor:pointer;opacity:.65;white-space:nowrap}
+.viatura-del:hover{opacity:1}
+.viatura-prazos{display:flex;gap:10px;flex-wrap:wrap}
+.viatura-prazo{flex:1;min-width:200px;background:rgba(255,255,255,0.03);border:1px solid var(--linha);border-radius:4px;padding:11px 13px;display:flex;flex-direction:column;gap:6px}
+.viatura-prazo-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.viatura-prazo-data{font-size:14px;font-weight:600}
+.viatura-btn-confirmar{align-self:flex-start;font-size:12px;padding:6px 11px;background:rgba(201,169,110,0.15);border:1px solid rgba(201,169,110,0.35);color:var(--castanho-claro);border-radius:3px;cursor:pointer;font-family:Inter,sans-serif}
+.viatura-btn-confirmar:hover{background:rgba(201,169,110,0.28)}
 </style>
 
 
@@ -58,6 +71,7 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;height:2px;background
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 <script src="../../assets/firebase-config.js"></script>
+<script src="../../assets/motor-viaturas.js"></script>
 <script>
 try { firebase.initializeApp(firebaseConfig); } catch(e) {}
 // Proteger app — verificar sessão
@@ -133,6 +147,14 @@ if (localStorage.getItem('mira_ok') !== '1') {
     </div>
   </div>
 
+  <!-- FICHA DAS VIATURAS DA FROTA -->
+  <div class="section" id="frota-viaturas-section">
+    <div class="section-title">🚗 Frota · Viaturas</div>
+    <div id="frota-viaturas-lista">
+      <div style="padding:20px;text-align:center;font-size:14px;color:var(--muted)">A carregar...</div>
+    </div>
+  </div>
+
   <!-- SECÇÃO DE DOCUMENTOS DINÂMICOS -->
   <div class="section" id="docs-dinamicos-section">
     <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
@@ -173,28 +195,41 @@ if (localStorage.getItem('mira_ok') !== '1') {
           </select>
         </div>
         <div id="upload-viatura-fields" style="display:none;flex-direction:column;gap:14px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:6px">
-          <div style="font-size:12px;color:var(--castanho-claro);letter-spacing:.05em">🚚 Este documento é de uma viatura — se tiver um prazo a cumprir (vistoria, selo, seguro...), preenche abaixo e crio logo o lembrete na Agenda.</div>
+          <div style="font-size:12px;color:var(--castanho-claro);letter-spacing:.05em">🚚 Este documento é de uma viatura.</div>
           <div>
             <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Matrícula</label>
             <input type="text" id="upload-matricula" placeholder="Ex: AA-00-BB" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none;text-transform:uppercase">
           </div>
-          <div>
-            <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Este documento tem prazo?</label>
-            <select id="upload-prazo-tipo" style="width:100%;background:#1c1a17;border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
+
+          <div style="display:flex;align-items:center;gap:10px;padding-top:2px;border-top:1px solid rgba(255,255,255,0.06)">
+            <input type="checkbox" id="upload-eh-duc" onchange="onDucChange()" style="width:auto;accent-color:var(--castanho-claro)">
+            <label for="upload-eh-duc" style="margin-bottom:0;text-transform:none;letter-spacing:normal;font-size:14px;color:var(--texto);cursor:pointer">📄 Este ficheiro é o DUC desta viatura</label>
+          </div>
+          <div id="upload-duc-fields" style="display:none;flex-direction:column;gap:14px">
+            <div style="font-size:12px;color:var(--muted)">A partir da categoria e da data da 1ª matrícula, calculo automaticamente a próxima inspeção e o próximo selo (IUC) desta viatura, e mantenho os lembretes na Agenda.</div>
+            <div>
+              <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Categoria da viatura</label>
+              <select id="upload-viatura-categoria" style="width:100%;background:#1c1a17;border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
+                <option value="ligeiro-passageiros">Ligeiro de passageiros</option>
+                <option value="ligeiro-mercadorias">Ligeiro de mercadorias</option>
+                <option value="outro">Outra categoria</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Data da 1ª matrícula</label>
+              <input type="date" id="upload-data-matricula" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
+            </div>
+          </div>
+
+          <div style="padding-top:2px;border-top:1px solid rgba(255,255,255,0.06)">
+            <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Este documento tem outro prazo? (opcional — ex: seguro, manutenção)</label>
+            <select id="upload-prazo-tipo" style="width:100%;background:#1c1a17;border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none;margin-bottom:10px">
               <option value="">Não tem prazo (só arquivo)</option>
-              <option value="Vistoria">Vistoria</option>
-              <option value="Selo">Imposto Único de Circulação (Selo)</option>
               <option value="Seguro">Seguro</option>
               <option value="Manutenção">Manutenção</option>
               <option value="Outro">Outro prazo</option>
             </select>
-          </div>
-          <div>
-            <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Data limite</label>
-            <input type="date" id="upload-prazo-data" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
-          </div>
-          <div>
-            <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Repetir</label>
+            <input type="date" id="upload-prazo-data" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none;margin-bottom:10px">
             <select id="upload-prazo-repetir" style="width:100%;background:#1c1a17;border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
               <option value="">Não repete (evento único)</option>
               <option value="1">Todos os anos</option>
@@ -333,6 +368,11 @@ function onCategoriaChange() {
   bloco.style.display = ehFrota ? 'flex' : 'none';
 }
 
+function onDucChange() {
+  const marcado = document.getElementById('upload-eh-duc').checked;
+  document.getElementById('upload-duc-fields').style.display = marcado ? 'flex' : 'none';
+}
+
 function abrirUpload() {
   document.getElementById('upload-overlay').style.display = 'flex';
   onCategoriaChange();
@@ -346,6 +386,10 @@ function fecharUpload() {
   document.getElementById('upload-nome').value = '';
   document.getElementById('upload-file').value = '';
   document.getElementById('upload-matricula').value = '';
+  document.getElementById('upload-eh-duc').checked = false;
+  document.getElementById('upload-viatura-categoria').value = 'ligeiro-passageiros';
+  document.getElementById('upload-data-matricula').value = '';
+  document.getElementById('upload-duc-fields').style.display = 'none';
   document.getElementById('upload-prazo-tipo').value = '';
   document.getElementById('upload-prazo-data').value = '';
   document.getElementById('upload-prazo-repetir').value = '';
@@ -359,7 +403,15 @@ async function fazerUpload() {
   if(!nome) { document.getElementById('upload-nome').focus(); return; }
   if(!file) { alert('Selecciona um ficheiro'); return; }
   if(file.size > 50 * 1024 * 1024) { alert('Ficheiro demasiado grande (máx. 50 MB)'); return; }
-  
+
+  const ehDuc = cat === 'Frota' && document.getElementById('upload-eh-duc').checked;
+  if (ehDuc) {
+    const matriculaDuc = document.getElementById('upload-matricula').value.trim();
+    const dataMatriculaDuc = document.getElementById('upload-data-matricula').value;
+    if (!matriculaDuc) { alert('Indica a matrícula da viatura.'); document.getElementById('upload-matricula').focus(); return; }
+    if (!dataMatriculaDuc) { alert('Indica a data da 1ª matrícula.'); document.getElementById('upload-data-matricula').focus(); return; }
+  }
+
   const progressEl = document.getElementById('upload-progress');
   const barEl = document.getElementById('upload-bar');
   const statusEl = document.getElementById('upload-status');
@@ -383,12 +435,18 @@ async function fazerUpload() {
       const prazoTipo = document.getElementById('upload-prazo-tipo').value;
       const prazoData = document.getElementById('upload-prazo-data').value;
       const prazoRepetir = document.getElementById('upload-prazo-repetir').value ? parseInt(document.getElementById('upload-prazo-repetir').value, 10) : null;
+      const ehDuc = cat === 'Frota' && document.getElementById('upload-eh-duc').checked;
+      const viaturaCategoria = document.getElementById('upload-viatura-categoria').value;
+      const dataMatricula = document.getElementById('upload-data-matricula').value;
+
       const novoDoc = await db.collection('documentos-internos').add({
         nome, cat, nomeFicheiro: file.name, url, storagePath: path,
         tamanho: file.size, tipo: file.type,
-        matricula: matricula || null, prazoTipo: prazoTipo || null, prazoData: prazoData || null, prazoRepetirAnos: prazoRepetir,
+        matricula: matricula || null, ehDuc, prazoTipo: prazoTipo || null, prazoData: prazoData || null, prazoRepetirAnos: prazoRepetir,
         criadoEm: new Date().toISOString()
       });
+
+      // Prazo simples (não coberto pelo motor legal): ex. seguro, manutenção.
       if (cat === 'Frota' && prazoData) {
         try {
           await db.collection('agenda-geral').doc('DOC-' + novoDoc.id).set({
@@ -405,10 +463,156 @@ async function fazerUpload() {
           }, { merge: true });
         } catch(erroAgenda) { console.warn('Não foi possível criar o lembrete na agenda:', erroAgenda); }
       }
+
+      // DUC: cria/atualiza a ficha da viatura e recalcula inspeção + selo.
+      if (ehDuc && matricula && dataMatricula) {
+        try {
+          await criarOuAtualizarFicha(matricula, viaturaCategoria, dataMatricula);
+        } catch(erroFicha) { console.warn('Não foi possível atualizar a ficha da viatura:', erroFicha); }
+      }
+
       fecharUpload();
       carregarDocsDinamicos();
+      carregarViaturas();
     }
   );
+}
+
+// ===== FICHA DAS VIATURAS DA FROTA =====
+
+async function criarOuAtualizarFicha(matricula, categoria, dataMatricula) {
+  if (!db || !window.MotorViaturas) return;
+  const mid = MotorViaturas.idMatricula(matricula);
+  const ref = db.collection('viaturas-frota').doc(mid);
+  // Preserva ciclos já confirmados se a viatura já existir (reenviar o DUC
+  // não deve reiniciar o histórico de inspeções/selos confirmados).
+  await ref.set({
+    matricula: matricula.toUpperCase(),
+    categoria,
+    dataMatricula,
+    atualizadoEm: new Date().toISOString()
+  }, { merge: true });
+  const snap = await ref.get();
+  await sincronizarAgendaViatura({ id: mid, ...snap.data() });
+}
+
+async function sincronizarAgendaViatura(viatura) {
+  if (!db || !window.MotorViaturas) return;
+  const eventos = MotorViaturas.construirEventosAgenda(viatura);
+  if (eventos.inspecao) {
+    await db.collection('agenda-geral').doc(eventos.inspecao.id).set(eventos.inspecao.doc, { merge: true });
+  } else {
+    await db.collection('agenda-geral').doc('VEIC-INSP-' + viatura.id).delete().catch(()=>{});
+  }
+  if (eventos.selo) {
+    await db.collection('agenda-geral').doc(eventos.selo.id).set(eventos.selo.doc, { merge: true });
+  }
+}
+
+function fmtDataPT(dataStr) {
+  if (!dataStr) return '';
+  return new Date(dataStr + 'T12:00:00').toLocaleDateString('pt-PT', {day:'2-digit', month:'2-digit', year:'numeric'});
+}
+
+function diasAteData(dataStr) {
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const d = new Date(dataStr + 'T00:00:00');
+  return Math.round((d - hoje) / 86400000);
+}
+
+function corPorDias(dias) {
+  if (dias <= 0) return '#e85555';
+  if (dias <= 14) return '#e8a855';
+  return 'var(--castanho-claro)';
+}
+
+function textoDias(dias) {
+  if (dias < 0) return 'vencido há ' + Math.abs(dias) + (Math.abs(dias)===1?' dia':' dias');
+  if (dias === 0) return 'hoje';
+  if (dias === 1) return 'amanhã';
+  return 'em ' + dias + ' dias';
+}
+
+async function carregarViaturas() {
+  if (!db) return;
+  const el = document.getElementById('frota-viaturas-lista');
+  try {
+    const snap = await db.collection('viaturas-frota').orderBy('matricula','asc').get();
+    if (snap.empty) {
+      el.innerHTML = '<div style="padding:20px;text-align:center;font-size:14px;color:var(--muted)">Sem viaturas registadas ainda. Ao carregar o DUC de uma viatura em "Frota", a ficha aparece aqui.</div>';
+      return;
+    }
+    el.innerHTML = snap.docs.map(d => {
+      const v = { id: d.id, ...d.data() };
+      const insp = window.MotorViaturas.calcularProximaInspecao(v);
+      const selo = window.MotorViaturas.calcularProximoSelo(v);
+      const blocoInsp = insp
+        ? (() => {
+            const dias = diasAteData(insp.data);
+            return `<span class="viatura-prazo-data" style="color:${corPorDias(dias)}">${fmtDataPT(insp.data)} · ${textoDias(dias)}</span>
+              <button class="viatura-btn-confirmar" onclick="confirmarInspecao('${v.id}')">✓ Inspeção feita</button>`;
+          })()
+        : `<span class="viatura-prazo-data" style="color:var(--muted);font-weight:400;font-size:13px">Categoria sem cálculo automático — gerir manualmente na Agenda</span>`;
+      const diasSelo = diasAteData(selo.data);
+      return `<div class="viatura-card">
+        <div class="viatura-head">
+          <div>
+            <div class="viatura-matricula">${v.matricula}</div>
+            <div class="viatura-categoria">${window.MotorViaturas.labelCategoria(v.categoria)} · 1ª matrícula ${fmtDataPT(v.dataMatricula)}</div>
+          </div>
+          <button class="viatura-del" onclick="eliminarViatura('${v.id}')" title="Remover ficha desta viatura">Remover ficha ×</button>
+        </div>
+        <div class="viatura-prazos">
+          <div class="viatura-prazo">
+            <span class="viatura-prazo-label">Próxima inspeção</span>
+            ${blocoInsp}
+          </div>
+          <div class="viatura-prazo">
+            <span class="viatura-prazo-label">Próximo selo (IUC)</span>
+            <span class="viatura-prazo-data" style="color:${corPorDias(diasSelo)}">${fmtDataPT(selo.data)} · ${textoDias(diasSelo)}</span>
+            <button class="viatura-btn-confirmar" onclick="confirmarSelo('${v.id}')">✓ Selo pago</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="padding:20px;color:#e88;font-size:14px">Erro: '+e.message+'</div>';
+  }
+}
+
+async function confirmarInspecao(mid) {
+  if (!db) return;
+  const ref = db.collection('viaturas-frota').doc(mid);
+  const snap = await ref.get();
+  if (!snap.exists) return;
+  const v = { id: mid, ...snap.data() };
+  const atual = v.inspecoesConfirmadas || 0;
+  await ref.set({ inspecoesConfirmadas: atual + 1, atualizadoEm: new Date().toISOString() }, { merge: true });
+  const snap2 = await ref.get();
+  await sincronizarAgendaViatura({ id: mid, ...snap2.data() });
+  carregarViaturas();
+}
+
+async function confirmarSelo(mid) {
+  if (!db) return;
+  const ref = db.collection('viaturas-frota').doc(mid);
+  const snap = await ref.get();
+  if (!snap.exists) return;
+  const v = { id: mid, ...snap.data() };
+  const selo = window.MotorViaturas.calcularProximoSelo(v);
+  await ref.set({ seloConfirmadoAno: selo.ano, atualizadoEm: new Date().toISOString() }, { merge: true });
+  const snap2 = await ref.get();
+  await sincronizarAgendaViatura({ id: mid, ...snap2.data() });
+  carregarViaturas();
+}
+
+async function eliminarViatura(mid) {
+  if (!db) return;
+  if (!confirm('Remover a ficha desta viatura? Os lembretes de inspeção e selo na Agenda também são removidos. Os documentos já carregados não são apagados.')) return;
+  await db.collection('viaturas-frota').doc(mid).delete();
+  await db.collection('agenda-geral').doc('VEIC-INSP-' + mid).delete().catch(()=>{});
+  await db.collection('agenda-geral').doc('VEIC-SELO-' + mid).delete().catch(()=>{});
+  carregarViaturas();
 }
 
 async function eliminarDoc(id, storagePath) {
@@ -423,6 +627,7 @@ async function eliminarDoc(id, storagePath) {
 
 // Init
 carregarDocsDinamicos();
+carregarViaturas();
 </script>
 
 
