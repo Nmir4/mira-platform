@@ -19,7 +19,10 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;height:2px;background
 .section{margin-bottom:36px}
 .doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
 .doc-list{display:flex;flex-direction:column}
-.doc-cat-header{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--castanho);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--linha)}
+.doc-cat-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--linha)}
+.doc-cat-label{display:flex;align-items:center;gap:10px;min-width:0}
+.doc-cat-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;border:1px solid rgba(255,255,255,0.06)}
+.doc-cat-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--castanho);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .doc-cat-count{font-size:11px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:normal;white-space:nowrap}
 .doc-row{display:flex;align-items:center;gap:14px;padding:12px 14px;background:rgba(255,255,255,0.02);border:1px solid var(--linha);border-radius:3px;margin-bottom:8px;transition:all .2s}
 .doc-row:hover{background:rgba(255,255,255,0.05)}
@@ -229,6 +232,23 @@ try {
 } catch(e) { console.error('Firebase:', e); }
 
 // CARREGAR DOCUMENTOS DINÂMICOS
+function iconeCategoria(cat) {
+  const mapa = {
+    'Administrativo': {icon:'📋', bg:'rgba(139,115,85,0.25)'},
+    'Dados Bancários': {icon:'🏦', bg:'rgba(80,90,60,0.35)'},
+    'Frota': {icon:'🚚', bg:'rgba(60,70,90,0.35)'},
+    'Imóveis · Centro Logístico': {icon:'🏭', bg:'rgba(40,60,80,0.4)'},
+    'Imóveis · Lojas Rio do Porto': {icon:'🏪', bg:'rgba(60,40,20,0.4)'},
+    'Imóveis · Terreno Monte Prado': {icon:'🌿', bg:'rgba(30,60,30,0.4)'},
+    'Seguros': {icon:'🛡️', bg:'rgba(50,70,90,0.35)'},
+    'Licenças': {icon:'📜', bg:'rgba(90,75,40,0.35)'},
+    'Fiscal': {icon:'🧾', bg:'rgba(80,60,40,0.35)'},
+    'Recursos Humanos': {icon:'👥', bg:'rgba(70,55,85,0.35)'},
+    'Outro': {icon:'📁', bg:'rgba(90,90,90,0.3)'}
+  };
+  return mapa[cat] || {icon:'📁', bg:'rgba(90,90,90,0.3)'};
+}
+
 async function carregarDocsDinamicos() {
   if(!db) return;
   try {
@@ -249,7 +269,8 @@ async function carregarDocsDinamicos() {
     
     let html_out = '';
     Object.entries(cats).forEach(([cat, docs]) => {
-      html_out += `<div style="margin-bottom:22px"><div class="doc-cat-header"><span>${cat}</span><span class="doc-cat-count">${docs.length} ${docs.length===1?'documento':'documentos'}</span></div>`;
+      const ic = iconeCategoria(cat);
+      html_out += `<div style="margin-bottom:22px"><div class="doc-cat-header"><div class="doc-cat-label"><span class="doc-cat-icon" style="background:${ic.bg}">${ic.icon}</span><span class="doc-cat-name">${cat}</span></div><span class="doc-cat-count">${docs.length} ${docs.length===1?'documento':'documentos'}</span></div>`;
       docs.forEach(doc => {
         const ext = doc.nome.split('.').pop().toUpperCase();
         const icon = ['PDF'].includes(ext)?'📄':['JPG','JPEG','PNG'].includes(ext)?'🖼️':['ZIP'].includes(ext)?'📦':'📎';
