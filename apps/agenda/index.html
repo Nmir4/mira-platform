@@ -79,7 +79,7 @@ nav a:hover{color:#c9a96e}
 .field textarea{min-height:80px;resize:vertical}
 .field select option{background:#1c1a17}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:17px}
-.modal-footer{padding:19px 26px;border-top:1px solid rgba(255,255,255,0.07);display:flex;gap:12px;justify-content:flex-end}
+.modal-footer{padding:19px 26px;border-top:1px solid rgba(255,255,255,0.07);display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap}
 .modal-footer button{padding:12px 24px;font-size:15px;font-family:'Inter',sans-serif;font-weight:500;border-radius:4px;cursor:pointer;transition:all .2s}
 .btn-cancel{background:transparent;border:1px solid var(--linha);color:var(--muted)}
 .btn-cancel:hover{border-color:var(--castanho);color:var(--castanho-claro)}
@@ -185,10 +185,19 @@ if (localStorage.getItem('mira_ok') !== '1') {
       </div>
       <div class="field"><label>Local</label><input type="text" id="f-local" placeholder="Local, endereço..."></div>
       <div class="field"><label>Responsável / Viatura</label><input type="text" id="f-resp" placeholder="Nome ou matrícula..."></div>
+      <div class="field"><label>Repetir</label>
+        <select id="f-repetir">
+          <option value="">Não repete (evento único)</option>
+          <option value="1">Todos os anos</option>
+          <option value="2">De 2 em 2 anos</option>
+          <option value="3">De 3 em 3 anos</option>
+        </select>
+      </div>
       <div class="field"><label>Notas</label><textarea id="f-notas" placeholder="Instruções, observações..."></textarea></div>
     </div>
     <div class="modal-footer">
       <button class="btn-del" id="btn-del" onclick="eliminarEvento()" style="display:none">Eliminar</button>
+      <button class="btn-concluir" id="btn-concluir" onclick="concluirERenovar()" style="display:none;background:rgba(139,115,85,0.2);border:1px solid var(--castanho);color:var(--castanho-claro);padding:12px 16px;font-size:13px;font-family:'Inter',sans-serif;font-weight:500;border-radius:4px;cursor:pointer;margin-right:auto;white-space:nowrap">✓ Concluído, agendar próxima</button>
       <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
       <button class="btn-save" onclick="gravarEvento()">Gravar</button>
     </div>
@@ -328,7 +337,9 @@ function abrirModal(data=''){
   document.getElementById('f-local').value='';
   document.getElementById('f-resp').value='';
   document.getElementById('f-notas').value='';
+  document.getElementById('f-repetir').value='';
   document.getElementById('btn-del').style.display='none';
+  document.getElementById('btn-concluir').style.display='none';
   document.getElementById('overlay').classList.add('open');
   setTimeout(()=>document.getElementById('f-nome').focus(),100);
 }
@@ -344,7 +355,9 @@ function editarEvento(id){
   document.getElementById('f-local').value=e.local||'';
   document.getElementById('f-resp').value=e.resp||'';
   document.getElementById('f-notas').value=e.notas||'';
+  document.getElementById('f-repetir').value=e.repetirAnos||'';
   document.getElementById('btn-del').style.display='';
+  document.getElementById('btn-concluir').style.display=e.repetirAnos?'':'none';
   document.getElementById('overlay').classList.add('open');
 }
 
@@ -354,6 +367,7 @@ async function gravarEvento(){
   if(!db){alert('Firebase não disponível');return;}
   const nome=document.getElementById('f-nome').value.trim();
   if(!nome){document.getElementById('f-nome').focus();return;}
+  const repetirVal = document.getElementById('f-repetir').value;
   const doc={
     nome,data:document.getElementById('f-data').value,
     hora:document.getElementById('f-hora').value,
@@ -361,6 +375,7 @@ async function gravarEvento(){
     local:document.getElementById('f-local').value,
     resp:document.getElementById('f-resp').value,
     notas:document.getElementById('f-notas').value,
+    repetirAnos: repetirVal ? parseInt(repetirVal,10) : null,
     criadoEm:new Date().toISOString()
   };
   const id=editId||('EVT-'+Date.now());
@@ -372,6 +387,22 @@ async function gravarEvento(){
 async function eliminarEvento(){
   if(!editId||!db)return;
   if(!confirm('Eliminar evento?'))return;
+  await db.collection('agenda-geral').doc(editId).delete();
+  fecharModal();
+  carregarEventos();
+}
+
+async function concluirERenovar(){
+  if(!editId||!db)return;
+  const e=eventos.find(x=>x.id===editId);if(!e||!e.repetirAnos)return;
+  const anos=e.repetirAnos;
+  const [ano,mes,dia]=e.data.split('-').map(Number);
+  const proximaData=`${ano+anos}-${String(mes).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+  if(!confirm(`Marcar como concluído e agendar a próxima para ${dia}/${mes}/${ano+anos}?`))return;
+  await db.collection('agenda-geral').add({
+    nome:e.nome, data:proximaData, hora:e.hora||'', cat:e.cat, local:e.local||'',
+    resp:e.resp||'', notas:e.notas||'', repetirAnos:anos, criadoEm:new Date().toISOString()
+  });
   await db.collection('agenda-geral').doc(editId).delete();
   fecharModal();
   carregarEventos();

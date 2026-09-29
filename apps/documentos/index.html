@@ -193,6 +193,15 @@ if (localStorage.getItem('mira_ok') !== '1') {
             <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Data limite</label>
             <input type="date" id="upload-prazo-data" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
           </div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Repetir</label>
+            <select id="upload-prazo-repetir" style="width:100%;background:#1c1a17;border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
+              <option value="">Não repete (evento único)</option>
+              <option value="1">Todos os anos</option>
+              <option value="2">De 2 em 2 anos</option>
+              <option value="3">De 3 em 3 anos</option>
+            </select>
+          </div>
         </div>
         <div>
           <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Ficheiro</label>
@@ -339,6 +348,7 @@ function fecharUpload() {
   document.getElementById('upload-matricula').value = '';
   document.getElementById('upload-prazo-tipo').value = '';
   document.getElementById('upload-prazo-data').value = '';
+  document.getElementById('upload-prazo-repetir').value = '';
 }
 
 async function fazerUpload() {
@@ -372,10 +382,11 @@ async function fazerUpload() {
       const matricula = document.getElementById('upload-matricula').value.trim();
       const prazoTipo = document.getElementById('upload-prazo-tipo').value;
       const prazoData = document.getElementById('upload-prazo-data').value;
+      const prazoRepetir = document.getElementById('upload-prazo-repetir').value ? parseInt(document.getElementById('upload-prazo-repetir').value, 10) : null;
       const novoDoc = await db.collection('documentos-internos').add({
         nome, cat, nomeFicheiro: file.name, url, storagePath: path,
         tamanho: file.size, tipo: file.type,
-        matricula: matricula || null, prazoTipo: prazoTipo || null, prazoData: prazoData || null,
+        matricula: matricula || null, prazoTipo: prazoTipo || null, prazoData: prazoData || null, prazoRepetirAnos: prazoRepetir,
         criadoEm: new Date().toISOString()
       });
       if (cat === 'Frota' && prazoData) {
@@ -388,6 +399,7 @@ async function fazerUpload() {
             local: '',
             resp: matricula || '',
             notas: 'Criado automaticamente a partir do documento "' + nome + '" (Documentos › Frota).',
+            repetirAnos: prazoRepetir,
             origemDocumento: novoDoc.id,
             criadoEm: new Date().toISOString()
           }, { merge: true });
