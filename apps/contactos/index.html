@@ -92,6 +92,7 @@ if(localStorage.getItem('mira_ok') !== '1') {
 function sairDaApp() {
   if(confirm('Tens a certeza que queres sair?')) {
     localStorage.removeItem('mira_ok');
+    try{ firebase.auth().signOut(); }catch(e){}
     window.location.href = '../../index.html';
   }
 }
@@ -187,7 +188,7 @@ if (localStorage.getItem('mira_ok') !== '1') {
 <script>
 let db = null, editId = null, todos = [], catActiva = 'TODOS';
 try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch(e) {}
-  try{ firebase.auth().signInAnonymously().catch(function(e){ console.error('Auth anon falhou:', e); }); }catch(e){ console.error('Auth anon falhou:', e); }
+  firebase.auth().onAuthStateChanged(function(user){ if(!user){ try{ localStorage.removeItem('mira_ok'); }catch(e){} window.location.replace('../../index.html'); } });
 
 const CAT_ICON = {'Emergência':'🆘','Autarquia':'🏛','Junta de Freguesia':'🏘','Saúde':'🏥','Segurança':'🛡','Justiça / Notariado':'⚖️','Serviços Públicos':'📋','Igreja / Religioso':'⛪','Parceiro / Fornecedor':'🤝','Advogado / Solicitador':'📜','Frota / Mecânica':'🚗','Cliente':'👤','Outro':'📌'};
 

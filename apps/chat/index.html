@@ -68,7 +68,7 @@ let db = null;
 try {
   if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   db = firebase.firestore();
-  try{ firebase.auth().signInAnonymously().catch(function(e){ console.error('Auth anon falhou:', e); }); }catch(e){ console.error('Auth anon falhou:', e); }
+  firebase.auth().onAuthStateChanged(function(user){ if(!user){ try{ localStorage.removeItem('mira_ok'); }catch(e){} window.location.replace('../../index.html'); } });
 } catch(e) {}
 
 const nomeGuardado = localStorage.getItem(NOME_KEY)||'';

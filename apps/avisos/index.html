@@ -230,7 +230,7 @@ input[type=date],input[type=time],input[type=datetime-local]{color-scheme:dark}
 <script>
 try { if (!firebase.apps.length) firebase.initializeApp(firebaseConfig); } catch(e) { console.error(e); }
 const db = firebase.firestore();
-  try{ firebase.auth().signInAnonymously().catch(function(e){ console.error('Auth anon falhou:', e); }); }catch(e){ console.error('Auth anon falhou:', e); }
+  firebase.auth().onAuthStateChanged(function(user){ if(!user){ try{ localStorage.removeItem('mira_ok'); }catch(e){} window.location.replace('../../index.html'); } });
 const COL = 'avisos-tv', COL_FOTO = 'avisos-tv-fotos';
 const TV_URL = new URL('../../tv/', location.href).href;
 document.getElementById('tv-url').textContent = TV_URL;

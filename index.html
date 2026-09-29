@@ -270,7 +270,10 @@ footer span{font-size:14px;color:var(--mut)}
 </div>
 
 <script>
-const HASH = 'd415e14542e23c7a4c05f0bea483125dadf057d2377cba0442d2db35caf4a32f';
+// Declarado cedo para evitar erro de TDZ (era referenciado por iniciarChat()
+// antes de ser inicializado, quando mostrar() corre logo no carregamento
+// para uma sessao ja existente)
+let chatOpen = false, unsub = null, lastCount = 0;
 const KEY = 'mira_ok';
 const NOME_KEY = 'mira_nome';
 
@@ -279,25 +282,29 @@ let db = null;
 try {
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   db = firebase.firestore();
-  try{ firebase.auth().signInAnonymously().catch(function(e){ console.error('Auth anon falhou:', e); }); }catch(e){ console.error('Auth anon falhou:', e); }
+  firebase.auth().onAuthStateChanged(function(user){
+    if (user) { try{ localStorage.setItem(KEY, '1'); }catch(e){} }
+    else { try{ localStorage.removeItem(KEY); }catch(e){} 
+      var loginEl = document.getElementById('login'), platEl = document.getElementById('platform');
+      if (loginEl) loginEl.style.display = 'flex';
+      if (platEl) platEl.style.display = 'none';
+    }
+  });
 } catch(e) { console.error('Firebase:', e); }
 
-// SHA256
-async function sha256(s) {
-  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-  return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');
-}
-
 // LOGIN
+const LOGIN_EMAIL = 'geral@mmira.pt';
 async function login() {
   const pw = document.getElementById('pw').value;
   const e = document.getElementById('lerro');
   if (!pw) { e.textContent = 'Introduz a password.'; return; }
-  const h = await sha256(pw);
-  if (h === HASH) {
+  e.textContent = '';
+  try {
+    await firebase.auth().signInWithEmailAndPassword(LOGIN_EMAIL, pw);
     localStorage.setItem(KEY, '1');
     mostrar();
-  } else {
+  } catch (err) {
+    console.error('Login falhou:', err);
     e.textContent = 'Password incorrecta.';
     document.getElementById('pw').value = '';
     document.getElementById('pw').focus();
@@ -309,6 +316,7 @@ function recuperar() {
 }
 
 function sair() {
+  try{ firebase.auth().signOut(); }catch(e){}
   localStorage.removeItem(KEY);
   document.getElementById('login').style.display = 'flex';
   document.getElementById('platform').style.display = 'none';
@@ -344,7 +352,6 @@ if (nomeGuardado) document.getElementById('chat-nome').value = nomeGuardado;
 document.getElementById('chat-nome').addEventListener('change', e => localStorage.setItem(NOME_KEY, e.target.value.trim()));
 
 // ── CHAT ──────────────────────────────────────────────────
-let chatOpen = false, unsub = null, lastCount = 0;
 
 function toggleChat() {
   chatOpen = !chatOpen;
