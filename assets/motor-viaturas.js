@@ -12,11 +12,28 @@
  *    a janela de aviso usada pelo banner de destaque.
  *
  *  - IUC / Selo: anual, a pagar durante o mês civil do aniversário da
- *    1ª matrícula (do dia 1 ao último dia desse mês), independentemente
- *    da categoria do veículo.
+ *    matrícula (do dia 1 ao último dia desse mês), independentemente da
+ *    categoria do veículo.
+ *
+ *    ATENÇÃO — viaturas IMPORTADAS: o mês que conta para o IUC é o do
+ *    registo/matrícula em Portugal (matrícula nacional, campo da DUA/
+ *    livrete), não o mês da 1ª matrícula no país de origem (o que está
+ *    gravado na chapa/faixa amarela pode ser um mês diferente). Isto está
+ *    confirmado pelo artigo 4º do Código do IUC ("...com exceção do ano
+ *    da matrícula ou registo do veículo em território nacional...") e é
+ *    prática corrente confirmada pela AT: uma viatura importada mantém a
+ *    data da 1ª matrícula estrangeira para efeitos de idade/categoria e
+ *    inspeções, mas o ciclo do selo segue a data de matrícula portuguesa.
+ *    Por isso a ficha tem um campo opcional "matriculaNacionalPT" — só
+ *    preenchido quando a viatura foi importada — que manda no mês do
+ *    selo sem alterar o cálculo da inspeção (que continua a usar sempre
+ *    dataMatricula).
  *
  * Cada viatura (coleção Firestore "viaturas-frota") guarda:
  *   matricula, categoria, dataMatricula,
+ *   matriculaNacionalPT (opcional — data de registo em Portugal, só para
+ *     viaturas importadas; se ausente, assume-se que dataMatricula já é
+ *     a matrícula portuguesa),
  *   proximaInspecao (data, YYYY-MM-DD, ou null se categoria sem cálculo),
  *   seloConfirmadoAno (último ano civil cujo selo foi confirmado pago)
  *
@@ -98,7 +115,10 @@
 
   function calcularProximoSelo(viatura) {
     if (!viatura || !viatura.dataMatricula) return null;
-    var mesMatricula = parseInt(viatura.dataMatricula.split('-')[1], 10);
+    // Importada -> usa o mês da matrícula/registo em Portugal, não o da
+    // 1ª matrícula no país de origem (ver nota no topo do ficheiro).
+    var dataReferenciaSelo = viatura.matriculaNacionalPT || viatura.dataMatricula;
+    var mesMatricula = parseInt(dataReferenciaSelo.split('-')[1], 10);
     var hoje = new Date(); hoje.setHours(0, 0, 0, 0);
     var anoAtual = hoje.getFullYear();
     var mesAtual = hoje.getMonth() + 1;

@@ -232,6 +232,11 @@ if (localStorage.getItem('mira_ok') !== '1') {
               <input type="date" id="upload-data-matricula" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
             </div>
             <div>
+              <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Viatura importada? Data de matrícula/registo em Portugal</label>
+              <input type="date" id="upload-matricula-nacional-pt" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
+              <div style="font-size:11px;color:var(--muted);margin-top:5px">Só para viaturas importadas: o mês do selo (IUC) conta a partir do registo em Portugal, não da 1ª matrícula (que pode ser noutro país). Deixa em branco se a viatura não foi importada.</div>
+            </div>
+            <div>
               <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Data da próxima inspeção (se já souberes)</label>
               <input type="date" id="upload-proxima-inspecao" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
               <div style="font-size:11px;color:var(--muted);margin-top:5px">Importante para viaturas que já circulam: sem esta data, assumo que é a 1ª inspeção de sempre da viatura (matrícula + 4 ou 2 anos), o que fica errado para uma viatura mais antiga.</div>
@@ -325,6 +330,11 @@ if (localStorage.getItem('mira_ok') !== '1') {
         <div>
           <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Data da 1ª matrícula</label>
           <input type="date" id="ficha-edit-data-matricula" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
+        </div>
+        <div>
+          <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Viatura importada? Data de matrícula/registo em Portugal</label>
+          <input type="date" id="ficha-edit-matricula-nacional-pt" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
+          <div style="font-size:11px;color:var(--muted);margin-top:5px">Só para viaturas importadas: o mês do selo (IUC) conta a partir do registo em Portugal, não da 1ª matrícula. Deixa em branco se não for importada.</div>
         </div>
         <div>
           <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Próxima inspeção (corrigir data)</label>
@@ -467,7 +477,7 @@ function renderGrupoViatura(mid, viatura, docs) {
     cabecalho = `<div class="viatura-grupo-header">
       <div style="flex:1;min-width:200px">
         <div class="viatura-matricula">🚗 ${viatura.matricula}</div>
-        <div class="viatura-categoria">${window.MotorViaturas.labelCategoria(viatura.categoria)} · 1ª matrícula ${fmtDataPT(viatura.dataMatricula)}</div>
+        <div class="viatura-categoria">${window.MotorViaturas.labelCategoria(viatura.categoria)} · 1ª matrícula ${fmtDataPT(viatura.dataMatricula)}${viatura.matriculaNacionalPT ? ' · importada, registo PT ' + fmtDataPT(viatura.matriculaNacionalPT) : ''}</div>
       </div>
       <div class="viatura-prazos" style="flex:2;min-width:280px">${blocoInsp}${blocoSelo}</div>
       <div class="viatura-grupo-acoes">
@@ -583,6 +593,7 @@ function fecharUpload() {
   document.getElementById('upload-eh-duc').checked = false;
   document.getElementById('upload-viatura-categoria').value = 'ligeiro-passageiros';
   document.getElementById('upload-data-matricula').value = '';
+  document.getElementById('upload-matricula-nacional-pt').value = '';
   document.getElementById('upload-proxima-inspecao').value = '';
   document.getElementById('upload-selo-pago').checked = false;
   document.getElementById('upload-duc-fields').style.display = 'none';
@@ -634,6 +645,7 @@ async function fazerUpload() {
       const ehDuc = cat === 'Frota' && document.getElementById('upload-eh-duc').checked;
       const viaturaCategoria = document.getElementById('upload-viatura-categoria').value;
       const dataMatricula = document.getElementById('upload-data-matricula').value;
+      const matriculaNacionalPT = document.getElementById('upload-matricula-nacional-pt').value;
       const proximaInspecaoConhecida = document.getElementById('upload-proxima-inspecao').value;
       const seloJaPago = document.getElementById('upload-selo-pago').checked;
 
@@ -665,7 +677,7 @@ async function fazerUpload() {
       // DUC: cria/atualiza a ficha da viatura e recalcula inspeção + selo.
       if (ehDuc && matricula && dataMatricula) {
         try {
-          await criarOuAtualizarFicha(matricula, viaturaCategoria, dataMatricula, proximaInspecaoConhecida, seloJaPago);
+          await criarOuAtualizarFicha(matricula, viaturaCategoria, dataMatricula, proximaInspecaoConhecida, seloJaPago, matriculaNacionalPT);
         } catch(erroFicha) { console.warn('Não foi possível atualizar a ficha da viatura:', erroFicha); }
       }
 
@@ -677,7 +689,7 @@ async function fazerUpload() {
 
 // ===== FICHA DAS VIATURAS DA FROTA =====
 
-async function criarOuAtualizarFicha(matricula, categoria, dataMatricula, proximaInspecaoConhecida, seloJaPago) {
+async function criarOuAtualizarFicha(matricula, categoria, dataMatricula, proximaInspecaoConhecida, seloJaPago, matriculaNacionalPT) {
   if (!db || !window.MotorViaturas) return;
   const mid = MotorViaturas.idMatricula(matricula);
   const ref = db.collection('viaturas-frota').doc(mid);
@@ -690,6 +702,13 @@ async function criarOuAtualizarFicha(matricula, categoria, dataMatricula, proxim
     atualizadoEm: new Date().toISOString()
   };
   if (!snapAntes.exists) dados.criadoEm = new Date().toISOString();
+
+  // Viatura importada: o mês do selo (IUC) conta a partir do registo em
+  // Portugal, não da 1ª matrícula (que pode ter sido noutro país) — ver
+  // motor-viaturas.js para a explicação legal completa.
+  if (matriculaNacionalPT) {
+    dados.matriculaNacionalPT = matriculaNacionalPT;
+  }
 
   // Sempre que esta data vier preenchida, corrige/define a próxima inspeção
   // conhecida — é o que permite corrigir uma ficha já existente (ex: viatura
@@ -792,6 +811,7 @@ function editarFicha(mid) {
     document.getElementById('ficha-edit-matricula').value = v.matricula || mid;
     document.getElementById('ficha-edit-categoria').value = v.categoria || 'ligeiro-passageiros';
     document.getElementById('ficha-edit-data-matricula').value = v.dataMatricula || '';
+    document.getElementById('ficha-edit-matricula-nacional-pt').value = v.matriculaNacionalPT || '';
     document.getElementById('ficha-edit-proxima-inspecao').value = v.proximaInspecao || '';
     document.getElementById('ficha-edit-selo-ano').value = v.seloConfirmadoAno || '';
     document.getElementById('ficha-edit-overlay').style.display = 'flex';
@@ -807,12 +827,16 @@ async function guardarEdicaoFicha() {
   if (!ficha_edit_mid || !db) return;
   const categoria = document.getElementById('ficha-edit-categoria').value;
   const dataMatricula = document.getElementById('ficha-edit-data-matricula').value;
+  const matriculaNacionalPT = document.getElementById('ficha-edit-matricula-nacional-pt').value;
   const proximaInspecao = document.getElementById('ficha-edit-proxima-inspecao').value;
   const seloAnoTexto = document.getElementById('ficha-edit-selo-ano').value;
   if (!dataMatricula) { alert('Indica a data da 1ª matrícula.'); return; }
   const ref = db.collection('viaturas-frota').doc(ficha_edit_mid);
   const dados = { categoria, dataMatricula, atualizadoEm: new Date().toISOString() };
   if (proximaInspecao) dados.proximaInspecao = proximaInspecao;
+  // Em branco -> não é (ou deixou de ser) importada: remove o campo e o
+  // motor volta a usar a data da 1ª matrícula para o mês do selo.
+  dados.matriculaNacionalPT = matriculaNacionalPT ? matriculaNacionalPT : firebase.firestore.FieldValue.delete();
   // Selo: valor indicado -> aplica esse ano; em branco -> remove o campo e
   // deixa o motor calcular o ciclo normal a partir de hoje (corrige
   // confirmações a mais por engano, ex. cliques a dobrar em "Selo pago").
