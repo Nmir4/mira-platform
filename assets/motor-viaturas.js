@@ -130,6 +130,44 @@
     return { data: anoAlvo + '-' + String(mesMatricula).padStart(2, '0') + '-' + String(dia).padStart(2, '0'), ano: anoAlvo };
   }
 
+  // Deteta situações que costumam ser erro humano (ex.: cliques a dobrar
+  // em "Selo pago"/"Inspeção feita", ou campos trocados) — não impede
+  // nada, só avisa, para serem revistas com calma na ficha.
+  function detectarAnomalias(viatura) {
+    var avisos = [];
+    if (!viatura || !viatura.dataMatricula) return avisos;
+    var hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+    var hojeStr = hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0') + '-' + String(hoje.getDate()).padStart(2, '0');
+
+    if (viatura.dataMatricula > hojeStr) {
+      avisos.push('A 1ª matrícula está registada no futuro (' + viatura.dataMatricula + ').');
+    }
+
+    if (viatura.matriculaNacionalPT && viatura.matriculaNacionalPT < viatura.dataMatricula) {
+      avisos.push('A data de registo em Portugal (' + viatura.matriculaNacionalPT + ') é anterior à 1ª matrícula (' + viatura.dataMatricula + ') — parecem trocadas.');
+    }
+
+    if (viatura.seloConfirmadoAno) {
+      var selo = calcularProximoSelo(viatura);
+      var mesRef = parseInt((viatura.matriculaNacionalPT || viatura.dataMatricula).split('-')[1], 10);
+      var anoAtual = hoje.getFullYear();
+      var mesAtual = hoje.getMonth() + 1;
+      var cicloCorrente = (mesAtual > mesRef) ? anoAtual + 1 : anoAtual;
+      if (viatura.seloConfirmadoAno - cicloCorrente > 2) {
+        avisos.push('Selo confirmado até ' + viatura.seloConfirmadoAno + ', ' + (viatura.seloConfirmadoAno - cicloCorrente) + ' anos à frente do esperado — confirma se não houve confirmações a mais por engano (ver Histórico).');
+      }
+    }
+
+    if (viatura.proximaInspecao) {
+      var dias = Math.round((new Date(viatura.proximaInspecao + 'T00:00:00') - hoje) / 86400000);
+      if (dias < -180) {
+        avisos.push('Próxima inspeção vencida há mais de 6 meses (' + viatura.proximaInspecao + ') — confirma se já foi feita e a ficha ficou por atualizar, ou se a data está errada.');
+      }
+    }
+
+    return avisos;
+  }
+
   var LABEL_CATEGORIA = {
     'ligeiro-passageiros': 'Ligeiro de passageiros',
     'ligeiro-mercadorias': 'Ligeiro de mercadorias',
@@ -197,6 +235,7 @@
     calcularProximaInspecao: calcularProximaInspecao,
     avancarInspecao: avancarInspecao,
     calcularProximoSelo: calcularProximoSelo,
+    detectarAnomalias: detectarAnomalias,
     construirEventosAgenda: construirEventosAgenda
   };
 })(window);

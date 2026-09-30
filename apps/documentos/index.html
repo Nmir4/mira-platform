@@ -79,6 +79,14 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;height:2px;background
 .viatura-grupo{margin-bottom:26px}
 .viatura-grupo-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;padding:14px 16px;margin-bottom:10px;background:rgba(255,255,255,0.02);border:1px solid var(--linha);border-radius:5px}
 .viatura-grupo-acoes{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start}
+.viatura-btn-historico{align-self:flex-start;font-size:12px;padding:6px 11px;background:none;border:1px solid var(--linha);color:var(--muted);border-radius:3px;cursor:pointer;font-family:Inter,sans-serif}
+.viatura-btn-historico:hover{border-color:var(--castanho-claro);color:var(--castanho-claro)}
+.viatura-avisos{display:flex;flex-direction:column;gap:6px;margin:-4px 0 10px;padding:11px 14px;background:rgba(232,168,85,0.08);border:1px solid rgba(232,168,85,0.35);border-radius:5px}
+.viatura-aviso-linha{font-size:12.5px;color:#e8a855;line-height:1.5}
+.frota-resumo-alerta{color:#e8a855;font-size:12px;cursor:help}
+.historico-item{padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;line-height:1.5}
+.historico-item:last-child{border-bottom:none}
+.historico-item-quando{color:var(--muted);font-size:11px;display:block;margin-bottom:2px}
 .doc-duc-badge{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--castanho-claro);background:rgba(201,169,110,0.15);border:1px solid rgba(201,169,110,0.35);padding:2px 6px;border-radius:3px;margin-left:8px;vertical-align:middle}
 .doc-row-desc{font-size:12px;color:var(--muted);margin-top:3px;font-style:italic;overflow-wrap:break-word}
 .doc-row-edit-btn{color:var(--muted)}
@@ -352,6 +360,20 @@ if (localStorage.getItem('mira_ok') !== '1') {
       </div>
     </div>
   </div>
+
+  <!-- MODAL HISTORICO DA VIATURA -->
+  <div id="historico-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:20px">
+    <div style="background:#1c1a17;border:1px solid rgba(255,255,255,0.1);border-radius:8px;width:100%;max-width:520px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden">
+      <div style="background:rgba(139,115,85,0.15);border-bottom:1px solid rgba(255,255,255,0.07);padding:16px 22px;display:flex;justify-content:space-between;align-items:center">
+        <h3 id="historico-titulo" style="font-family:Cormorant Garamond,serif;font-size:20px;font-weight:400">Histórico da viatura</h3>
+        <button onclick="fecharHistorico()" style="background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer">×</button>
+      </div>
+      <div id="historico-lista" style="padding:18px 22px;overflow-y:auto"></div>
+      <div style="padding:14px 22px;border-top:1px solid rgba(255,255,255,0.07);display:flex;justify-content:flex-end">
+        <button onclick="fecharHistorico()" style="background:transparent;border:1px solid var(--linha);color:var(--muted);padding:10px 18px;font-size:14px;border-radius:4px;cursor:pointer;font-family:Inter,sans-serif">Fechar</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Botão Logout -->
@@ -452,10 +474,13 @@ function renderResumoFrota(viaturas) {
     const selo = window.MotorViaturas.calcularProximoSelo(v);
     const diasInsp = insp ? diasAteData(insp.data) : null;
     const diasSelo = selo ? diasAteData(selo.data) : null;
+    const avisos = window.MotorViaturas.detectarAnomalias(v);
+    const alerta = avisos.length ? `<span class="frota-resumo-alerta" title="${avisos.join(' | ').replace(/"/g,'&quot;')}">⚠ ${avisos.length === 1 ? '1 anomalia' : avisos.length + ' anomalias'}</span>` : '';
     return `<div class="frota-resumo-row">
       <span class="frota-resumo-matricula">🚗 ${v.matricula}</span>
       ${statusPillHtml('Inspeção', diasInsp)}
       ${statusPillHtml('Selo', diasSelo)}
+      ${alerta}
     </div>`;
   }).join('');
   return `<div class="frota-resumo">${linhas}</div>`;
@@ -474,6 +499,10 @@ function renderGrupoViatura(mid, viatura, docs) {
       : `<div class="viatura-prazo"><span class="viatura-prazo-label">Próxima inspeção</span><span class="viatura-prazo-data" style="color:var(--muted);font-weight:400;font-size:13px">Categoria sem cálculo automático</span></div>`;
     const diasSelo = diasAteData(selo.data);
     const blocoSelo = `<div class="viatura-prazo"><span class="viatura-prazo-label">Próximo selo (IUC)</span><span class="viatura-prazo-data" style="color:${corPorDias(diasSelo)}">${fmtDataPT(selo.data)} · ${textoDias(diasSelo)}</span><button class="viatura-btn-confirmar" onclick="confirmarSelo('${mid}')">✓ Selo pago</button></div>`;
+    const avisos = window.MotorViaturas.detectarAnomalias(viatura);
+    const blocoAvisos = avisos.length
+      ? `<div class="viatura-avisos">${avisos.map(a => `<div class="viatura-aviso-linha">⚠ ${a}</div>`).join('')}</div>`
+      : '';
     cabecalho = `<div class="viatura-grupo-header">
       <div style="flex:1;min-width:200px">
         <div class="viatura-matricula">🚗 ${viatura.matricula}</div>
@@ -482,9 +511,10 @@ function renderGrupoViatura(mid, viatura, docs) {
       <div class="viatura-prazos" style="flex:2;min-width:280px">${blocoInsp}${blocoSelo}</div>
       <div class="viatura-grupo-acoes">
         <button class="viatura-btn-editar" onclick="editarFicha('${mid}')" title="Corrigir categoria/datas">✎ Editar ficha</button>
+        <button class="viatura-btn-historico" onclick="verHistorico('${mid}')" title="Ver histórico de alterações">📜 Histórico</button>
         <button class="viatura-del" onclick="eliminarViatura('${mid}')" title="Remover ficha desta viatura">Remover ficha ×</button>
       </div>
-    </div>`;
+    </div>${blocoAvisos}`;
   } else {
     cabecalho = `<div class="viatura-grupo-header">
       <div>
@@ -724,6 +754,30 @@ async function criarOuAtualizarFicha(matricula, categoria, dataMatricula, proxim
   await ref.set(dados, { merge: true });
   const snap = await ref.get();
   await sincronizarAgendaViatura({ id: mid, ...snap.data() });
+
+  if (!snapAntes.exists) {
+    await registarHistorico(mid, 'Ficha criada a partir do DUC (1ª matrícula ' + fmtDataPT(dataMatricula) + ').');
+  } else {
+    if (proximaInspecaoConhecida) await registarHistorico(mid, 'Próxima inspeção corrigida para ' + fmtDataPT(proximaInspecaoConhecida) + ' (via novo DUC carregado).');
+    if (seloJaPago) await registarHistorico(mid, 'Selo marcado como pago (via novo DUC carregado).');
+    if (matriculaNacionalPT) await registarHistorico(mid, 'Marcada como importada — registo em Portugal a ' + fmtDataPT(matriculaNacionalPT) + ' (via novo DUC carregado).');
+  }
+}
+
+// Regista uma linha no histórico da viatura (subcoleção "historico"),
+// para se conseguir perceber depois quem alterou o quê e quando, sem
+// precisar de reconstituir a partir dos valores finais. Nunca deve
+// impedir a operação principal, por isso falha em silêncio.
+async function registarHistorico(mid, descricao) {
+  if (!db) return;
+  try {
+    await db.collection('viaturas-frota').doc(mid).collection('historico').add({
+      descricao,
+      quando: new Date().toISOString()
+    });
+  } catch (erro) {
+    console.warn('Não foi possível registar histórico da viatura:', erro);
+  }
 }
 
 async function sincronizarAgendaViatura(viatura) {
@@ -770,11 +824,13 @@ async function confirmarInspecao(mid) {
   const snap = await ref.get();
   if (!snap.exists) return;
   const v = { id: mid, ...snap.data() };
+  const dataAnterior = v.proximaInspecao || window.MotorViaturas.calcularPrimeiraInspecao(v);
   const novaData = window.MotorViaturas.avancarInspecao(v);
   if (!novaData) return;
   await ref.set({ proximaInspecao: novaData, atualizadoEm: new Date().toISOString() }, { merge: true });
   const snap2 = await ref.get();
   await sincronizarAgendaViatura({ id: mid, ...snap2.data() });
+  await registarHistorico(mid, 'Inspeção confirmada: avançou de ' + fmtDataPT(dataAnterior) + ' para ' + fmtDataPT(novaData) + '.');
   carregarDocsDinamicos();
 }
 
@@ -785,10 +841,12 @@ async function confirmarSelo(mid) {
   const snap = await ref.get();
   if (!snap.exists) return;
   const v = { id: mid, ...snap.data() };
+  const anoAnterior = v.seloConfirmadoAno;
   const selo = window.MotorViaturas.calcularProximoSelo(v);
   await ref.set({ seloConfirmadoAno: selo.ano, atualizadoEm: new Date().toISOString() }, { merge: true });
   const snap2 = await ref.get();
   await sincronizarAgendaViatura({ id: mid, ...snap2.data() });
+  await registarHistorico(mid, 'Selo confirmado: avançou de ' + (anoAnterior || '(nunca confirmado)') + ' para ' + selo.ano + '.');
   carregarDocsDinamicos();
 }
 
@@ -802,12 +860,14 @@ async function eliminarViatura(mid) {
 }
 
 let ficha_edit_mid = null;
+let ficha_edit_dados_antes = null;
 
 function editarFicha(mid) {
   db.collection('viaturas-frota').doc(mid).get().then(snap => {
     if (!snap.exists) return;
     const v = snap.data();
     ficha_edit_mid = mid;
+    ficha_edit_dados_antes = v;
     document.getElementById('ficha-edit-matricula').value = v.matricula || mid;
     document.getElementById('ficha-edit-categoria').value = v.categoria || 'ligeiro-passageiros';
     document.getElementById('ficha-edit-data-matricula').value = v.dataMatricula || '';
@@ -821,6 +881,7 @@ function editarFicha(mid) {
 function fecharEdicaoFicha() {
   document.getElementById('ficha-edit-overlay').style.display = 'none';
   ficha_edit_mid = null;
+  ficha_edit_dados_antes = null;
 }
 
 async function guardarEdicaoFicha() {
@@ -845,11 +906,49 @@ async function guardarEdicaoFicha() {
   } else {
     dados.seloConfirmadoAno = firebase.firestore.FieldValue.delete();
   }
+  const antes = ficha_edit_dados_antes || {};
+  const diffs = [];
+  if (antes.categoria !== categoria) diffs.push('categoria: ' + window.MotorViaturas.labelCategoria(antes.categoria) + ' → ' + window.MotorViaturas.labelCategoria(categoria));
+  if (antes.dataMatricula !== dataMatricula) diffs.push('1ª matrícula: ' + fmtDataPT(antes.dataMatricula) + ' → ' + fmtDataPT(dataMatricula));
+  const matriculaNacionalPTAntes = antes.matriculaNacionalPT || '';
+  if (matriculaNacionalPTAntes !== matriculaNacionalPT) diffs.push('registo PT (importação): ' + (matriculaNacionalPTAntes ? fmtDataPT(matriculaNacionalPTAntes) : '(nenhum)') + ' → ' + (matriculaNacionalPT ? fmtDataPT(matriculaNacionalPT) : '(nenhum)'));
+  if (proximaInspecao && antes.proximaInspecao !== proximaInspecao) diffs.push('próxima inspeção: ' + fmtDataPT(antes.proximaInspecao) + ' → ' + fmtDataPT(proximaInspecao));
+  const seloAnoNovo = seloAnoTexto ? parseInt(seloAnoTexto, 10) : undefined;
+  if ((antes.seloConfirmadoAno || undefined) !== seloAnoNovo) diffs.push('selo confirmado até: ' + (antes.seloConfirmadoAno || '(nenhum)') + ' → ' + (seloAnoNovo || '(nenhum)'));
+
   await ref.set(dados, { merge: true });
   const snap = await ref.get();
   await sincronizarAgendaViatura({ id: ficha_edit_mid, ...snap.data() });
+  if (diffs.length) await registarHistorico(ficha_edit_mid, 'Ficha editada manualmente — ' + diffs.join('; ') + '.');
   fecharEdicaoFicha();
   carregarDocsDinamicos();
+}
+
+function verHistorico(mid) {
+  const container = document.getElementById('historico-lista');
+  document.getElementById('historico-titulo').textContent = 'Histórico — ' + mid;
+  container.innerHTML = '<div style="color:var(--muted);font-size:13px">A carregar...</div>';
+  document.getElementById('historico-overlay').style.display = 'flex';
+  db.collection('viaturas-frota').doc(mid).collection('historico').get().then(snap => {
+    const itens = [];
+    snap.forEach(d => itens.push(d.data()));
+    itens.sort((a, b) => (b.quando || '').localeCompare(a.quando || ''));
+    if (!itens.length) {
+      container.innerHTML = '<div style="color:var(--muted);font-size:13px">Ainda sem histórico registado para esta viatura.</div>';
+      return;
+    }
+    container.innerHTML = itens.map(it => {
+      const quando = it.quando ? new Date(it.quando).toLocaleString('pt-PT', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+      return `<div class="historico-item"><span class="historico-item-quando">${quando}</span>${(it.descricao||'').replace(/</g,'&lt;')}</div>`;
+    }).join('');
+  }).catch(erro => {
+    container.innerHTML = '<div style="color:#e85555;font-size:13px">Não foi possível carregar o histórico.</div>';
+    console.warn(erro);
+  });
+}
+
+function fecharHistorico() {
+  document.getElementById('historico-overlay').style.display = 'none';
 }
 
 let doc_edit_id = null;
