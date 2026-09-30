@@ -1,12 +1,10 @@
 /* ===== Motor de prazos legais de viaturas (IPO + IUC/Selo) =====
  * Regras aplicadas (Portugal), conforme apuradas:
  *
- *  - IPO (Inspeção Periódica Obrigatória):
- *      ligeiro-passageiros: 1ª inspeção aos 4 anos da 1ª matrícula,
- *        depois de 2 em 2 anos até aos 8 anos (i.e. aos 6 e aos 8 anos),
- *        e anual a partir dos 8 anos.
- *      ligeiro-mercadorias: 1ª inspeção aos 2 anos da 1ª matrícula,
- *        depois anual.
+ *  - IPO (Inspeção Periódica Obrigatória), por idade da viatura (anos
+ *    desde a 1ª matrícula):
+ *      ligeiro-passageiros: 4, 6, 8, depois anual (9, 10, 11...).
+ *      ligeiro-mercadorias: 2, depois anual (3, 4, 5...).
  *      outra categoria: periodicidade não calculada automaticamente
  *        (varia consoante o tipo de veículo) — gerir manualmente na
  *        Agenda (categoria "Viatura" + repetição).
@@ -19,23 +17,35 @@
  *
  * Cada viatura (coleção Firestore "viaturas-frota") guarda:
  *   matricula, categoria, dataMatricula,
- *   inspecoesConfirmadas (nº de ciclos de inspeção já confirmados),
+ *   proximaInspecao (data, YYYY-MM-DD, ou null se categoria sem cálculo),
  *   seloConfirmadoAno (último ano civil cujo selo foi confirmado pago)
+ *
+ * IMPORTANTE: proximaInspecao é a data-limite ATUAL, guardada diretamente
+ * — não um índice de ciclo contado desde a matrícula. Isto é essencial
+ * para viaturas que já tinham uma vida (e inspeções) antes de entrarem
+ * neste sistema: ao criar a ficha, se já se souber a próxima inspeção
+ * real, essa data é usada tal e qual; só quando não se sabe é que se
+ * calcula a partir do zero (1ª inspeção legal a contar da matrícula) —
+ * o que só faz sentido para uma viatura mesmo a estrear. Cada confirmação
+ * avança a data para a idade seguinte da tabela, a partir da idade em
+ * que a viatura estava nessa inspeção (não de uma contagem de ciclos).
  *
  * Este módulo é independente do Firestore: só calcula datas. Quem o usa
  * decide o que escrever na agenda-geral (ver construirEventosAgenda).
  */
 (function (global) {
 
-  function anosDoCiclo(categoria, indice) {
+  // Idade (em anos completos) a que a PRÓXIMA inspeção é devida, dado que
+  // a última confirmada (ou a situação de partida) foi à idade "idade".
+  function proximaIdadeInspecao(categoria, idade) {
     if (categoria === 'ligeiro-passageiros') {
-      if (indice === 0) return 4;
-      if (indice === 1) return 6;
-      if (indice === 2) return 8;
-      return indice + 6; // 8,9,10... a partir do 4º ciclo (indice>=3 -> 9,10,...)
+      if (idade < 4) return 4;
+      if (idade < 8) return idade + 2; // 4->6, 6->8
+      return idade + 1; // anual a partir dos 8
     }
     if (categoria === 'ligeiro-mercadorias') {
-      return indice + 2; // 2,3,4,5...
+      if (idade < 2) return 2;
+      return idade + 1; // anual a partir dos 2
     }
     return null; // sem periodicidade automática para esta categoria
   }
@@ -46,12 +56,40 @@
     return (ano + anos) + '-' + String(mes).padStart(2, '0') + '-' + String(dia).padStart(2, '0');
   }
 
+  // Idade (anos inteiros) da viatura numa certa data, assumindo que a
+  // data-limite cai sempre no dia/mês da matrícula (como a lei define).
+  function idadeNaData(dataMatricula, dataAlvo) {
+    return new Date(dataAlvo).getFullYear() - new Date(dataMatricula).getFullYear();
+  }
+
+  // Calcula a próxima inspeção partindo do zero (viatura a estrear no
+  // sistema, sem qualquer inspeção conhecida) — 1º ciclo legal a contar
+  // da matrícula.
+  function calcularPrimeiraInspecao(viatura) {
+    var idade = proximaIdadeInspecao(viatura.categoria, 0);
+    if (idade === null) return null;
+    return somarAnosAData(viatura.dataMatricula, idade);
+  }
+
+  // A próxima inspeção é sempre a que está guardada em viatura.proximaInspecao.
+  // Só recalcula do zero se esse campo não existir (ficha antiga/incompleta).
   function calcularProximaInspecao(viatura) {
     if (!viatura || !viatura.dataMatricula) return null;
-    var indice = viatura.inspecoesConfirmadas || 0;
-    var anos = anosDoCiclo(viatura.categoria, indice);
-    if (anos === null) return null;
-    return { data: somarAnosAData(viatura.dataMatricula, anos), ciclo: indice + 1 };
+    if (viatura.proximaInspecao) return { data: viatura.proximaInspecao };
+    var data = calcularPrimeiraInspecao(viatura);
+    return data ? { data: data } : null;
+  }
+
+  // Ao confirmar uma inspeção feita na data-limite atual, avança para a
+  // idade seguinte da tabela — a partir da idade real em que a viatura
+  // estava, não de uma contagem de ciclos desde a matrícula.
+  function avancarInspecao(viatura) {
+    var dataAtual = viatura.proximaInspecao || calcularPrimeiraInspecao(viatura);
+    if (!dataAtual) return null;
+    var idadeConfirmada = idadeNaData(viatura.dataMatricula, dataAtual);
+    var proximaIdade = proximaIdadeInspecao(viatura.categoria, idadeConfirmada);
+    if (proximaIdade === null) return null;
+    return somarAnosAData(viatura.dataMatricula, proximaIdade);
   }
 
   function ultimoDiaDoMes(ano, mes1a12) {
@@ -101,8 +139,8 @@
           hora: '',
           cat: 'viatura',
           local: '',
-          resp: viatura.matricula,
-          notas: 'Inspeção periódica obrigatória (ciclo nº' + insp.ciclo + ') — pode ser feita até 3 meses antes desta data.',
+          resp: '',
+          notas: 'Inspeção periódica obrigatória — pode ser feita até 3 meses antes desta data.',
           subtipoViatura: 'inspecao',
           origemViatura: mid,
           criadoEm: agora
@@ -120,7 +158,7 @@
           hora: '',
           cat: 'viatura',
           local: '',
-          resp: viatura.matricula,
+          resp: '',
           notas: 'Imposto Único de Circulação — ano ' + selo.ano + '. Pode ser pago em qualquer dia do mês.',
           subtipoViatura: 'selo',
           origemViatura: mid,
@@ -135,7 +173,9 @@
   global.MotorViaturas = {
     idMatricula: idMatricula,
     labelCategoria: function (cat) { return LABEL_CATEGORIA[cat] || cat || 'Outra categoria'; },
+    calcularPrimeiraInspecao: calcularPrimeiraInspecao,
     calcularProximaInspecao: calcularProximaInspecao,
+    avancarInspecao: avancarInspecao,
     calcularProximoSelo: calcularProximoSelo,
     construirEventosAgenda: construirEventosAgenda
   };

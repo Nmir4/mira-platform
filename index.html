@@ -152,6 +152,8 @@ footer span{font-size:14px;color:var(--mut)}
     </div>
   </header>
 
+  <div class="destaque-banner destaque-banner--topo" id="destaque-banner-dash" style="display:none"></div>
+
   <div class="apps-grid">
     <a class="app-card" href="apps/florista/index.html">
       <div class="app-icon" style="background:rgba(45,90,61,0.35)">🌿</div>
@@ -223,7 +225,6 @@ footer span{font-size:14px;color:var(--mut)}
   <!-- MINI CALENDÁRIO -->
   <div class="dash-bottom" id="dash-bottom" style="display:none">
     <div class="mini-card">
-      <div class="destaque-banner destaque-banner--embutido" id="destaque-banner-dash" style="display:none"></div>
       <div class="mini-header">
         <div style="display:flex;align-items:center;gap:16px">
           <h3>📅 Agenda</h3>
@@ -459,7 +460,7 @@ async function carregarAgenda() {
     const hoje = new Date().toISOString().split('T')[0];
     mostrarDia(hoje);
     if (window.MiraBannerDestaque) {
-      MiraBannerDestaque.montarBannerDestaque('destaque-banner-dash', eventos, { compacto: true });
+      MiraBannerDestaque.montarBannerDestaque('destaque-banner-dash', eventos);
     }
   } catch(e) {}
 }
