@@ -309,7 +309,7 @@ if (localStorage.getItem('mira_ok') !== '1') {
         <button onclick="fecharEdicaoFicha()" style="background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer">×</button>
       </div>
       <div style="padding:22px;display:flex;flex-direction:column;gap:14px">
-        <div style="font-size:12px;color:var(--muted)">Usa isto para corrigir a categoria, a data de matrícula ou a próxima inspeção desta viatura, sem teres de carregar um ficheiro novo.</div>
+        <div style="font-size:12px;color:var(--muted)">Usa isto para corrigir a categoria, a data de matrícula, a próxima inspeção ou o selo desta viatura, sem teres de carregar um ficheiro novo.</div>
         <div>
           <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Matrícula</label>
           <input type="text" id="ficha-edit-matricula" disabled style="width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--muted);font-family:Inter,sans-serif;outline:none">
@@ -329,6 +329,11 @@ if (localStorage.getItem('mira_ok') !== '1') {
         <div>
           <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Próxima inspeção (corrigir data)</label>
           <input type="date" id="ficha-edit-proxima-inspecao" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
+        </div>
+        <div>
+          <label style="display:block;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Selo (IUC) confirmado pago até ao ano</label>
+          <input type="number" id="ficha-edit-selo-ano" placeholder="ex.: 2026" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:11px 14px;font-size:15px;color:var(--texto);font-family:Inter,sans-serif;outline:none">
+          <div style="font-size:11px;color:var(--muted);margin-top:5px">Deixa em branco para repor ao ciclo normal (corrige confirmações a mais por engano, ex. cliques a dobrar no botão "Selo pago").</div>
         </div>
       </div>
       <div style="padding:14px 22px;border-top:1px solid rgba(255,255,255,0.07);display:flex;gap:10px;justify-content:flex-end">
@@ -741,6 +746,7 @@ function textoDias(dias) {
 
 async function confirmarInspecao(mid) {
   if (!db) return;
+  if (!confirm('Confirmar que a inspeção foi feita? Isto avança a data para o próximo ciclo — não repitas o clique.')) return;
   const ref = db.collection('viaturas-frota').doc(mid);
   const snap = await ref.get();
   if (!snap.exists) return;
@@ -755,6 +761,7 @@ async function confirmarInspecao(mid) {
 
 async function confirmarSelo(mid) {
   if (!db) return;
+  if (!confirm('Confirmar que o selo (IUC) foi pago? Isto avança o ano confirmado — não repitas o clique.')) return;
   const ref = db.collection('viaturas-frota').doc(mid);
   const snap = await ref.get();
   if (!snap.exists) return;
@@ -786,6 +793,7 @@ function editarFicha(mid) {
     document.getElementById('ficha-edit-categoria').value = v.categoria || 'ligeiro-passageiros';
     document.getElementById('ficha-edit-data-matricula').value = v.dataMatricula || '';
     document.getElementById('ficha-edit-proxima-inspecao').value = v.proximaInspecao || '';
+    document.getElementById('ficha-edit-selo-ano').value = v.seloConfirmadoAno || '';
     document.getElementById('ficha-edit-overlay').style.display = 'flex';
   });
 }
@@ -800,10 +808,19 @@ async function guardarEdicaoFicha() {
   const categoria = document.getElementById('ficha-edit-categoria').value;
   const dataMatricula = document.getElementById('ficha-edit-data-matricula').value;
   const proximaInspecao = document.getElementById('ficha-edit-proxima-inspecao').value;
+  const seloAnoTexto = document.getElementById('ficha-edit-selo-ano').value;
   if (!dataMatricula) { alert('Indica a data da 1ª matrícula.'); return; }
   const ref = db.collection('viaturas-frota').doc(ficha_edit_mid);
   const dados = { categoria, dataMatricula, atualizadoEm: new Date().toISOString() };
   if (proximaInspecao) dados.proximaInspecao = proximaInspecao;
+  // Selo: valor indicado -> aplica esse ano; em branco -> remove o campo e
+  // deixa o motor calcular o ciclo normal a partir de hoje (corrige
+  // confirmações a mais por engano, ex. cliques a dobrar em "Selo pago").
+  if (seloAnoTexto) {
+    dados.seloConfirmadoAno = parseInt(seloAnoTexto, 10);
+  } else {
+    dados.seloConfirmadoAno = firebase.firestore.FieldValue.delete();
+  }
   await ref.set(dados, { merge: true });
   const snap = await ref.get();
   await sincronizarAgendaViatura({ id: ficha_edit_mid, ...snap.data() });
