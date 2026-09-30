@@ -106,6 +106,8 @@ body{font-family:'Nunito',Arial,sans-serif;color:#003a5f;-webkit-font-smoothing:
   var avisos = [];      // avisos activos (ordenados)
   var fotos = {};       // cache id -> {v, url}
   var idx = 0, rotTimer = null, lastSig = '';
+  var falhasSeguidas = 0;
+  var CACHE_KEY = 'mira_tv_cache';
 
   var DIAS = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
   var MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
@@ -169,6 +171,24 @@ body{font-family:'Nunito',Arial,sans-serif;color:#003a5f;-webkit-font-smoothing:
   }
   function chaveOrdem(a){ return (a.funData || '9999') + ' ' + (a.funHora || '99'); }
 
+  // Guarda o último conjunto de avisos carregado com sucesso, para que um
+  // recarregamento da página (o agendado a cada 6h, ou um reinício do
+  // televisor/navegador) não mostre o ecrã institucional enquanto espera
+  // pela primeira resposta da rede — mostra logo o que já se sabia.
+  function guardarCache(lista){
+    try {
+      var fotosUsadas = {};
+      for (var i = 0; i < lista.length; i++) { var f = fotos[lista[i].id]; if (f) fotosUsadas[lista[i].id] = f; }
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ avisos: lista, fotos: fotosUsadas }));
+    } catch (e) { /* localStorage indisponível/cheia — sem cache, mas o ecrã continua a funcionar normalmente */ }
+  }
+  function lerCache(){
+    try {
+      var raw = localStorage.getItem(CACHE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+
   function carregar(){
     var agora = new Date().getTime();
     var body = { structuredQuery: {
@@ -177,6 +197,7 @@ body{font-family:'Nunito',Arial,sans-serif;color:#003a5f;-webkit-font-smoothing:
       limit: 30 } };
     xhr('POST', BASE + ':runQuery?key=' + KEY, body, function(res){
       document.getElementById('offline').style.display = 'none';
+      falhasSeguidas = 0;
       var lista = [];
       for (var i = 0; i < res.length; i++) {
         if (!res[i].document) continue;
@@ -184,9 +205,15 @@ body{font-family:'Nunito',Arial,sans-serif;color:#003a5f;-webkit-font-smoothing:
         if (a.ativo === true && a.consentimento === true) lista.push(a);
       }
       lista.sort(function(x, y){ return chaveOrdem(x) < chaveOrdem(y) ? -1 : 1; });
-      carregarFotos(lista, function(){ aplicar(lista); });
+      carregarFotos(lista, function(){ aplicar(lista); guardarCache(lista); });
     }, function(){
       document.getElementById('offline').style.display = 'block'; // mantém o que está no ecrã
+      // Nas primeiras falhas a seguir a uma quebra de rede, tenta outra vez
+      // depressa (em vez de esperar pelo próximo ciclo de 60s), para que uma
+      // quebra breve — a coincidir por azar com o recarregamento periódico —
+      // não deixe o ecrã institucional no ar mais tempo do que o necessário.
+      falhasSeguidas++;
+      if (falhasSeguidas <= 6) setTimeout(carregar, 8000);
     });
   }
   function carregarFotos(lista, done){
@@ -308,7 +335,17 @@ body{font-family:'Nunito',Arial,sans-serif;color:#003a5f;-webkit-font-smoothing:
     avisos = []; render();
     if (window.parent !== window) window.parent.postMessage({ tipo: 'tv-pronta' }, '*');
   } else {
-    render();                              // ecrã institucional enquanto carrega
+    // Restaura o último conjunto de avisos conhecido (se ainda válido) antes
+    // de qualquer resposta da rede, para o ecrã não "piscar" para a imagem
+    // institucional logo a seguir a um recarregamento — só mostra isso se
+    // realmente não houver nenhum aviso ativo, e não por a rede estar lenta.
+    var cache = lerCache();
+    if (cache && cache.avisos && cache.avisos.length) {
+      var agora0 = new Date().getTime(), validos = [];
+      for (var ci = 0; ci < cache.avisos.length; ci++) if (cache.avisos[ci].expiraMs > agora0) validos.push(cache.avisos[ci]);
+      if (validos.length) { avisos = validos; fotos = cache.fotos || {}; lastSig = assinatura(validos); }
+    }
+    render();                              // cache restaurada, ou ecrã institucional enquanto carrega
     relogio(); setInterval(relogio, 15000);
     carregar();
     setInterval(carregar, 60000);          // verifica novidades a cada minuto
